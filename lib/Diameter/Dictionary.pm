@@ -83,7 +83,7 @@ sub new {
             return undef;
         };
 
-    $class->_validate_yaml_datastructure( $yaml_ds )
+    $class->_validate_and_expand_yaml_datastructure( $yaml_ds )
         or do {
             $@ = "YAML parse error: $@";
             return undef;
@@ -133,53 +133,48 @@ use constant {
 };
 
 my %element_structure = (
-    MessageTypes => [0, 'HASH', {}, {
-        ApplicationId => [0, 'uint32', 0],
-        Code          => [1, 'uint32', undef],
-        Proxiable     => [0, 'bool', 1],
-        Error         => [0, 'bool', 0],
-        Request       => [0, 'HASH', {}, {
-            Names           => [1, 'ARRAY', undef],
-            AvpOrder        => [0, 'ARRAY', []],
-            MandatoryAvps   => [0, 'ARRAY', []],
-            OptionalAvps    => [0, 'ARRAY', []],
+    MessageTypes => [0, 'list', [], [1, 'map', {}, {
+            ApplicationId => [0, 'uint32', 0],
+            Code          => [1, 'uint32', undef],
+            Proxiable     => [0, 'bool', 1],
+            Error         => [0, 'bool', 0],
+            Request       => [0, 'map', {}, {
+                Names           => [1, 'list', undef],
+                AvpOrder        => [0, 'list', []],
+                MandatoryAvps   => [0, 'list', []],
+                OptionalAvps    => [0, 'list', []],
+            }],
+            Answer        => [0, 'map', {}, {
+                Names           => [1, 'list', undef],
+                AvpOrder        => [0, 'list', []],
+                MandatoryAvps   => [0, 'list', []],
+                OptionalAvps    => [0, 'list', []],
+            }],
         }],
-        Answer        => [0, 'HASH', {}, {
-            Names           => [1, 'ARRAY', undef],
-            AvpOrder        => [0, 'ARRAY', []],
-            MandatoryAvps   => [0, 'ARRAY', []],
-            OptionalAvps    => [0, 'ARRAY', []],
+    ],
+    AvpTypes => [0, 'list', [], [1, 'map', {}, {
+            Code        => [1, 'uint32', undef],
+            VendorId    => [0, 'uint32', 0],
+            Names       => [1, 'list', undef],
+            Type        => [0, 'enum', 'OctetString', [qw(Address DiamIdent DiamURI Enumerated Float32 Float64
+                                                          Grouped Integer32 Integer64 OctetString Time 
+                                                          Unsigned32 Unsigned64 UTF8String)]],
         }],
-    }],
+    ],
 );
 
-my %yaml_boolean_table = (
-    Yes   => 1,
-    YES   => 1,
-    n     => 0,
-    N     => 0,
-    no    => 0,
-    No    => 0,
-    NO    => 0,
-    true  => 1,
-    True  => 1,
-    TRUE  => 1,
-    false => 0,
-    False => 0,
-    FALSE => 0,
-    on    => 1,
-    On    => 1,
-    ON    => 1,
-    off   => 0,
-    Off   => 0,
-    OFF   => 0,
-);
-
-sub _validate_yaml_element {
+sub _validate_and_expand_yaml_element {
     my $class = shift;
-    my ($node_name, $element_value, $structure_def_ar) = @_;
+    my ($node_name, $element_value, $element_ref, $structure_def_ar) = @_;
 
     my ($is_required, $required_type, $default_value, $struct_children) = @{ $structure_def_ar };
+
+    if (!$is_required && !defined $element_value) {
+        if (!ref $element_value) { $$element_ref = $default_value }
+        else                     { $element_value = $default_value }
+
+        return 1;
+    }
 
     my $element_type = ref $element_value;
 
@@ -188,9 +183,10 @@ sub _validate_yaml_element {
             $@ = "For ($node_name) value must be YAML boolean";
             return 0;
         }
-
-        if (!exists $yaml_boolean_table{$element_value}) {
-            $@ = "For ($node_name) value must be YAML boolean";
+    }
+    elsif ($required_type eq "enum") {
+        unless (grep { $element_value eq $_ } @{ $structure_def_ar->[E_CHILDREN] }) {
+            $@ = "For ($node_name), value is not in the enum list";
             return 0;
         }
     }
@@ -205,13 +201,23 @@ sub _validate_yaml_element {
             return 0;
         }
     }
-    elsif ($required_type eq "ARRAY") {
+    elsif ($required_type eq "list") {
         unless ($element_type eq "ARRAY") {
             $@ = "For ($node_name) value must be a YAML list";
             return 0;
         }
+        if (defined $struct_children) {
+            for (my $i = 0; $i < @{ $element_value }; $i++) {
+                if (!$class->_validate_and_expand_yaml_element( "$node_name/$i",
+                                                                $element_value->[$i],
+                                                                (ref $element_value->[$i] ? $element_value->[$i] : \$element_value->[$i]),
+                                                                $struct_children )) {
+                    return 0;
+                }
+            }
+        }
     }
-    elsif ($required_type eq "HASH") {
+    elsif ($required_type eq "map") {
         unless ($element_type eq "HASH") {
             $@ = "For ($node_name) value must be a YAML map";
             return 0;
@@ -221,17 +227,20 @@ sub _validate_yaml_element {
             my %child_elements = (map { $_ => 1 } (keys %{ $element_value }));
 
             foreach my $struct_child_key (keys %{ $struct_children }) {
-                if ($struct_children->{$struct_child_key}->[E_IS_REQUIRED]) {
-                    if (!exists $child_elements{$struct_child_key}) {
+                if (!exists $child_elements{$struct_child_key}) {
+                    if ($struct_children->{$struct_child_key}->[E_IS_REQUIRED]) {
                         $@ = "For ($node_name) must have child ($struct_child_key)";
                         return 0;
                     }
                 }
 
-                my $r = $class->_validate_yaml_element( "$node_name/$struct_child_key", $element_value->{$struct_child_key}, $struct_children->{$struct_child_key} );
-
-                if (!$r) {
-
+                if (!$class->_validate_and_expand_yaml_element( "$node_name/$struct_child_key",
+                                                                $element_value->{$struct_child_key},
+                                                                (ref $element_value->{$struct_child_key}
+                                                                    ? $element_value->{$struct_child_key} 
+                                                                    : \$element_value->{$struct_child_key}),
+                                                                $struct_children->{$struct_child_key} )) {
+                    return 0;
                 }
 
                 delete $child_elements{$struct_child_key};
@@ -253,7 +262,7 @@ sub _validate_yaml_element {
     return 1;
 }
 
-sub _validate_yaml_datastructure {
+sub _validate_and_expand_yaml_datastructure {
     my $class = shift;
     my $yaml_ds = shift;
 
@@ -269,19 +278,34 @@ sub _validate_yaml_datastructure {
 
     my $struct_ok = 0;
     if (exists $yaml_ds->{MessageTypes}) {
-        if (!defined $yaml_ds->{MessageTypes} || scalar( keys( %{ $yaml_ds->{MessageTypes} } ) ) == 0) {
-            $yaml_ds->{MessageTypes} = {};
+        if (!defined $yaml_ds->{MessageTypes}) {
+            $yaml_ds->{MessageTypes} = [];
             $struct_ok = 1;
         }
+        elsif (ref $yaml_ds->{MessageTypes} ne "ARRAY") {
+            $@ = "For (MessageTypes), type must be YAML list";
+            return 0;
+        }
         else {
-            $struct_ok = $class->_validate_yaml_element( "MessageTypes", $yaml_ds->{MessageTypes}, $element_structure{MessageTypes} );
+            $struct_ok = $class->_validate_and_expand_yaml_element( "MessageTypes", $yaml_ds->{MessageTypes}, $yaml_ds->{MessageTypes}, $element_structure{MessageTypes} );
         }
     }
 
     if (exists $yaml_ds->{AvpTypes}) {
+        if (!defined $yaml_ds->{AvpTypes}) {
+            $yaml_ds->{AvpTypes} = [];
+            $struct_ok = 1;
+        }
+        elsif (ref $yaml_ds->{AvpTypes} ne "ARRAY") {
+            $@ = "For (AvpTypes), type must be YAML list";
+            return 0;
+        }
+        else {
+            $struct_ok = $class->_validate_and_expand_yaml_element( "AvpTypes", $yaml_ds->{AvpTypes}, $yaml_ds->{AvpTypes}, $element_structure{AvpTypes} );
+        }
     }
 
-    return $struct_ok;;
+    return $struct_ok;
 }
 
 
