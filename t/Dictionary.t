@@ -58,119 +58,6 @@ ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with only single simple
 
 $yaml_string =<<EOY;
 ---
-MessageTypes:
-   - Code: 272
-     ApplicationId: 0
-     Proxiable: false
-     Request:
-         Names: ["Capabilities-Exchange-Request", "CER"]
-         AvpOrder:
-            - Origin-Host
-            - Origin-Realm
-            - Host-IP-Address
-            - Vendor-Id
-            - Product-Name
-            - Origin-State-Id
-            - Supported-Vendor-Id
-            - Auth-Application-Id
-            - Inband-Security-Id
-            - Acct-Application-Id
-            - Vendor-Specific-Application-Id
-            - Firmware-Revision
-            - AVP
-         MandatoryAvps:
-            - Origin-Host
-            - Origin-Realm
-            - Host-IP-Address:1*
-            - Vendor-Id
-            - Product-Name
-         OptionalAvps:
-            - Origin-State-Id
-            - Supported-Vendor-Id:*
-            - Auth-Application-Id:*
-            - Inband-Security-Id:*
-            - Acct-Application-Id:*
-            - Vendor-Specific-Application-Id:*
-            - Firmware-Revision
-            - AVP:*
-     Answer:
-         Names: ["Capabilities-Exchange-Answer", "CEA"]
-         AvpOrder:
-            - Result-Code
-            - Origin-Host
-            - Origin-Realm
-            - Host-IP-Address
-            - Vendor-Id
-            - Product-Name
-            - Origin-State-Id
-            - Error-Message
-            - Failed-AVP
-            - Supported-Vendor-Id
-            - Auth-Application-Id
-            - Inband-Security-Id
-            - Acct-Application-Id
-            - Vendor-Specific-Application-Id
-            - Firmware-Revision
-            - AVP
-         MandatoryAvps:
-            - Result-Code
-            - Origin-Host
-            - Origin-Realm
-            - Host-IP-Address:1*
-            - Vendor-Id
-            - Product-Name
-         OptionalAvps:
-            - Origin-State-Id
-            - Error-Message
-            - Failed-AVP
-            - Supported-Vendor-Id:*
-            - Auth-Application-Id:*
-            - Inband-Security-Id:*
-            - Acct-Application-Id:*
-            - Vendor-Specific-Application-Id:*
-            - Firmware-Revision
-            - AVP:*
-   - Code: 282
-     ApplicationId: 0
-     Proxiable: false
-     Request:
-         Names: ["Disconnect-Peer-Request", "DPR"]
-         AvpOrder:
-            - Origin-Host
-            - Origin-Realm
-            - Disconnect-Cause
-            - AVP
-         MandatoryAvps:
-            - Origin-Host
-            - Origin-Realm
-            - Disconnect-Cause
-         OptionalAvps:
-            - AVP:*
-     Answer:
-         Names: ["Capabilities-Exchange-Answer", "CEA"]
-         AvpOrder:
-            - Result-Code
-            - Origin-Host
-            - Origin-Realm
-            - Error-Message
-            - Failed-AVP
-            - AVP
-         MandatoryAvps:
-            - Result-Code
-            - Origin-Host
-            - Origin-Realm
-         OptionalAvps:
-            - Error-Message
-            - Failed-AVP
-            - AVP:*
-
-EOY
-
-$d = Diameter::Dictionary->new( FromString => $yaml_string );
-ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with multiple MessageType stanzas succeeds" );
-
-$yaml_string =<<EOY;
----
 AvpTypes:
    - Code: 1
      Names: ["User-Name"]
@@ -325,7 +212,386 @@ AvpTypes:
 EOY
 
 $d = Diameter::Dictionary->new( FromString => $yaml_string );
-ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with multiple AvpType stanzas succeeds" );
+ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with AVP definitions but no Message definitions succeeds" );
 
+$yaml_string =<<EOY;
+---
+MessageTypes:
+   - Code: 272
+     ApplicationId: 0
+     Proxiable: false
+     Request:
+         Names: ["Capabilities-Exchange-Request", "CER"]
+         AvpOrder:
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address
+            - Vendor-Id
+            - Product-Name
+            - Origin-State-Id
+            - Supported-Vendor-Id
+            - Auth-Application-Id
+            - Inband-Security-Id
+            - Acct-Application-Id
+            - Vendor-Specific-Application-Id
+            - Firmware-Revision
+            - AVP
+         MandatoryAvps:
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address:1*
+            - Vendor-Id
+            - Product-Name
+         OptionalAvps:
+            - Origin-State-Id
+            - Supported-Vendor-Id:*
+            - Auth-Application-Id:*
+            - Inband-Security-Id:*
+            - Acct-Application-Id:*
+            - Vendor-Specific-Application-Id:*
+            - Firmware-Revision
+            - AVP:*
+     Answer:
+         Names: ["Capabilities-Exchange-Answer", "CEA"]
+         AvpOrder:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address
+            - Vendor-Id
+            - Product-Name
+            - Origin-State-Id
+            - Error-Message
+            - Failed-AVP
+            - Supported-Vendor-Id
+            - Auth-Application-Id
+            - Inband-Security-Id
+            - Acct-Application-Id
+            - Vendor-Specific-Application-Id
+            - Firmware-Revision
+            - AVP
+         MandatoryAvps:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address:1*
+            - Vendor-Id
+            - Product-Name
+         OptionalAvps:
+            - Origin-State-Id
+            - Error-Message
+            - Failed-AVP
+            - Supported-Vendor-Id:*
+            - Auth-Application-Id:*
+            - Inband-Security-Id:*
+            - Acct-Application-Id:*
+            - Vendor-Specific-Application-Id:*
+            - Firmware-Revision
+            - AVP:*
+   - Code: 282
+     ApplicationId: 0
+     Proxiable: false
+     Request:
+         Names: ["Disconnect-Peer-Request", "DPR"]
+         AvpOrder:
+            - Origin-Host
+            - Origin-Realm
+            - Disconnect-Cause
+            - AVP
+         MandatoryAvps:
+            - Origin-Host
+            - Origin-Realm
+            - Disconnect-Cause
+         OptionalAvps:
+            - AVP:*
+     Answer:
+         Names: ["Capabilities-Exchange-Answer", "CEA"]
+         AvpOrder:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+            - Error-Message
+            - Failed-AVP
+            - AVP
+         MandatoryAvps:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+         OptionalAvps:
+            - Error-Message
+            - Failed-AVP
+            - AVP:*
+
+EOY
+
+$d = Diameter::Dictionary->new( FromString => $yaml_string );
+ok( !defined $d, "Diameter\:\:Dictionary->new() with Message definitions but no AVPs fails because AVPs are not defined" );
+
+
+$yaml_string =<<EOY;
+---
+MessageTypes:
+   - Code: 272
+     ApplicationId: 0
+     Proxiable: false
+     Request:
+         Names: ["Capabilities-Exchange-Request", "CER"]
+         AvpOrder:
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address
+            - Vendor-Id
+            - Product-Name
+            - Origin-State-Id
+            - Supported-Vendor-Id
+            - Auth-Application-Id
+            - Inband-Security-Id
+            - Acct-Application-Id
+            - Vendor-Specific-Application-Id
+            - Firmware-Revision
+            - AVP
+         MandatoryAvps:
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address:1*
+            - Vendor-Id
+            - Product-Name
+         OptionalAvps:
+            - Origin-State-Id
+            - Supported-Vendor-Id:*
+            - Auth-Application-Id:*
+            - Inband-Security-Id:*
+            - Acct-Application-Id:*
+            - Vendor-Specific-Application-Id:*
+            - Firmware-Revision
+            - AVP:*
+     Answer:
+         Names: ["Capabilities-Exchange-Answer", "CEA"]
+         AvpOrder:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address
+            - Vendor-Id
+            - Product-Name
+            - Origin-State-Id
+            - Error-Message
+            - Failed-AVP
+            - Supported-Vendor-Id
+            - Auth-Application-Id
+            - Inband-Security-Id
+            - Acct-Application-Id
+            - Vendor-Specific-Application-Id
+            - Firmware-Revision
+            - AVP
+         MandatoryAvps:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address:1*
+            - Vendor-Id
+            - Product-Name
+         OptionalAvps:
+            - Origin-State-Id
+            - Error-Message
+            - Failed-AVP
+            - Supported-Vendor-Id:*
+            - Auth-Application-Id:*
+            - Inband-Security-Id:*
+            - Acct-Application-Id:*
+            - Vendor-Specific-Application-Id:*
+            - Firmware-Revision
+            - AVP:*
+   - Code: 282
+     ApplicationId: 0
+     Proxiable: false
+     Request:
+         Names: ["Disconnect-Peer-Request", "DPR"]
+         AvpOrder:
+            - Origin-Host
+            - Origin-Realm
+            - Disconnect-Cause
+            - AVP
+         MandatoryAvps:
+            - Origin-Host
+            - Origin-Realm
+            - Disconnect-Cause
+         OptionalAvps:
+            - AVP:*
+     Answer:
+         Names: ["Capabilities-Exchange-Answer", "CEA"]
+         AvpOrder:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+            - Error-Message
+            - Failed-AVP
+            - AVP
+         MandatoryAvps:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+         OptionalAvps:
+            - Error-Message
+            - Failed-AVP
+            - AVP:*
+AvpTypes:
+   - Code: 1
+     Names: ["User-Name"]
+     Type: "UTF8String"
+   - Code: 25
+     Names: ["Class"]
+     Type: "OctetString"
+   - Code: 27
+     Names: ["Session-Timeout"]
+     Type: "Unsigned32"
+   - Code: 33
+     Names: ["Proxy-State"]
+     Type: "OctetString"
+   - Code: 44
+     Names: ["Accounting-Session-Id"]
+     Type: "OctetString"
+   - Code: 50
+     Names: ["Acct-Multi-Session-Id"]
+     Type: "UTF8String"
+   - Code: 55
+     Names: ["Event-Timestamp"]
+     Type: "Time"
+   - Code: 85
+     Names: ["Acct-Interim-Interval"]
+     Type: "Unsigned32"
+   - Code: 257
+     Names: ["Host-IP-Address"]
+     Type: "Address"
+   - Code: 258
+     Names: ["Auth-Application-Id"]
+     Type: "Unsigned32"
+   - Code: 259
+     Names: ["Acct-Application-Id"]
+     Type: "Unsigned32"
+   - Code: 260
+     Names: ["Vendor-Specific-Application-Id"]
+     Type: "Grouped"
+   - Code: 261
+     Names: ["Redirect-Host-Usage"]
+     Type: "Enumerated"
+   - Code: 262
+     Names: ["Redirect-Max-Cache-Time"]
+     Type: "Unsigned32"
+   - Code: 263
+     Names: ["Session-Id"]
+     Type: "UTF8String"
+   - Code: 264
+     Names: ["Origin-Host"]
+     Type: "DiamIdent"
+   - Code: 265
+     Names: ["Supported-Vendor-Id"]
+     Type: "Unsigned32"
+   - Code: 266
+     Names: ["Vendor-Id"]
+     Type: "Unsigned32"
+   - Code: 267
+     Names: ["Firmware-Revision"]
+     Type: "Unsigned32"
+   - Code: 268
+     Names: ["Result-Code"]
+     Type: "Unsigned32"
+   - Code: 269
+     Names: ["Product-Name"]
+     Type: "UTF8String"
+   - Code: 270
+     Names: ["Session-Binding"]
+     Type: "Unsigned32"
+   - Code: 271
+     Names: ["Session-Server-Failover"]
+     Type: "Enumerated"
+   - Code: 272
+     Names: ["Multi-Round-Time-Out"]
+     Type: "Unsigned32"
+   - Code: 273
+     Names: ["Disconnect-Cause"]
+     Type: "Enumerated"
+   - Code: 274
+     Names: ["Auth-Request-Type"]
+     Type: "Enumerated"
+   - Code: 276
+     Names: ["Auth-Grace-Period"]
+     Type: "Unsigned32"
+   - Code: 277
+     Names: ["Auth-Session-State"]
+     Type: "Enumerated"
+   - Code: 278
+     Names: ["Origin-State-Id"]
+     Type: "Unsigned32"
+   - Code: 279
+     Names: ["Failed-AVP"]
+     Type: "Grouped"
+   - Code: 280
+     Names: ["Proxy-Host"]
+     Type: "DiamIdent"
+   - Code: 281
+     Names: ["Error-Message"]
+     Type: "UTF8String"
+   - Code: 282
+     Names: ["Route-Record"]
+     Type: "DiamIdent"
+   - Code: 283
+     Names: ["Destination-Realm"]
+     Type: "DiamIdent"
+   - Code: 284
+     Names: ["Proxy-Info"]
+     Type: "Grouped"
+   - Code: 285
+     Names: ["Re-Auth-Request-Type"]
+     Type: "Enumerated"
+   - Code: 287
+     Names: ["Accounting-Sub-Session-Id"]
+     Type: "Unsigned64"
+   - Code: 291
+     Names: ["Authorization-Lifetime"]
+     Type: "Unsigned32"
+   - Code: 292
+     Names: ["Redirect-Host"]
+     Type: "DiamURI"
+   - Code: 293
+     Names: ["Destination-Host"]
+     Type: "DiamIdent"
+   - Code: 294
+     Names: ["Error-Reporting-Host"]
+     Type: "DiamIdent"
+   - Code: 295
+     Names: ["Termination-Cause"]
+     Type: "Enumerated"
+   - Code: 296
+     Names: ["Origin-Realm"]
+     Type: "DiamIdent"
+   - Code: 297
+     Names: ["Experimental-Result"]
+     Type: "Grouped"
+   - Code: 298
+     Names: ["Experimental-Result-Code"]
+     Type: "Unsigned32"
+   - Code: 299
+     Names: ["Inband-Security-Id"]
+     Type: "Unsigned32"
+   - Code: 300
+     Names: ["E2E-Sequence"]
+     Type: "Grouped"
+   - Code: 480
+     Names: ["Accounting-Record-Type"]
+     Type: "Enumerated"
+   - Code: 483
+     Names: ["Accounting-Realtime-Required"]
+     Type: "Enumerated"
+   - Code: 485
+     Names: ["Accounting-Record-Number"]
+     Type: "Unsigned32"
+
+EOY
+
+$d = Diameter::Dictionary->new( FromString => $yaml_string );
+ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with Message definitions and all corresponding AVP definitions succeeds" );
+
+my %v = $d->describe_message( Name => "CER" );
 
 done_testing();
