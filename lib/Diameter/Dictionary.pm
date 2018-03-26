@@ -27,6 +27,9 @@ use constant {
 # auto-populated)?; (4) if the type is 'map', what are the child elements, and if the
 # type is 'enum', what are the permitted string values?
 #
+# If the value for E_IS_REQUIRED is undef, and it is an element of a Map, and
+# if no value is defined, then the element is not created in the resulting hashref
+#
 my %element_structure = (
     MessageTypes => [0, 'list', [], [1, 'map', {}, {
             ApplicationId => [0, 'uint32', 0],
@@ -54,6 +57,7 @@ my %element_structure = (
             Type        => [0, 'enum', 'OctetString', [qw(Address DiamIdent DiamURI Enumerated Float32 Float64
                                                           Grouped Integer32 Integer64 OctetString Time 
                                                           Unsigned32 Unsigned64 UTF8String)]],
+            ChildAvps   => [undef, 'childavp', undef],  # childavps is a special type handled in code
         }],
     ],
 );
@@ -476,6 +480,17 @@ sub _validate_and_expand_yaml_element {
             return 0;
         }
     }
+    elsif ($required_type eq "count") {
+        if (ref $element_type) {
+            $@ = "For ($node_name) value must be a YAML string";
+            return 0;
+        }
+
+        unless ($element_value eq "*" || $element_value =~ /^\d+(\*)?/) {
+            $@ = "For ($node_name) value must a count: either '*', a positive integer, or a positive integer followed by '*'";
+            return 0;
+        }
+    }
     elsif ($required_type eq "list") {
         unless ($element_type eq "ARRAY") {
             $@ = "For ($node_name) value must be a YAML list";
@@ -505,8 +520,11 @@ sub _validate_and_expand_yaml_element {
                         $@ = "For ($node_name) must have child ($struct_child_key)";
                         return 0;
                     }
-                    elsif (defined $struct_children->{$struct_child_key}->[E_DEFAULT_VALUE]) {
+                    elsif (defined $struct_children->{$struct_child_key}->[E_IS_REQUIRED] && defined $struct_children->{$struct_child_key}->[E_DEFAULT_VALUE]) {
                         $element_value->{$struct_child_key} = $struct_children->{$struct_child_key}->[E_DEFAULT_VALUE];
+                        next CHILD_KEY;
+                    }
+                    else {
                         next CHILD_KEY;
                     }
                 }
@@ -528,6 +546,58 @@ sub _validate_and_expand_yaml_element {
         elsif (keys %{ $element_value }) {
             $@ = "For ($node_name), there must be no children";
             return 0;
+        }
+    }
+    elsif ($required_type eq "childavps") {
+        unless ($element_type eq "ARRAY") {
+            $@ = "For ($node_name) value must be a YAML list";
+            return 0;
+        }
+
+        for (my $i = 0; $i < @{ $element_value }; $i++) {
+            my $nv = $element_value->[$i];
+            unless (defined $nv && ref $nv eq 'HASH') {
+                $@ = "For ($node_name/$i) value must be a YAML map";
+                return 0;
+            }
+
+            # must have VendorId+Code, Code or Name
+            if (exists $nv->{Code} && defined $nv->{Code} && $nv->{Code} ne "") {
+                unless ($nv->{Code} =~ /^\d+$/) {
+                    $@ = "For ($node_name/$i) Code must be a positive integer";
+                    return 0;
+                }
+                if (exists $nv->{Name}) {
+                    $@ = "For ($node_name/$i) cannot have Code and Name together";
+                    return 0;
+                }
+
+                if (exists $nv->{VendorId} && !defined $nv->{VendorId} && $nv->{VendorId} ne "") {
+                    unless ($nv->{VendorId} =~ /^\d+$/) {
+                        $@ = "For ($node_name/$i) VendorId must be a positive integer";
+                        return 0;
+                    }
+                }
+                else {
+                    $nv->{VendorId} = 0;
+                }
+            }
+            elsif (!exist $nv->{Name} || !defined $nv->{Name} || $nv->{Name} eq "") {
+                $@ = "For ($node_name/$i) VendorId+Code, Code, or Name must be defined";
+                return 0;
+            }
+            elsif (exists $nv->{VendorId}) {
+                $@ = "For ($node_name/$i) cannot specify VendorId with Name";
+                return 0;
+            }
+
+            if (!exists $nv->{Count} || !defined $nv->{Count} || $nv->{Count} eq "") {
+                $nv->{Count} = '*';
+            }
+            elsif ($nv->{Count} ne "*" && $nv->{Count} !~ /^\d+\*?$/) {
+                $@ = "For ($node_name/$i) Count must be *, a positive integer, or a positive integer followed by *";
+                return 0;
+            }
         }
     }
 
@@ -588,6 +658,7 @@ sub _validate_and_expand_yaml_datastructure {
 
     return $struct_ok;
 }
+
 
 
 1;

@@ -33,12 +33,12 @@ if (!$@ && defined $dwa) {
 sub dwr_decode_tests {
     my $dwr = shift;
 
-    cmp_ok( $dwr->version,       '==', 1,           '$dwr->version check' );
-    cmp_ok( $dwr->msg_length,    '==', 64,          '$dwr->msg_length check' );
-    cmp_ok( $dwr->flags,         '==', 0x8,         '$dwr->flags check' );
-    cmp_ok( $dwr->app_id,        '==', 0,           '$dwr->app_id check' );
-    cmp_ok( $dwr->hop_by_hop_id, '==', 0xa81826d5,  '$dwr->hop_by_hop_id check' );
-    cmp_ok( $dwr->end_to_end_id, '==', 0xe77f7c8f,  '$dwr->end_to_end_id check' );
+    cmp_ok( $dwr->version,        '==', 1,           '$dwr->version check' );
+    cmp_ok( $dwr->msg_length,     '==', 64,          '$dwr->msg_length check' );
+    cmp_ok( $dwr->flags,          '==', 0x8,         '$dwr->flags check' );
+    cmp_ok( $dwr->application_id, '==', 0,           '$dwr->application_id check' );
+    cmp_ok( $dwr->hop_by_hop_id,  '==', 0xa81826d5,  '$dwr->hop_by_hop_id check' );
+    cmp_ok( $dwr->end_to_end_id,  '==', 0xe77f7c8f,  '$dwr->end_to_end_id check' );
     ok( $dwr->is_request, '$dwr->is_request check' );
 
     my @avps = $dwr->avps;
@@ -56,12 +56,12 @@ sub dwr_decode_tests {
 sub dwa_tests {
     my $dwa = shift;
 
-    cmp_ok( $dwa->version,       '==', 1,           '$dwa->version check' );
-    cmp_ok( $dwa->msg_length,    '==', 72,          '$dwa->msg_length check' );
-    cmp_ok( $dwa->flags,         '==', 0,           '$dwa->flags check' );
-    cmp_ok( $dwa->app_id,        '==', 0,           '$dwa->app_id check' );
-    cmp_ok( $dwa->hop_by_hop_id, '==', 0xa81826d5,  '$dwa->hop_by_hop_id check' );
-    cmp_ok( $dwa->end_to_end_id, '==', 0xe77f7c8f,  '$dwa->end_to_end_id check' );
+    cmp_ok( $dwa->version,        '==', 1,           '$dwa->version check' );
+    cmp_ok( $dwa->msg_length,     '==', 72,          '$dwa->msg_length check' );
+    cmp_ok( $dwa->flags,          '==', 0,           '$dwa->flags check' );
+    cmp_ok( $dwa->application_id, '==', 0,           '$dwa->application_id check' );
+    cmp_ok( $dwa->hop_by_hop_id,  '==', 0xa81826d5,  '$dwa->hop_by_hop_id check' );
+    cmp_ok( $dwa->end_to_end_id,  '==', 0xe77f7c8f,  '$dwa->end_to_end_id check' );
     ok( ! $dwa->is_request, '$dwa->is_request check' );
 
     my @avps = $dwa->avps;

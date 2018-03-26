@@ -247,7 +247,7 @@ my %MESSAGE_TYPE_TO_CLASS = (
 
 #
 # $p = Diameter::Message->new( IsRequest => 1|0, IsError => 1|0, IsProxyable => 1|0, CommandCode => $cc,
-#                              AppId => $aid, HopByHopId => $hhid, EndToEndId => $eeid,
+#                              ApplicationId => $aid, HopByHopId => $hhid, EndToEndId => $eeid,
 #                              Avps => \@avps, Flags => $flags );
 #
 # where @avps is listrefs of Diameter::Message::AVP objects
@@ -269,10 +269,10 @@ sub new {
 
     my ($code, $appid);
     if ($class eq 'Diameter::Message') {
-        die "Missing parameter\n" unless exists $params{CommandCode} && defined $params{CommandCode} && 
-                                         exists $params{AppId}       && defined $params{AppId};
+        die "Missing parameter\n" unless exists $params{CommandCode}   && defined $params{CommandCode} && 
+                                         exists $params{ApplicationId} && defined $params{ApplicationId};
 
-        ($code, $appid) = ($params{CommandCode}, $params{AppId});
+        ($code, $appid) = ($params{CommandCode}, $params{ApplicationId});
 
         die "Invalid parameter\n" unless $code =~ /^\d+$/ && $code <= 0xffffffff && $appid =~ /^\d+$/ && $appid <= 0xffffffff;
 
@@ -402,7 +402,7 @@ sub msg_length      { return shift->[MSG_LENGTH] }
 sub flags           { return (shift->[FLAGS] >> 4) & 0xff }
 sub is_request      { return shift->[FLAGS] & 0x80 }
 sub command_code    { return shift->[COMMAND_CODE] }
-sub app_id          { return shift->[APPLICATION_ID] }
+sub application_id  { return shift->[APPLICATION_ID] }
 sub hop_by_hop_id   { return shift->[HOP_BY_HOP_ID] }
 sub end_to_end_id   { return shift->[END_TO_END_ID] }
 sub avps            { return @{ shift->[AVP_LIST] } }
@@ -486,7 +486,7 @@ sub decode {
 
     die "Invalid Diameter Message Exception\n"  if $stream_offset != $stream_length;
 
-    return $class->new( Version => $version, ApplicationId => $app_id, Length => $msg_length, CommandCode => $code, Flags => $flags, AppId => $app_id,
+    return $class->new( Version => $version, ApplicationId => $app_id, Length => $msg_length, CommandCode => $code, Flags => $flags,
                         HopByHopId => $hbh_id, EndToEndId => $ete_id, Avps => \@avps );
 }
 

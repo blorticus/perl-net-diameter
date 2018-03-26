@@ -505,7 +505,10 @@ sub decode {
     my $flags = ($hdr2 >> 24) & 0xff;
     my $length = $hdr2 & 0x00ffffff;
 
-    die "Malformed AVP Exception\n" unless CORE::length $stream == $length;
+    my $pm = CORE::length( $stream ) % 4;
+    my $data_pad_bytes = ($pm == 0 ? 0 : 4 - $pm);
+
+    die "Malformed AVP Exception\n" unless CORE::length( $stream ) == $length || CORE::length( $stream ) == $length + $data_pad_bytes;
 
     my $encoded = $stream;  # copy because we substr bits out of $stream, but want to keep $encoded
 
@@ -518,7 +521,6 @@ sub decode {
     }
 
     my $data;
-    my $data_pad_bytes = 0;
 
     my $key = (defined $vendor_id ? "$code:$vendor_id" : $code);
 
@@ -532,13 +534,14 @@ sub decode {
 
             die "Malformed AVP Exception\n"     unless CORE::length $stream >= $next_avp_len;
 
-            push @{ $data }, Diameter::Message::AVP->decode( substr $stream, 0, $next_avp_len, '' );
+            my $avp = Diameter::Message::AVP->decode( substr $stream, 0, $next_avp_len, '' );
+            push @{ $data }, $avp;
+
+            substr $stream, 0, $avp->padded_length - $avp->length, '';
         }
     }
     else {
         $data = $stream;
-        my $pm = CORE::length( $data ) % 4;
-        $data_pad_bytes = ($pm == 0 ? 0 : 4 - $pm);
     }
 
     $class = (exists $AVP_DEFINITION_BY_CODE{$key} ? 'Diameter::Message::AVP::' . $AVP_DEFINITION_BY_CODE{$key}->[1] : 'Diameter::Message::AVP');
