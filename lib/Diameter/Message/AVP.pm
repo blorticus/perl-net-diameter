@@ -181,7 +181,7 @@ use constant {
 
 
 # $avp = Diameter::Message::AVP->new( Code => $code, VendorId => $vendorid, IsMandatory => 1|0, Flags => $flags,
-#                                     EncodedData => $encoded_data, Data => $data, DataType => $type );
+#                                     EncodedData => $encoded_data, Data => $data, Type => $type );
 #
 # Provide AVP code ($code), which is required.  If $vendorid is provided and isn't undef, set V flag and add
 # VendorID field.  If IsMandatory is true, set M flag.  If $flags provided, override IsMandatory based on that.
@@ -205,7 +205,7 @@ sub new {
 
     my $code = $params{Code};
     my $vendorid = (exists $params{VendorId} && defined $params{VendorId} && $params{VendorId} ne "" ? $params{VendorId} : 0);
-    my $data_type = (exists $params{Type} && defined $params{Type} && $params{Type} ne "" ? $params{Type} : "OctetString");
+    my $data_type = (exists $params{DataType} && defined $params{DataType} && $params{DataType} ne "" ? $params{DataType} : "OctetString");
 
     if (!exists $params{IsMandatory} && defined $params{IsMandatory})    { $params{IsMandatory} = 0 }
 

@@ -223,7 +223,7 @@ sub avp {
 
     return Diameter::Dictionary::Message::AVP->new( Name     => $avp_desc->{Name},     Code => $avp_desc->{Code},
                                                     VendorId => $avp_desc->{VendorId}, Data => $params{Value},
-                                                    Type     => $avp_desc->{Type} );
+                                                    DataType => $avp_desc->{Type} );
 }
 
 

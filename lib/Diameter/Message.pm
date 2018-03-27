@@ -27,17 +27,12 @@ Diameter::Message - Interface describing a Diameter Message, with encoders and d
     HopByHopId  => 1234,
     EndToEndId  => 987654,
     Avps        => [
-        Diameter::Message::AVP->new( Code => 260, IsMandatory => 1, Data => [
-            Diameter::Message::AVP->new( Code => 276, IsMandatory => 1, Data => 16777217 ),
+        Diameter::Message::AVP->new( Code => 260, IsMandatory => 1, Type => 'Grouped', Data => [
+            Diameter::Message::AVP->new( Code => 276, IsMandatory => 1, Data => 16777217, Type => 'Unsigned32' ),
         ],
-        Diameter::Message::AVP->new( Code => 277, IsMandatory => 1, Data => 1 ),
-        Diameter::Message::AVP->new( Code => 264, IsMandatory => 1, Data => 'test.example.com' ),
-        Diameter::Message::AVP->new( Code => 296, IsMandatory => 1, Data => 'example.com' ),
-        Diameter::Message::AVP->new( Code => 283, IsMandatory => 1, Data => 'remote.com' ),
-        Diameter::Message::AVP->new( Code => 703, VendorId => 10415, IsMandatory => 1, Data => 22 ),
-        Diameter::Message::AVP->new( Code => 700, VendorId => 10415, IsMandatory => 1, Data => [
-            Diameter::Message::AVP->new( Code => 601, VendorId => 10415, "sip:joe@example.com" ),
-        ],
+        [ 0, 277, 1, 'Unsigned', 1 ],   # an alternate form; must be [ $vendor_id, $code, $is_mandatory, data_type, $typed_data ]
+        { Code => 264, IsMandatory => 1, Data => 'test.example.com', Type => 'UTF8String' }, # yet another alternate form; passed directly to Diameter::Message::AVP->new
+        ...
     ]
  );
 
@@ -76,180 +71,8 @@ use constant {
 };
 
 
-# Configuration for message subtypes.  These correspond to Diameter::Message::$name where $name is the
-# key in this table.  The value is a hashref of ("Code", "ApplicationId", "IsRequest", "RequiredAVPs", "OptionalAVPs").
-# The AVPs are listref by AVP class basename.  If ApplicationId is set to undef, then no value is set and a value must be provided
-# in the constructor parameters.
 #
-# Possible count values are '1' or '1*' meaning exactly one or one or more, respectively
-#
-my %TYPE_DEFS_BY_CLASS;
-
-
-# Indexed by Code, hashref indexed by IsRequest (that is, a 0 or a 1), value is the corresponding class
-# Autopopulated on load to avoid necessity to duplicate configuration
-my %CODE_TO_CLASS;
-
-
-BEGIN {
-%TYPE_DEFS_BY_CLASS = (
-    'Diameter::Message::CER'     => {
-        Code            => 257,
-        ApplicationId   => 0,
-        IsRequest       => 1,
-        RequiredAVPs    => [
-            [ OriginHost                    => '1'  ],
-            [ OriginRealm                   => '1'  ],
-            [ HostIPAddress                 => '1*' ],
-            [ VendorId                      => '1', ],
-            [ ProductName                   => '1', ],
-        ],
-        OptionalAVPs    => [
-            [ OriginStateId                 => '1'  ],
-            [ SupportedVendorId             => '1*' ],
-            [ AuthApplicationId             => '1*' ],
-            [ InbandSecurityId              => '1*' ],
-            [ AcctApplicationId             => '1*' ],
-            [ VendorSpecificApplicationId   => '1*' ],
-            [ FirmwareRevision              => '1'  ],
-        ],
-    },
-    'Diameter::Message::CEA'     => {
-        Code            => 257,
-        ApplicationId   => 0,
-        IsRequest       => 0,
-        RequiredAVPs    => [
-            [ ResultCode                    => '1'  ],
-            [ OriginHost                    => '1'  ],
-            [ OriginRealm                   => '1'  ],
-            [ HostIPAddress                 => '1*' ],
-            [ VendorId                      => '1'  ],
-            [ ProductName                   => '1'  ],
-        ],
-        OptionalAVPs    => [
-            [ OriginStateId                 => '1'  ],
-            [ ErrorMessage                  => '1'  ],
-            [ FailedAVP                     => '1'  ],
-            [ SupportedVendorId             => '1*' ],
-            [ AuthApplicationId             => '1*' ],
-            [ InbandSecurityId              => '1*' ],
-            [ AcctApplicationId             => '1*' ],
-            [ VendorSpecificApplicationId   => '1*' ],
-            [ FirmwareRevision              => '1'  ],
-        ],
-    },
-
-    'Diameter::Message::DWR'     => {
-        Code            => 280,
-        ApplicationId   => 0,
-        IsRequest       => 1,
-        RequiredAVPs    => [
-            [ OriginHost                    => '1'  ],
-            [ OriginRealm                   => '1'  ],
-        ],
-        OptionalAVPs    => [
-            [ OriginStateId                 => '1'  ],
-        ],
-    },
-    'Diameter::Message::DWA'     => {
-        Code            => 280,
-        ApplicationId   => 0,
-        IsRequest       => 0,
-        RequiredAVPs    => [
-            [ ResultCode                    => '1'  ],
-            [ OriginHost                    => '1'  ],
-            [ OriginRealm                   => '1'  ],
-        ],
-        OptionalAVPs    => [
-            [ ErrorMessage                  => '1'  ],
-            [ FailedAVP                     => '1'  ],
-            [ OriginStateId                 => '1'  ],
-        ],
-    },
-
-    'Diameter::Message::SLR'    => {
-        Code            => 8388635,
-        ApplicationId   => 16777302,
-        IsRequest       => 1,
-        RequiredAVPs    => [
-            [ SessionId                     => '1'  ],
-            [ AuthApplicationId             => '1'  ],
-            [ OriginHost                    => '1'  ], 
-            [ OriginRealm                   => '1'  ],
-            [ DestinationRealm              => '1'  ],
-            [ SLRequestType                 => '1'  ],
-        ],
-    },
-
-    'Diameter::Message::SLA'    => {
-        Code            => 8388635,
-        ApplicationId   => 16777302,
-        IsRequest       => 0,
-        RequiredAVPs    => [
-            [ SessionId                     => '1'  ],
-            [ AuthApplicationId             => '1'  ],
-            [ OriginHost                    => '1'  ], 
-            [ OriginRealm                   => '1'  ],
-        ],
-        OptionalAVPs    => [
-            [ ResultCode                    => '1'  ],
-        ],
-    },
-
-    'Diameter::Message::SSNR'    => {
-        Code            => 8388636,
-        ApplicationId   => 16777302,
-        IsRequest       => 1,
-        RequiredAVPs    => [
-            [ SessionId                     => '1'  ],
-            [ OriginHost                    => '1'  ], 
-            [ OriginRealm                   => '1'  ],
-            [ DestinationHost               => '1'  ],
-            [ DestinationRealm              => '1'  ],
-            [ AuthApplicationId             => '1'  ],
-        ],
-    },
-
-    'Diameter::Message::SSNA'    => {
-        Code            => 8388636,
-        ApplicationId   => 16777302,
-        IsRequest       => 0,
-        RequiredAVPs    => [
-            [ SessionId                     => '1'  ],
-            [ OriginHost                    => '1'  ], 
-            [ OriginRealm                   => '1'  ],
-        ],
-        OptionalAVPs    => [
-            [ ResultCode                    => '1'  ],
-        ],
-    },
-
-);
-
-
-foreach my $class (keys %TYPE_DEFS_BY_CLASS) {
-    my $hr = $TYPE_DEFS_BY_CLASS{$class};
-    $CODE_TO_CLASS{$hr->{Code}}{$hr->{IsRequest}} = $class;
-}
-
-};
-
-
-my %MESSAGE_TYPE_TO_CLASS = (
-    CER     => 'Diameter::Message::CER',
-    CEA     => 'Diameter::Message::CEA',
-    DWR     => 'Diameter::Message::DWR',
-    DWA     => 'Diameter::Message::DWA',
-    SLR     => 'Diameter::Message::SLR',
-    SLA     => 'Diameter::Message::SLA',
-    SSNR    => 'Diameter::Message::SSNR',
-    SSNA    => 'Diameter::Message::SSNA',
-);
-
-
-
-#
-# $p = Diameter::Message->new( IsRequest => 1|0, IsError => 1|0, IsProxyable => 1|0, CommandCode => $cc,
+# $p = Diameter::Message->new( IsRequest => 1|0, IsError => 1|0, IsProxiable => 1|0, CommandCode => $cc,
 #                              ApplicationId => $aid, HopByHopId => $hhid, EndToEndId => $eeid,
 #                              Avps => \@avps, Flags => $flags );
 #
@@ -260,39 +83,33 @@ sub new {
     my $class = shift;
     my %params = @_;
 
-    $params{IsError}    = 0         unless exists $params{IsError}    && defined $params{IsError}    && $params{IsError} ne '';
-    $params{HopByHopId} = 0         unless exists $params{HopByHopId} && defined $params{HopByHopId} && $params{HopByHopId} ne '';
-    $params{EndToEndId} = 0         unless exists $params{EndToEndId} && defined $params{EndToEndId} && $params{EndToEndId} ne '';
-    $params{Avps}       = []        unless exists $params{Avps}       && defined $params{Avps}       && ref $params{Avps} eq 'ARRAY';
+    $params{HopByHopId}    = 0   unless exists $params{HopByHopId}    && defined $params{HopByHopId} && $params{HopByHopId} ne '';
+    $params{EndToEndId}    = 0   unless exists $params{EndToEndId}    && defined $params{EndToEndId} && $params{EndToEndId} ne '';
+    $params{Avps}          = []  unless exists $params{Avps}          && defined $params{Avps}       && ref $params{Avps} eq 'ARRAY';
+    $params{ApplicationId} = 0   unless exists $params{ApplicationId} && defined $params{ApplicationId}; 
 
-    # Proxyable by default, but if Flags set, get value from there if IsProxyable not defined;
-    # !Request by default, but if Flags set, get value from there if IsRequest not defined
-    $params{IsProxyable} = (exists $params{IsProxyable} ? ($params{IsProxyable} ? 1 : 0) : (exists $params{Flags} ? $params{Flags} & 0x40 : 1));
-    $params{IsRequest}   = (exists $params{IsRequest}   ? ($params{IsRequest}   ? 1 : 0) : (exists $params{Flags} ? $params{Flags} & 0x80 : 0));
+    # defaults are IsProxiable => true, all others => false, but get value from Flags if that is defined, instead of setting default
+    $params{IsPotentialRetransmit}  = (exists $params{IsPotentialRetransmit} ? ($params{IsPotentialRetransmit}   ? 1 : 0) : (exists $params{Flags} ? $params{Flags} & 0x10 : 0));
+    $params{IsError}      = (exists $params{IsError}     ? ($params{IsError}     ? 1 : 0) : (exists $params{Flags} ? $params{Flags} & 0x20 : 0));
+    $params{IsProxiable}  = (exists $params{IsProxiable} ? ($params{IsProxiable} ? 1 : 0) : (exists $params{Flags} ? $params{Flags} & 0x40 : 1));
+    $params{IsRequest}    = (exists $params{IsRequest}   ? ($params{IsRequest}   ? 1 : 0) : (exists $params{Flags} ? $params{Flags} & 0x80 : 0));
 
-    my ($code, $appid);
-    if ($class eq 'Diameter::Message') {
-        die "Missing parameter\n" unless exists $params{CommandCode}   && defined $params{CommandCode} && 
-                                         exists $params{ApplicationId} && defined $params{ApplicationId};
-
-        ($code, $appid) = ($params{CommandCode}, $params{ApplicationId});
-
-        die "Invalid parameter\n" unless $code =~ /^\d+$/ && $code <= 0xffffffff && $appid =~ /^\d+$/ && $appid <= 0xffffffff;
-
-        if (exists $CODE_TO_CLASS{$code} && exists $CODE_TO_CLASS{$code}{$params{IsRequest}}) {
-            my $new_class = $CODE_TO_CLASS{$code}{$params{IsRequest}};
-            return $new_class->new( %params );
-        }
-    }
-    else {
-        my $config_params_hr = $TYPE_DEFS_BY_CLASS{$class};
-
-        $params{IsRequest} = $config_params_hr->{IsRequest};
-        $code              = $config_params_hr->{Code};
-        $appid             = $config_params_hr->{ApplicationId}    if defined $config_params_hr->{ApplicationId};
+    unless (exists $params{CommandCode}) {
+        $@ = "Missing Parameter Exception: Commandcode";
+        return undef;
     }
 
-    die "Invalid Message Definition Exception: missing ApplicationId"   unless defined $appid && $appid =~ /^\d+$/ && $appid >= 0 && $appid <= 0xffffffff;
+    my ($code, $appid) = ($params{CommandCode}, $params{ApplicationId});
+
+    unless (defined $code && $code =~ /^\d+$/  && $code <= 0xffffffff) {
+        $@ = "Invalid Parameter Exception: Code";
+        return undef;
+    }
+
+    unless ($appid =~ /^\d+$/ && $appid <= 0xffffffff) {
+        $@ = "Invalid Parameter Exception: ApplicationId";
+        return undef;
+    }
 
     my $flags;
 
@@ -302,7 +119,7 @@ sub new {
     else {
         $flags = 0x00;
         $flags |= 0x80   if $params{IsRequest};
-        $flags |= 0x40   if $params{IsProxyable};
+        $flags |= 0x40   if $params{IsProxiable};
         $flags |= 0x20   if $params{IsError};
     }
 
@@ -311,70 +128,23 @@ sub new {
 
     # Convert %params shorthand for AVP values into AVP objects
     #
-    if (exists $TYPE_DEFS_BY_CLASS{$class}) {
-        foreach my $avpname (map { $_->[0] } @{ $TYPE_DEFS_BY_CLASS{$class}->{RequiredAVPs} }) {
-            if (exists $params{$avpname}) {
-                if (ref $params{$avpname}) {
-                    unless (ref $params{$avpname} eq "ARRAY") { die "Invalid Message Definition: avp ($avpname)" }
-                }
-                else {
-                    $params{$avpname} = [$params{$avpname}];
-                }
-
-                my $avpclass = 'Diameter::Message::AVP::' . $avpname;
-                foreach my $avp_value (@{ $params{$avpname} }) {
-                    push @avps, $avpclass->new( IsMandatory => 1, Data => $avp_value );
-                }
-            }
+    foreach my $avp (@avps) {
+        if (ref $avp eq "HASH") {
+            $avp = Diameter::Message::AVP->new( %{ $avp } );
         }
-
-        foreach my $avpname (map { $_->[0] } @{ $TYPE_DEFS_BY_CLASS{$class}->{OptionalAVPs} }) {
-            if (exists $params{$avpname}) {
-                if (ref $params{$avpname}) {
-                    die "Inavlid Message Definition: avp ($avpname)"    unless ref $params{$avpname} eq "ARRAY";
-                }
-                else {
-                    $params{$avpname} = [$params{$avpname}];
-                }
-
-                my $avpclass = 'Diameter::Message::AVP::' . $avpname;
-                foreach my $avp_value (@{ $params{$avpname} }) {
-                    push @avps, $avpclass->new( IsMandatory => 0, Data => $avp_value );
-                }
+        elsif (ref $avp eq "ARRAY") {
+            # [ $vendor_id, $code, $is_mandatory, $data_type, $typed_data ]
+            unless (@{ $avp } == 5) {
+                $@ = "Invalid Parameter Exception: AVP";
+                return undef;
             }
+            $avp = Diameter::Message::AVP->new( VendorId => $avp->[0], Code => $avp->[1], IsMandatory => $avp->[2], DataType => $avp->[3], Data => $avp->[4] );
         }
-
-
-        # Validate requisite AVPs are present and that mandatory and optional AVPs are in correct numbers
-        my %avp_count_by_class;
-        foreach my $avp (@avps) {
-            my $ref = ref $avp;
-            my $basename = $ref;
-               $basename =~ s/^.+:://;
-
-            $avp_count_by_class{$basename}++;
-        }
-
-        foreach my $avprow (@{ $TYPE_DEFS_BY_CLASS{$class}->{RequiredAVPs} }) {
-            my ($avp_class, $count) = @{ $avprow };
-            if (!exists $avp_count_by_class{$avp_class}) {
-                die "Missing Required AVP Exception: $avp_class";
-            }
-            else {
-                if ($avp_count_by_class{$avp_class} > 1 && $count eq '1') {
-                    die "Invalid AVP Count Exception: $avp_class";
-                }
-            }
-        }
-
-        foreach my $avprow (@{ $TYPE_DEFS_BY_CLASS{$class}->{OptionalAVPs} }) {
-            my ($avp_class, $count) = @{ $avprow };
-            if (exists $avp_count_by_class{$avp_class} && $avp_count_by_class{$avp_class} > 1 && $count eq '1') {
-                die "Invalid AVP Count Exception: $avp_class";
-            }
+        elsif (!$avp->isa( 'Diameter::Message::AVP' )) {
+            $@ = "Invalid Parameter Exception: AVP";
+            return undef;
         }
     }
-
 
     my $msg_length;
     if (!exists $params{Length}) {
@@ -409,20 +179,6 @@ sub application_id  { return shift->[APPLICATION_ID] }
 sub hop_by_hop_id   { return shift->[HOP_BY_HOP_ID] }
 sub end_to_end_id   { return shift->[END_TO_END_ID] }
 sub avps            { return @{ shift->[AVP_LIST] } }
-
-
-sub is {
-    my $self = shift;
-    my $type = shift;
-
-    if (exists $MESSAGE_TYPE_TO_CLASS{$type}) {
-        return $MESSAGE_TYPE_TO_CLASS{$type} eq ref $self;
-    }
-    else {
-        return 0;
-    }
-}
-
 
 sub encode {
     my $self = shift;
@@ -493,31 +249,6 @@ sub decode {
                         HopByHopId => $hbh_id, EndToEndId => $ete_id, Avps => \@avps );
 }
 
-
-#package Diameter::Message::CER;
-#use parent -norequire, 'Diameter::Message';
-#
-#package Diameter::Message::CEA;
-#use parent -norequire, 'Diameter::Message';
-#
-#package Diameter::Message::DWR;
-#use parent -norequire, 'Diameter::Message';
-#
-#package Diameter::Message::DWA;
-#use parent -norequire, 'Diameter::Message';
-#
-#package Diameter::Message::SLR;
-#use parent -norequire, 'Diameter::Message';
-#
-#package Diameter::Message::SLA;
-#use parent -norequire, 'Diameter::Message';
-#
-#package Diameter::Message::SSNR;
-#use parent -norequire, 'Diameter::Message';
-#
-#package Diameter::Message::SSNA;
-#use parent -norequire, 'Diameter::Message';
-#
 
 
 1;
