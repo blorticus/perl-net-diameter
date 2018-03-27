@@ -30,12 +30,14 @@ MessageTypes:
      ApplicationId: 0
      Proxiable: false
      Request:
-         Names: ["Capabilities-Exchange-Request", "CER"]
+         Name: "Capabilities-Exchange-Request"
+         AbbreviatedName: "CER"
          AvpOrder: []
          MandatoryAvps: []
          OptionalAvps: []
      Answer:
-         Names: ["Capabilities-Exchange-Answer", "CEA"]
+         Name: "Capabilities-Exchange-Answer"
+         AbbreviatedName: "CEA"
          AvpOrder: []
          MandatoryAvps: []
          OptionalAvps: []
@@ -49,8 +51,8 @@ $yaml_string =<<EOY;
 AvpTypes:
    - Code: 264
      VendorId: 0
-     Names: ["Origin-Host"]
-     Type: "DiamIdent"
+     Name: "Origin-Host"
+     Type: "DiameterIdentity"
 EOY
 
 $d = Diameter::Dictionary->new( FromString => $yaml_string );
@@ -60,154 +62,154 @@ $yaml_string =<<EOY;
 ---
 AvpTypes:
    - Code: 1
-     Names: ["User-Name"]
+     Name: "User-Name"
      Type: "UTF8String"
    - Code: 25
-     Names: ["Class"]
+     Name: "Class"
      Type: "OctetString"
    - Code: 27
-     Names: ["Session-Timeout"]
+     Name: "Session-Timeout"
      Type: "Unsigned32"
    - Code: 33
-     Names: ["Proxy-State"]
+     Name: "Proxy-State"
      Type: "OctetString"
    - Code: 44
-     Names: ["Accounting-Session-Id"]
+     Name: "Accounting-Session-Id"
      Type: "OctetString"
    - Code: 50
-     Names: ["Acct-Multi-Session-Id"]
+     Name: "Acct-Multi-Session-Id"
      Type: "UTF8String"
    - Code: 55
-     Names: ["Event-Timestamp"]
+     Name: "Event-Timestamp"
      Type: "Time"
    - Code: 85
-     Names: ["Acct-Interim-Interval"]
+     Name: "Acct-Interim-Interval"
      Type: "Unsigned32"
    - Code: 257
-     Names: ["Host-IP-Address"]
+     Name: "Host-IP-Address"
      Type: "Address"
    - Code: 258
-     Names: ["Auth-Application-Id"]
+     Name: "Auth-Application-Id"
      Type: "Unsigned32"
    - Code: 259
-     Names: ["Acct-Application-Id"]
+     Name: "Acct-Application-Id"
      Type: "Unsigned32"
    - Code: 260
-     Names: ["Vendor-Specific-Application-Id"]
+     Name: "Vendor-Specific-Application-Id"
      Type: "Grouped"
    - Code: 261
-     Names: ["Redirect-Host-Usage"]
+     Name: "Redirect-Host-Usage"
      Type: "Enumerated"
    - Code: 262
-     Names: ["Redirect-Max-Cache-Time"]
+     Name: "Redirect-Max-Cache-Time"
      Type: "Unsigned32"
    - Code: 263
-     Names: ["Session-Id"]
+     Name: "Session-Id"
      Type: "UTF8String"
    - Code: 264
-     Names: ["Origin-Host"]
-     Type: "DiamIdent"
+     Name: "Origin-Host"
+     Type: "DiameterIdentity"
    - Code: 265
-     Names: ["Supported-Vendor-Id"]
+     Name: "Supported-Vendor-Id"
      Type: "Unsigned32"
    - Code: 266
-     Names: ["Vendor-Id"]
+     Name: "Vendor-Id"
      Type: "Unsigned32"
    - Code: 267
-     Names: ["Firmware-Revision"]
+     Name: "Firmware-Revision"
      Type: "Unsigned32"
    - Code: 268
-     Names: ["Result-Code"]
+     Name: "Result-Code"
      Type: "Unsigned32"
    - Code: 269
-     Names: ["Product-Name"]
+     Name: "Product-Name"
      Type: "UTF8String"
    - Code: 270
-     Names: ["Session-Binding"]
+     Name: "Session-Binding"
      Type: "Unsigned32"
    - Code: 271
-     Names: ["Session-Server-Failover"]
+     Name: "Session-Server-Failover"
      Type: "Enumerated"
    - Code: 272
-     Names: ["Multi-Round-Time-Out"]
+     Name: "Multi-Round-Time-Out"
      Type: "Unsigned32"
    - Code: 273
-     Names: ["Disconnect-Cause"]
+     Name: "Disconnect-Cause"
      Type: "Enumerated"
    - Code: 274
-     Names: ["Auth-Request-Type"]
+     Name: "Auth-Request-Type"
      Type: "Enumerated"
    - Code: 276
-     Names: ["Auth-Grace-Period"]
+     Name: "Auth-Grace-Period"
      Type: "Unsigned32"
    - Code: 277
-     Names: ["Auth-Session-State"]
+     Name: "Auth-Session-State"
      Type: "Enumerated"
    - Code: 278
-     Names: ["Origin-State-Id"]
+     Name: "Origin-State-Id"
      Type: "Unsigned32"
    - Code: 279
-     Names: ["Failed-AVP"]
+     Name: "Failed-AVP"
      Type: "Grouped"
    - Code: 280
-     Names: ["Proxy-Host"]
-     Type: "DiamIdent"
+     Name: "Proxy-Host"
+     Type: "DiameterIdentity"
    - Code: 281
-     Names: ["Error-Message"]
+     Name: "Error-Message"
      Type: "UTF8String"
    - Code: 282
-     Names: ["Route-Record"]
-     Type: "DiamIdent"
+     Name: "Route-Record"
+     Type: "DiameterIdentity"
    - Code: 283
-     Names: ["Destination-Realm"]
-     Type: "DiamIdent"
+     Name: "Destination-Realm"
+     Type: "DiameterIdentity"
    - Code: 284
-     Names: ["Proxy-Info"]
+     Name: "Proxy-Info"
      Type: "Grouped"
    - Code: 285
-     Names: ["Re-Auth-Request-Type"]
+     Name: "Re-Auth-Request-Type"
      Type: "Enumerated"
    - Code: 287
-     Names: ["Accounting-Sub-Session-Id"]
+     Name: "Accounting-Sub-Session-Id"
      Type: "Unsigned64"
    - Code: 291
-     Names: ["Authorization-Lifetime"]
+     Name: "Authorization-Lifetime"
      Type: "Unsigned32"
    - Code: 292
-     Names: ["Redirect-Host"]
-     Type: "DiamURI"
+     Name: "Redirect-Host"
+     Type: "DiameterURI"
    - Code: 293
-     Names: ["Destination-Host"]
-     Type: "DiamIdent"
+     Name: "Destination-Host"
+     Type: "DiameterIdentity"
    - Code: 294
-     Names: ["Error-Reporting-Host"]
-     Type: "DiamIdent"
+     Name: "Error-Reporting-Host"
+     Type: "DiameterIdentity"
    - Code: 295
-     Names: ["Termination-Cause"]
+     Name: "Termination-Cause"
      Type: "Enumerated"
    - Code: 296
-     Names: ["Origin-Realm"]
-     Type: "DiamIdent"
+     Name: "Origin-Realm"
+     Type: "DiameterIdentity"
    - Code: 297
-     Names: ["Experimental-Result"]
+     Name: "Experimental-Result"
      Type: "Grouped"
    - Code: 298
-     Names: ["Experimental-Result-Code"]
+     Name: "Experimental-Result-Code"
      Type: "Unsigned32"
    - Code: 299
-     Names: ["Inband-Security-Id"]
+     Name: "Inband-Security-Id"
      Type: "Unsigned32"
    - Code: 300
-     Names: ["E2E-Sequence"]
+     Name: "E2E-Sequence"
      Type: "Grouped"
    - Code: 480
-     Names: ["Accounting-Record-Type"]
+     Name: "Accounting-Record-Type"
      Type: "Enumerated"
    - Code: 483
-     Names: ["Accounting-Realtime-Required"]
+     Name: "Accounting-Realtime-Required"
      Type: "Enumerated"
    - Code: 485
-     Names: ["Accounting-Record-Number"]
+     Name: "Accounting-Record-Number"
      Type: "Unsigned32"
 EOY
 
@@ -221,7 +223,8 @@ MessageTypes:
      ApplicationId: 0
      Proxiable: false
      Request:
-         Names: ["Capabilities-Exchange-Request", "CER"]
+         Name: "Capabilities-Exchange-Request"
+         AbbreviatedName: "CER"
          AvpOrder:
             - Origin-Host
             - Origin-Realm
@@ -252,7 +255,8 @@ MessageTypes:
             - Firmware-Revision
             - AVP:*
      Answer:
-         Names: ["Capabilities-Exchange-Answer", "CEA"]
+         Name: "Capabilities-Exchange-Answer"
+         AbbreviatedName: "CEA"
          AvpOrder:
             - Result-Code
             - Origin-Host
@@ -292,7 +296,8 @@ MessageTypes:
      ApplicationId: 0
      Proxiable: false
      Request:
-         Names: ["Disconnect-Peer-Request", "DPR"]
+         Name: "Disconnect-Peer-Request"
+         AbbreviatedName: "DPR"
          AvpOrder:
             - Origin-Host
             - Origin-Realm
@@ -305,7 +310,8 @@ MessageTypes:
          OptionalAvps:
             - AVP:*
      Answer:
-         Names: ["Capabilities-Exchange-Answer", "CEA"]
+         Name: "Capabilities-Exchange-Answer"
+         AbbreviatedName: "CEA"
          AvpOrder:
             - Result-Code
             - Origin-Host
@@ -321,7 +327,6 @@ MessageTypes:
             - Error-Message
             - Failed-AVP
             - AVP:*
-
 EOY
 
 $d = Diameter::Dictionary->new( FromString => $yaml_string );
@@ -335,7 +340,8 @@ MessageTypes:
      ApplicationId: 0
      Proxiable: false
      Request:
-         Names: ["Capabilities-Exchange-Request", "CER"]
+         Name: "Capabilities-Exchange-Request"
+         AbbreviatedName: "CER"
          AvpOrder:
             - Origin-Host
             - Origin-Realm
@@ -366,7 +372,8 @@ MessageTypes:
             - Firmware-Revision
             - AVP:*
      Answer:
-         Names: ["Capabilities-Exchange-Answer", "CEA"]
+         Name: "Capabilities-Exchange-Answer"
+         AbbreviatedName: "CEA"
          AvpOrder:
             - Result-Code
             - Origin-Host
@@ -406,7 +413,8 @@ MessageTypes:
      ApplicationId: 0
      Proxiable: false
      Request:
-         Names: ["Disconnect-Peer-Request", "DPR"]
+         Name: "Disconnect-Peer-Request"
+         AbbreviatedName: "DPR"
          AvpOrder:
             - Origin-Host
             - Origin-Realm
@@ -419,7 +427,8 @@ MessageTypes:
          OptionalAvps:
             - AVP:*
      Answer:
-         Names: ["Capabilities-Exchange-Answer", "CEA"]
+         Name: "Capabilities-Exchange-Answer"
+         AbbreviatedName: "CEA"
          AvpOrder:
             - Result-Code
             - Origin-Host
@@ -437,156 +446,155 @@ MessageTypes:
             - AVP:*
 AvpTypes:
    - Code: 1
-     Names: ["User-Name"]
+     Name: "User-Name"
      Type: "UTF8String"
    - Code: 25
-     Names: ["Class"]
+     Name: "Class"
      Type: "OctetString"
    - Code: 27
-     Names: ["Session-Timeout"]
+     Name: "Session-Timeout"
      Type: "Unsigned32"
    - Code: 33
-     Names: ["Proxy-State"]
+     Name: "Proxy-State"
      Type: "OctetString"
    - Code: 44
-     Names: ["Accounting-Session-Id"]
+     Name: "Accounting-Session-Id"
      Type: "OctetString"
    - Code: 50
-     Names: ["Acct-Multi-Session-Id"]
+     Name: "Acct-Multi-Session-Id"
      Type: "UTF8String"
    - Code: 55
-     Names: ["Event-Timestamp"]
+     Name: "Event-Timestamp"
      Type: "Time"
    - Code: 85
-     Names: ["Acct-Interim-Interval"]
+     Name: "Acct-Interim-Interval"
      Type: "Unsigned32"
    - Code: 257
-     Names: ["Host-IP-Address"]
+     Name: "Host-IP-Address"
      Type: "Address"
    - Code: 258
-     Names: ["Auth-Application-Id"]
+     Name: "Auth-Application-Id"
      Type: "Unsigned32"
    - Code: 259
-     Names: ["Acct-Application-Id"]
+     Name: "Acct-Application-Id"
      Type: "Unsigned32"
    - Code: 260
-     Names: ["Vendor-Specific-Application-Id"]
+     Name: "Vendor-Specific-Application-Id"
      Type: "Grouped"
    - Code: 261
-     Names: ["Redirect-Host-Usage"]
+     Name: "Redirect-Host-Usage"
      Type: "Enumerated"
    - Code: 262
-     Names: ["Redirect-Max-Cache-Time"]
+     Name: "Redirect-Max-Cache-Time"
      Type: "Unsigned32"
    - Code: 263
-     Names: ["Session-Id"]
+     Name: "Session-Id"
      Type: "UTF8String"
    - Code: 264
-     Names: ["Origin-Host"]
-     Type: "DiamIdent"
+     Name: "Origin-Host"
+     Type: "DiameterIdentity"
    - Code: 265
-     Names: ["Supported-Vendor-Id"]
+     Name: "Supported-Vendor-Id"
      Type: "Unsigned32"
    - Code: 266
-     Names: ["Vendor-Id"]
+     Name: "Vendor-Id"
      Type: "Unsigned32"
    - Code: 267
-     Names: ["Firmware-Revision"]
+     Name: "Firmware-Revision"
      Type: "Unsigned32"
    - Code: 268
-     Names: ["Result-Code"]
+     Name: "Result-Code"
      Type: "Unsigned32"
    - Code: 269
-     Names: ["Product-Name"]
+     Name: "Product-Name"
      Type: "UTF8String"
    - Code: 270
-     Names: ["Session-Binding"]
+     Name: "Session-Binding"
      Type: "Unsigned32"
    - Code: 271
-     Names: ["Session-Server-Failover"]
+     Name: "Session-Server-Failover"
      Type: "Enumerated"
    - Code: 272
-     Names: ["Multi-Round-Time-Out"]
+     Name: "Multi-Round-Time-Out"
      Type: "Unsigned32"
    - Code: 273
-     Names: ["Disconnect-Cause"]
+     Name: "Disconnect-Cause"
      Type: "Enumerated"
    - Code: 274
-     Names: ["Auth-Request-Type"]
+     Name: "Auth-Request-Type"
      Type: "Enumerated"
    - Code: 276
-     Names: ["Auth-Grace-Period"]
+     Name: "Auth-Grace-Period"
      Type: "Unsigned32"
    - Code: 277
-     Names: ["Auth-Session-State"]
+     Name: "Auth-Session-State"
      Type: "Enumerated"
    - Code: 278
-     Names: ["Origin-State-Id"]
+     Name: "Origin-State-Id"
      Type: "Unsigned32"
    - Code: 279
-     Names: ["Failed-AVP"]
+     Name: "Failed-AVP"
      Type: "Grouped"
    - Code: 280
-     Names: ["Proxy-Host"]
-     Type: "DiamIdent"
+     Name: "Proxy-Host"
+     Type: "DiameterIdentity"
    - Code: 281
-     Names: ["Error-Message"]
+     Name: "Error-Message"
      Type: "UTF8String"
    - Code: 282
-     Names: ["Route-Record"]
-     Type: "DiamIdent"
+     Name: "Route-Record"
+     Type: "DiameterIdentity"
    - Code: 283
-     Names: ["Destination-Realm"]
-     Type: "DiamIdent"
+     Name: "Destination-Realm"
+     Type: "DiameterIdentity"
    - Code: 284
-     Names: ["Proxy-Info"]
+     Name: "Proxy-Info"
      Type: "Grouped"
    - Code: 285
-     Names: ["Re-Auth-Request-Type"]
+     Name: "Re-Auth-Request-Type"
      Type: "Enumerated"
    - Code: 287
-     Names: ["Accounting-Sub-Session-Id"]
+     Name: "Accounting-Sub-Session-Id"
      Type: "Unsigned64"
    - Code: 291
-     Names: ["Authorization-Lifetime"]
+     Name: "Authorization-Lifetime"
      Type: "Unsigned32"
    - Code: 292
-     Names: ["Redirect-Host"]
-     Type: "DiamURI"
+     Name: "Redirect-Host"
+     Type: "DiameterURI"
    - Code: 293
-     Names: ["Destination-Host"]
-     Type: "DiamIdent"
+     Name: "Destination-Host"
+     Type: "DiameterIdentity"
    - Code: 294
-     Names: ["Error-Reporting-Host"]
-     Type: "DiamIdent"
+     Name: "Error-Reporting-Host"
+     Type: "DiameterIdentity"
    - Code: 295
-     Names: ["Termination-Cause"]
+     Name: "Termination-Cause"
      Type: "Enumerated"
    - Code: 296
-     Names: ["Origin-Realm"]
-     Type: "DiamIdent"
+     Name: "Origin-Realm"
+     Type: "DiameterIdentity"
    - Code: 297
-     Names: ["Experimental-Result"]
+     Name: "Experimental-Result"
      Type: "Grouped"
    - Code: 298
-     Names: ["Experimental-Result-Code"]
+     Name: "Experimental-Result-Code"
      Type: "Unsigned32"
    - Code: 299
-     Names: ["Inband-Security-Id"]
+     Name: "Inband-Security-Id"
      Type: "Unsigned32"
    - Code: 300
-     Names: ["E2E-Sequence"]
+     Name: "E2E-Sequence"
      Type: "Grouped"
    - Code: 480
-     Names: ["Accounting-Record-Type"]
+     Name: "Accounting-Record-Type"
      Type: "Enumerated"
    - Code: 483
-     Names: ["Accounting-Realtime-Required"]
+     Name: "Accounting-Realtime-Required"
      Type: "Enumerated"
    - Code: 485
-     Names: ["Accounting-Record-Number"]
+     Name: "Accounting-Record-Number"
      Type: "Unsigned32"
-
 EOY
 
 $d = Diameter::Dictionary->new( FromString => $yaml_string );
@@ -614,8 +622,8 @@ my $avp_ds = $d->describe_avp( Name => "Origin-Host" );
 my $expected_origin_host_ds = {
     Code            => 264,
     VendorId        => 0,
-    Names           => [ 'Origin-Host' ],
-    Type            => 'DiamIdent',
+    Name            => 'Origin-Host',
+    Type            => 'DiameterIdentity',
 };
 
 is_deeply( $avp_ds, $expected_origin_host_ds, "describe_avp() on expected data structure for Name => Origin-Host" );

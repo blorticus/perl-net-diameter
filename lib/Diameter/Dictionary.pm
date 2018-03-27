@@ -37,13 +37,15 @@ my %element_structure = (
             Proxiable     => [0, 'bool', 1],
             Error         => [0, 'bool', 0],
             Request       => [0, 'map', {}, {
-                Names           => [1, 'list', undef],
+                Name            => [1, 'string', undef],
+                AbbreviatedName => [0, 'string', ''],
                 AvpOrder        => [0, 'list', []],
                 MandatoryAvps   => [0, 'list', []],
                 OptionalAvps    => [0, 'list', []],
             }],
             Answer        => [0, 'map', {}, {
-                Names           => [1, 'list', undef],
+                Name            => [1, 'string', undef],
+                AbbreviatedName => [0, 'string', ''],
                 AvpOrder        => [0, 'list', []],
                 MandatoryAvps   => [0, 'list', []],
                 OptionalAvps    => [0, 'list', []],
@@ -53,11 +55,10 @@ my %element_structure = (
     AvpTypes => [0, 'list', [], [1, 'map', {}, {
             Code        => [1, 'uint32', undef],
             VendorId    => [0, 'uint32', 0],
-            Names       => [1, 'list', undef],
-            Type        => [0, 'enum', 'OctetString', [qw(Address DiamIdent DiamURI Enumerated Float32 Float64
-                                                          Grouped Integer32 Integer64 OctetString Time 
+            Name        => [1, 'string', undef],
+            Type        => [0, 'enum', 'OctetString', [qw(Address DiameterIdentity DiameterURI Enumerated Float32 Float64
+                                                          Grouped Integer32 Integer64 IPFilterRule OctetString Time 
                                                           Unsigned32 Unsigned64 UTF8String)]],
-            ChildAvps   => [undef, 'childavp', undef],  # childavps is a special type handled in code
         }],
     ],
 );
@@ -138,12 +139,20 @@ sub new {
 }
 
 
-# $m = $d->message( %msg_type, Avps => [ $d->avp( $name, $value ), ... ] ) or die $@;
+# $m = $d->message( %msg_type, Avps => [ [ $name, $value ], ... ] ) or die $@;
 #   $msg_type{ApplicationId} and $msg_type{Code}, optionally $msg_type{IsRequest}
 #   $msg_type{Code}, optionally $msg_type{IsRequest}
 #   $msg_type{Name}
 #
-# may include $msg_type{ValidateAvps}
+# may include $msg_type{ValidateAvps} (default is true)
+#
+# undef and set $@ on failure
+# $@ will begin with Unknown Message Type Exception if the message type is not
+# known in the dictionary.  It will begin with Unknown AVP Type Exception if one
+# of the provided AVPs is not in the dictionary.  It will begin with Incorrect AVP Type Value
+# if one of the AVPs has a value that is not permitted by type.  It will begin with
+# Missing AVP if a mandatory AVP is missing.  It will begin with Illegal AVP if one of the
+# AVPs is not permitted for this Message Type based on the dictionary.
 #
 sub message {
     my $self = shift;
@@ -199,7 +208,7 @@ sub avp {
         }
     }
     elsif (exists $params{Code} && defined $params{Code}) {
-        my $vendorid = (exists $params{VendorId} and defined $params{VendorId} ? $params{VendorId} : 0);
+        my $vendorid = (exists $params{VendorId} && defined $params{VendorId} ? $params{VendorId} : 0);
 
         if (exists $self->[DD_AVPS]->{Code}->{"$vendorid:$params{Code}"}) {
             $avp_desc = $self->[DD_AVPS]->{Code}->{"$vendorid:$params{Code}"};
@@ -212,7 +221,9 @@ sub avp {
         return undef;
     }
 
-    return Diameter::Message::AVP->new( Code => $avp_desc->{Code}, VendorId => $avp_desc->{VendorId}, Data => $params{Value} );
+    return Diameter::Dictionary::Message::AVP->new( Name     => $avp_desc->{Name},     Code => $avp_desc->{Code},
+                                                    VendorId => $avp_desc->{VendorId}, Data => $params{Value},
+                                                    Type     => $avp_desc->{Type} );
 }
 
 
@@ -281,7 +292,7 @@ sub describe_avp {
 #
 # Covert the generated datastructure from the YAML file to a hashref indexed by
 # {Code} and {Name}.  {Code} is "$vendorid:$code", while {Name} is from the set of
-# names for an AVP.  The value is a hashref of {Code}, {Names}, {VendorId}, {Type}.
+# names for an AVP.  The value is a hashref of {Code}, {Name}, {VendorId}, {Type}.
 # The YAML datastructure must have first been validated.
 #
 sub _process_yaml_ds_to_avp_pointers {
@@ -297,10 +308,7 @@ sub _process_yaml_ds_to_avp_pointers {
     foreach my $avp_hr (@{ $yaml_ds->{AvpTypes} }) {
         my ($vendor_id, $code) = ($avp_hr->{VendorId}, $avp_hr->{Code});
         $avp_pointers{Code}{"$vendor_id:$code"} = $avp_hr;
-
-        foreach my $name (@{ $avp_hr->{Names} }) {
-            $avp_pointers{Name}{$name} = $avp_hr;
-        }
+        $avp_pointers{Name}{$avp_hr->{Name}} = $avp_hr;
     }
 
     return \%avp_pointers;
@@ -346,7 +354,7 @@ sub _get_normalized_avp {
 # "$vendorid:$code" of Avp order; then {MandatoryAvps}, which is a hashref by
 # "$vendorid:$code"; then {OptionalAvps}, which is a hashref by
 # "$vendorid:$code", then {Properties}, which is a hashref of {ApplicationId},
-# {Codes}, {Names}, {Error} and {Proxiable}.  The value for each
+# {Codes}, {Name}, {AbbreviatedName}, {Error} and {Proxiable}.  The value for each
 # {"$vendorid:$code"} hashref key is the count when used with {MandatoryAvps}
 # and {OptionalAvps}.  For {AvpOrder}, the value is simply 1.
 #
@@ -428,12 +436,12 @@ sub _process_yaml_ds_to_message_pointers {
 
         $message_pointers{Code}{"$application_id:$code"} = \%message_ds;
 
-        foreach my $name (@{ $message_hr->{Request}->{Names} }) {
-            $message_pointers{Name}{$name} = $ra_pair[0];
+        foreach my $name ($message_hr->{Request}->{Name}, $message_hr->{Request}->{AbbreviatedName}) {
+            $message_pointers{Name}{$name} = $ra_pair[0]    if $name ne '';
         }
 
-        foreach my $name (@{ $message_hr->{Answer}->{Names} }) {
-            $message_pointers{Name}{$name} = $ra_pair[1];
+        foreach my $name ($message_hr->{Answer}->{Name}, $message_hr->{Answer}->{AbbreviatedName}) {
+            $message_pointers{Name}{$name} = $ra_pair[1]    if $name ne '';
         }
     }
 
@@ -463,6 +471,17 @@ sub _validate_and_expand_yaml_element {
             return 0;
         }
     }
+    elsif ($required_type eq "string") {
+        if (ref $element_type) {
+            $@ = "For ($node_name) value must be a YAML string";
+            return 0;
+        }
+
+        if (!defined $element_value || $element_value eq "") {
+            $@ = "For ($node_name) value cannot be empty";
+            return 0;
+        }
+    }
     elsif ($required_type eq "enum") {
         unless (grep { $element_value eq $_ } @{ $structure_def_ar->[E_CHILDREN] }) {
             $@ = "For ($node_name), value is not in the enum list";
@@ -477,17 +496,6 @@ sub _validate_and_expand_yaml_element {
 
         unless ($element_value =~ /^\d+/ && $element_value < 2**32) {
             $@ = "For ($node_name) value must be uint32";
-            return 0;
-        }
-    }
-    elsif ($required_type eq "count") {
-        if (ref $element_type) {
-            $@ = "For ($node_name) value must be a YAML string";
-            return 0;
-        }
-
-        unless ($element_value eq "*" || $element_value =~ /^\d+(\*)?/) {
-            $@ = "For ($node_name) value must a count: either '*', a positive integer, or a positive integer followed by '*'";
             return 0;
         }
     }
@@ -548,56 +556,67 @@ sub _validate_and_expand_yaml_element {
             return 0;
         }
     }
-    elsif ($required_type eq "childavps") {
-        unless ($element_type eq "ARRAY") {
-            $@ = "For ($node_name) value must be a YAML list";
+
+    return 1;
+}
+
+
+# I am preserving this bit of code because I may re-introduce it later.  I don't
+# currently think that it is sensible to specify the allowed contained AVPs in
+# a Grouped AVP -- or rather, that should be a function of MessageType validation --
+# but I'm leaving it here in case I re-decide later.
+sub _validate_childavps_element {
+    my $class = shift;
+    my ($node_name, $element_type, $element_value) = @_;
+
+    unless ($element_type eq "ARRAY") {
+        $@ = "For ($node_name) value must be a YAML list";
+        return 0;
+    }
+
+    for (my $i = 0; $i < @{ $element_value }; $i++) {
+        my $nv = $element_value->[$i];
+        unless (defined $nv && ref $nv eq 'HASH') {
+            $@ = "For ($node_name/$i) value must be a YAML map";
             return 0;
         }
 
-        for (my $i = 0; $i < @{ $element_value }; $i++) {
-            my $nv = $element_value->[$i];
-            unless (defined $nv && ref $nv eq 'HASH') {
-                $@ = "For ($node_name/$i) value must be a YAML map";
+        # must have VendorId+Code, Code or Name
+        if (exists $nv->{Code} && defined $nv->{Code} && $nv->{Code} ne "") {
+            unless ($nv->{Code} =~ /^\d+$/) {
+                $@ = "For ($node_name/$i) Code must be a positive integer";
+                return 0;
+            }
+            if (exists $nv->{Name}) {
+                $@ = "For ($node_name/$i) cannot have Code and Name together";
                 return 0;
             }
 
-            # must have VendorId+Code, Code or Name
-            if (exists $nv->{Code} && defined $nv->{Code} && $nv->{Code} ne "") {
-                unless ($nv->{Code} =~ /^\d+$/) {
-                    $@ = "For ($node_name/$i) Code must be a positive integer";
+            if (exists $nv->{VendorId} && !defined $nv->{VendorId} && $nv->{VendorId} ne "") {
+                unless ($nv->{VendorId} =~ /^\d+$/) {
+                    $@ = "For ($node_name/$i) VendorId must be a positive integer";
                     return 0;
                 }
-                if (exists $nv->{Name}) {
-                    $@ = "For ($node_name/$i) cannot have Code and Name together";
-                    return 0;
-                }
+            }
+            else {
+                $nv->{VendorId} = 0;
+            }
+        }
+        elsif (!exist $nv->{Name} || !defined $nv->{Name} || $nv->{Name} eq "") {
+            $@ = "For ($node_name/$i) VendorId+Code, Code, or Name must be defined";
+            return 0;
+        }
+        elsif (exists $nv->{VendorId}) {
+            $@ = "For ($node_name/$i) cannot specify VendorId with Name";
+            return 0;
+        }
 
-                if (exists $nv->{VendorId} && !defined $nv->{VendorId} && $nv->{VendorId} ne "") {
-                    unless ($nv->{VendorId} =~ /^\d+$/) {
-                        $@ = "For ($node_name/$i) VendorId must be a positive integer";
-                        return 0;
-                    }
-                }
-                else {
-                    $nv->{VendorId} = 0;
-                }
-            }
-            elsif (!exist $nv->{Name} || !defined $nv->{Name} || $nv->{Name} eq "") {
-                $@ = "For ($node_name/$i) VendorId+Code, Code, or Name must be defined";
-                return 0;
-            }
-            elsif (exists $nv->{VendorId}) {
-                $@ = "For ($node_name/$i) cannot specify VendorId with Name";
-                return 0;
-            }
-
-            if (!exists $nv->{Count} || !defined $nv->{Count} || $nv->{Count} eq "") {
-                $nv->{Count} = '*';
-            }
-            elsif ($nv->{Count} ne "*" && $nv->{Count} !~ /^\d+\*?$/) {
-                $@ = "For ($node_name/$i) Count must be *, a positive integer, or a positive integer followed by *";
-                return 0;
-            }
+        if (!exists $nv->{Count} || !defined $nv->{Count} || $nv->{Count} eq "") {
+            $nv->{Count} = '*';
+        }
+        elsif ($nv->{Count} ne "*" && $nv->{Count} !~ /^\d+\*?$/) {
+            $@ = "For ($node_name/$i) Count must be *, a positive integer, or a positive integer followed by *";
+            return 0;
         }
     }
 
@@ -657,6 +676,71 @@ sub _validate_and_expand_yaml_datastructure {
     }
 
     return $struct_ok;
+}
+
+
+
+package Diameter::Dictionary::Message::AVP;
+
+use warnings;
+
+use parent 'Diameter::Message::AVP';
+
+no strict;
+use constant {
+    AVP_NAME            => Diameter::Message::AVP::AVP__LAST_ELEMENT + 1,
+};
+
+use strict;
+
+
+# Because we know that Diameter::Message::AVP is a blessed listref,
+# we extend the listref here, but this means that, if the Diameter::Message::AVP
+# listref is changed, it must be changed here, too
+#
+sub new {
+    my $class = shift;
+    my %params = @_;
+
+    my $self = $class->SUPER::new( %params );
+
+    bless $self, $class;
+
+    $self->[AVP_NAME] = $params{Name};
+
+    return $self;
+}
+
+
+sub name {
+    return shift->[AVP_NAME];
+}
+
+
+package Diameter::Dictionary::Message;
+
+use warnings;
+
+use parent 'Diameter::Message';
+
+no strict;
+use constant {
+    MESSAGE_NAMES       => Diameter::Message::LAST_ELEMENT + 1,  
+};
+
+
+sub new {
+
+}
+
+
+sub name {
+
+}
+
+
+sub aliases {
+
 }
 
 

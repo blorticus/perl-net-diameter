@@ -71,6 +71,8 @@ use constant {
     END_TO_END_ID       => 6,
     AVP_LIST            => 7,
     ENCODED             => 8,
+
+    LAST_ELEMENT        => 8,
 };
 
 
@@ -243,6 +245,7 @@ my %MESSAGE_TYPE_TO_CLASS = (
     SSNR    => 'Diameter::Message::SSNR',
     SSNA    => 'Diameter::Message::SSNA',
 );
+
 
 
 #
@@ -491,30 +494,30 @@ sub decode {
 }
 
 
-package Diameter::Message::CER;
-use parent -norequire, 'Diameter::Message';
-
-package Diameter::Message::CEA;
-use parent -norequire, 'Diameter::Message';
-
-package Diameter::Message::DWR;
-use parent -norequire, 'Diameter::Message';
-
-package Diameter::Message::DWA;
-use parent -norequire, 'Diameter::Message';
-
-package Diameter::Message::SLR;
-use parent -norequire, 'Diameter::Message';
-
-package Diameter::Message::SLA;
-use parent -norequire, 'Diameter::Message';
-
-package Diameter::Message::SSNR;
-use parent -norequire, 'Diameter::Message';
-
-package Diameter::Message::SSNA;
-use parent -norequire, 'Diameter::Message';
-
+#package Diameter::Message::CER;
+#use parent -norequire, 'Diameter::Message';
+#
+#package Diameter::Message::CEA;
+#use parent -norequire, 'Diameter::Message';
+#
+#package Diameter::Message::DWR;
+#use parent -norequire, 'Diameter::Message';
+#
+#package Diameter::Message::DWA;
+#use parent -norequire, 'Diameter::Message';
+#
+#package Diameter::Message::SLR;
+#use parent -norequire, 'Diameter::Message';
+#
+#package Diameter::Message::SLA;
+#use parent -norequire, 'Diameter::Message';
+#
+#package Diameter::Message::SSNR;
+#use parent -norequire, 'Diameter::Message';
+#
+#package Diameter::Message::SSNA;
+#use parent -norequire, 'Diameter::Message';
+#
 
 
 1;
