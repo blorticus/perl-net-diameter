@@ -10,12 +10,255 @@ use FileHandle;
 use Storable qw[dclone];
 
 
+=head1 NAME
+
+Diameter::Dictionary - A dictionary interface for Diameter and Diameter AVP objects
+
+=head1 SYNOPSIS
+
+ $d = Diameter::Dictionary->from_yaml( File => $path_to_yaml );
+
+ $m = $d->message( Name => "CER", Avps => [
+    $d->avp( Name => "Origin-Host", "test.example.com" ),
+    OriginRealm => "example.com",
+    ...
+ ] );
+
+ $msg_name = $m->name;
+ $msg_an   = $m->abbreviated_name;
+
+ $avp_name = $m->avps->[0]->name;
+
+ \%info = $d->describe_message( ApplicationId => 16777232, Code => 520 );
+ \%info = $d->describe_avp( Name => "Host-IP-Address" );
+
+=head1 DESCRIPTION
+
+This package provides an interface to a Diameter dictionary.  A dictionary
+describes Diameter message structures and AVP structures.  While this is
+intended to be a generic interface, allowing many different types of dictionary
+infomration encoding, currently only a YAML dictionary is defined.  The
+schema for this is described below, in the section B<YAML SCHEMA>.
+
+B<from_yaml> reads a YAML file (if B<File> is supplied) or a YAML string
+(if B<String> is provided).  The YAML is validated.  If an error is encountered,
+the parser stops, set I<$@> and returnsa I<undef>.
+
+If the YAML is valid, a B<Diameter::Dictionary> object is returned.  This object
+can be used to create B<Diameter::Message> objects as follows:
+
+=over 4
+
+=item I<$m> = I<$d>-E<gt>B<message>( B<Name> => I<$message_name>, B<Avps> => I<\@avps> )
+
+=item I<$m> = I<$d>-E<gt>B<message>( B<Code> => I<$command_code>, B<Avps> => I<\@avps> )
+
+=item I<$m> = I<$d>-E<gt>B<message>( B<ApplicationId> => I<$appid>, B<Code> => I<$command_code>, B<Avps> => I<\@avps> )
+
+=back
+
+If the identified message type is not defined in the dictionary, set I<$@> and return I<undef>
+
+The dictionary supplies the mandatory AVPs, optional AVPs, and the AVP order.  The
+supplied I<@avps> can be in two forms: either a B<Diameter::Message::AVP> object
+(usually created by using B<Diameter::Dictionary>-E<gt>B<avp>), or AVP normalized name
+followed by a typed value.  The B<SYNOPSIS> section shows an example of this.  These
+may be freely mixed.  The normalized name is the dictionary name for the AVP, with any
+character outside the set [A-Za-z0-9] removed.
+
+The AVPs will be re-ordered according to the dictionary order for this message type.  If
+any mandatory AVPs are missing, I<$@> is set and I<undef> is returned.  The AVPs must
+also conform to the count requirements in the dictionary.
+
+If B<message> is passed B<ValidateAvps> and it is set to a false value, then AVPs are
+not checked and are not re-ordered.
+
+B<Diameter::Message::AVP> objects can also be created directly, as follows:
+
+=over 4
+
+=item I<$avp> = I<$d>-E<gt>B<avp>( B<Name> => I<$name>, B<Value> => I<$type_value> )
+
+=item I<$avp> = I<$d>-E<gt>B<avp>( B<Code> => I<$avp_code>, B<Value> => I<$type_value> )
+
+=item I<$avp> = I<$d>-E<gt>B<avp>( B<VendorId> => I<$vendor_id>, B<Code> => I<$avp_code>, B<Value> => I<$type_value> )
+
+=back
+
+If the specified AVP is not in the dictionary, set I<$@> and return I<undef>.  The
+data type is retrieved from the dictionary.
+
+The objects returned by B<message> and B<avp> are actually sub-types of B<Diameter::Message> and
+B<Diameter::Message::AVP>, respectively.  The first adds the methods B<name> and B<abbreviated_name>,
+which return those values as defined in the dictionary.  The second adds the method B<name>.
+
+B<describe_message> and B<describe_avp> return a hashref of information about a message type
+and an AVP type, respectively.  For B<describe_message>, the message type can be specified as any
+one of:
+
+=over 4
+
+=item I<\%info> = I<$d>-E<gt>B<describe_message>( B<Name> => I<$name> )
+
+=item I<\%info> = I<$d>-E<gt>B<describe_message>( B<Code> => I<$command_code> )
+
+=item I<\%info> = I<$d>-E<gt>B<describe_message>( B<ApplicationId> => I<$appid>, B<Code> => I<$command_code> )
+
+=back
+
+If I<$command_code> is given but I<$appid> is not, then I<$appid> is assumed to be 0.
+
+For B<describe_avp>, the AVP type can be specified as any of:
+
+=over 4
+
+=item I<\%info> = I<$d>-E<gt>B<describe_avp>( B<Name> => I<$name> )
+
+=item I<\%info> = I<$d>-E<gt>B<describe_avp>( B<Code> => I<$avp_code> )
+
+=item I<\%info> = I<$d>-E<gt>B<describe_avp>( B<VendorId> => I<$vendor_id>, B<Code> => I<$avp_code> )
+
+=back
+
+If I<$avp_code> is given but I<$vendor_id> is not, then I<$vendor_id> is assumed to be 0.
+
+For B<describe_message>, the returned hashref contains the following elements:
+
+=over 4
+
+=item B<Code>
+
+The command code.
+
+=item B<Name>
+
+The name for the message.
+
+=item B<AbbreviatedName>
+
+The abbreviated name for the message, or the empty string is one is not defined.
+For example, the B<Name> of a message might be I<Capabilities-Exchange-Request>
+and the B<AbbreviatedName> might be I<CER>.
+
+=item B<ApplicationId>
+
+The application-id for this message type.
+
+=item B<MandatoryAvps>
+
+A hashref indexed by "I<$vendor_id>:I<$avp_code>" values for the mandatory AVPs related
+to this message type.  The value of each element is the count, which may be '*' (meaning zero
+or more), an integer, meaning an exact number, or an integer followed by '*',
+meaning that number or more.
+
+=item B<OptionalAvps>
+
+A hashref indexed by "I<$vendor_id>:I<$avp_code>" values for the mandatory AVPs related
+to this message type.  A special value is "AVP", which means any AVP.  The
+value of each element is the count, which may be '*' (meaning zero or more), an integer,
+meaning an exact number, or an integer followed by '*', meaning that number or
+more.
+
+=item B<AvpOrder>
+
+A listref of "I<$vendor_id>:I<$avp_code>" values for the required order of AVPs.
+
+=back
+
+For B<describe_message>, the returned hashref contains the following elements:
+
+=over 4
+
+=item B<Code>
+
+The AVP code.
+
+=item B<VendorId>
+
+The vendor-id for the AVP.
+
+=item B<Name>
+
+The unique name for the AVP.
+
+=item B<Type>
+
+The data type for the AVP.
+
+=back
+
+=head1 YAML SCHEMA
+
+A YAML definition must have this basic structure:
+
+ ---
+ MessagesTypes:
+   ...
+
+ AvpTypes:
+   ...
+
+It is possible to omit one of the two Types definitions, but
+at least one must be present.
+
+B<MessageTypes> is a YAML list of YAML maps.  Each map is:
+
+ - Code: <code>
+   ApplicationId: <app_id>
+   Proxiable: <is_proxiable>
+   Request:
+      Name: <name>
+      AbbreviatedName: <aname>
+      AvpOrder:
+        ...
+      MandatoryAvps:
+        ...
+      OptionalAvps:
+        ...
+   Answer:
+      Name: <name>
+      AbbreviatedName: <aname>
+      AvpOrder:
+        ...
+      MandatoryAvps:
+        ...
+      OptionalAvps:
+        ...
+
+If B<ApplicationId> is absent, it defaults to 0.  If B<Proxiable> is absent, it
+defaults to 'true'.  B<Request> and B<Answer> are required.  Under each,
+B<Name> is required, but B<AbbreviatedName> is not.  Both values must be unique
+among all messages (this applies to B<AbbreviatedName> only when it is defined,
+of course).  B<MandatoryAvps> and B<OptionalAvps> are lists of
+"<avp-name>:<count>" or just "<avp-name>".  If it is just "<avp-name>", count
+is assumed to be "1" for B<MandatoryAvps> and "*" for B<OptionalAvps>.  A named
+AVP MUST be defined elsewhere in the dictionary.
+
+B<AvpOrder> is a list of AVP names, in the order in which the AVPs must appear.
+
+B<AvpTypes> is a YAML list of YAML maps.  Each map is:
+
+ - Code: <code>
+   VendorId: <vendor-id>
+   Type: <data-type>
+   Name: <avp-name>
+
+If B<VendorId> is absent, it is assumed to be 0.  If B<Type> is absent, it is
+assumed to be "OctetString".  B<Type> must be one of: Address,
+DiameterIdentity, DiameterURI, Enumerated, Float32, Float64, Grouped, Integer32,
+Integer64, OctetString, Time, Unsigned32, Unsigned64, UTF8String.  B<Code> and
+B<Name> are required.  B<Name> must be unique among all defined AVPs.
+
+=cut
+
+
 use constant {
     E_IS_REQUIRED       => 0,
     E_TYPE              => 1,
     E_DEFAULT_VALUE     => 2,
     E_CHILDREN          => 3,
 };
+
 
 # This describes what the serialized YAML datastructure (that is, the one created
 # by YAML::XS from a YAML file/string) must look like.  Each element has a root
@@ -139,21 +382,6 @@ sub new {
 }
 
 
-# $m = $d->message( %msg_type, Avps => [ [ $name, $value ], ... ] ) or die $@;
-#   $msg_type{ApplicationId} and $msg_type{Code}, optionally $msg_type{IsRequest}
-#   $msg_type{Code}, optionally $msg_type{IsRequest}
-#   $msg_type{Name}
-#
-# may include $msg_type{ValidateAvps} (default is true)
-#
-# undef and set $@ on failure
-# $@ will begin with Unknown Message Type Exception if the message type is not
-# known in the dictionary.  It will begin with Unknown AVP Type Exception if one
-# of the provided AVPs is not in the dictionary.  It will begin with Incorrect AVP Type Value
-# if one of the AVPs has a value that is not permitted by type.  It will begin with
-# Missing AVP if a mandatory AVP is missing.  It will begin with Illegal AVP if one of the
-# AVPs is not permitted for this Message Type based on the dictionary.
-#
 sub message {
     my $self = shift;
     my %params = @_;
@@ -190,10 +418,6 @@ sub message {
 }
 
 
-# $avpobj = $d->avp( Name => $name, Value => $typed_value ) or die;
-# $avpobj = $d->avp( Code => $code, Value => $typed_value ) or die;
-# $avpobj = $d->avp( VendorId => $vendorid, Code => $code, Value => $typed_value ) or die;
-#
 sub avp {
     my $self = shift;
     my %params = @_;
@@ -227,7 +451,6 @@ sub avp {
 }
 
 
-# \%v = $d->describe_message( Name => $name | Code => $code | (Code => $code, ApplicationId => $appid) );
 sub describe_message {
     my $self = shift;
     my %params = @_;
@@ -256,7 +479,6 @@ sub describe_message {
 }
 
 
-# %v = $d->describe_avp( Name => $name | Code => $code | (Code => $code, VendorId => $vendorid) ); 
 sub describe_avp {
     my $self = shift;
     my %params = @_;
@@ -286,15 +508,6 @@ sub describe_avp {
 }
 
 
-
-#
-# \%avp_pointers = $class->_process_yaml_ds_to_avp_pointers( $yaml_ds );
-#
-# Covert the generated datastructure from the YAML file to a hashref indexed by
-# {Code} and {Name}.  {Code} is "$vendorid:$code", while {Name} is from the set of
-# names for an AVP.  The value is a hashref of {Code}, {Name}, {VendorId}, {Type}.
-# The YAML datastructure must have first been validated.
-#
 sub _process_yaml_ds_to_avp_pointers {
     my $class = shift;
     my $yaml_ds = shift;
@@ -680,6 +893,8 @@ sub _validate_and_expand_yaml_datastructure {
 
 
 
+# This package provides a sub-type of Diameter::Dictionary::Message::AVP.  It
+# adds the name method.
 package Diameter::Dictionary::Message::AVP;
 
 use warnings;
@@ -717,6 +932,8 @@ sub name {
 }
 
 
+# This package provides a sub-type of Diameter::Dictionary::Message.  It adds
+# the name method and the abbreviated_name method.
 package Diameter::Dictionary::Message;
 
 use warnings;
@@ -739,7 +956,7 @@ sub name {
 }
 
 
-sub aliases {
+sub abbreviated_name {
 
 }
 
