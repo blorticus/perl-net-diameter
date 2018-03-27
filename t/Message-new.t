@@ -26,7 +26,7 @@ my $msg = Diameter::Message->new(
 );
 
 # defaults are: ApplicationId => 0, IsProxiable => 1, IsRequest => 0, IsError => 0, IsPotentialRetransmit => 0, HbHId => 0, EtEId => 0, no AVPs
-check_msg_values( $msg, 272, 0, 0x4, 0, 0, 0, 20, "0100001440000110000000000000000000000000", "Bare CCA" );
+check_msg_values( $msg, 272, 0, 0x40, 0, 0, 0, 20, "0100001440000110000000000000000000000000", "Bare CCA" );
 
 $msg = Diameter::Message->new(
     CommandCode     => 257,
@@ -34,7 +34,7 @@ $msg = Diameter::Message->new(
     IsProxiable     => 0,
 );
 
-check_msg_values( $msg, 257, 0, 0x8, 1, 0, 0, 20, "0100001480000101000000000000000000000000", "Bare CER" );
+check_msg_values( $msg, 257, 0, 0x80, 1, 0, 0, 20, "0100001480000101000000000000000000000000", "Bare CER" );
 
 $msg = Diameter::Message->new(
     CommandCode     => 272,
@@ -44,7 +44,7 @@ $msg = Diameter::Message->new(
     EndToEndId      => 0xffee1100,
 );
 
-check_msg_values( $msg, 272, 0, 0xc, 1, 0x12345678, 0xffee1100, 20, "01000014c00001100000000012345678ffee1100", "CER header only" );
+check_msg_values( $msg, 272, 0, 0xc0, 1, 0x12345678, 0xffee1100, 20, "01000014c00001100000000012345678ffee1100", "CER header only" );
 
 $msg = Diameter::Message->new(
     CommandCode     => 272,
@@ -55,7 +55,7 @@ $msg = Diameter::Message->new(
     Avps            => [],
 );
 
-check_msg_values( $msg, 272, 0, 0xc, 1, 0x12345678, 0xffee1100, 20, "01000014c00001100000000012345678ffee1100", "CER header only, but empty Avp provided" );
+check_msg_values( $msg, 272, 0, 0xc0, 1, 0x12345678, 0xffee1100, 20, "01000014c00001100000000012345678ffee1100", "CER header only, but empty Avp provided" );
 
 $msg = Diameter::Message->new(
     CommandCode     => 257,
@@ -72,7 +72,7 @@ $msg = Diameter::Message->new(
     ],
 );
 
-check_msg_values( $msg, 257, 0, 0xc, 1, 0x12345678, 0xffee1100, 112, "01000070c00001010000000012345678ffee11000000010840000017746573742e663564656d6f2e636f6d000000012840000012663564656d6f2e636f6d0000000001014000000e0001c0a8190100000000010a4000000c000015a80000010d40000014746573742d6861726e657373", "CER header only, but empty Avp provided" );
+check_msg_values( $msg, 257, 0, 0xc0, 1, 0x12345678, 0xffee1100, 112, "01000070c00001010000000012345678ffee11000000010840000017746573742e663564656d6f2e636f6d000000012840000012663564656d6f2e636f6d0000000001014000000e0001c0a8190100000000010a4000000c000015a80000010d40000014746573742d6861726e657373", "CER header only, but empty Avp provided" );
 
 
 done_testing();

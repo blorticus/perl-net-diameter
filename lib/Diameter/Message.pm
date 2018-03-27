@@ -38,6 +38,16 @@ Diameter::Message - Interface describing a Diameter Message, with encoders and d
 
  $socket->send( $m->encode );
 
+=head1 DESCRIPTION
+
+This package allows one to create objects representing Diameter Messages (see RFC 6733).  There is a package
+method (B<decode>) for reading a data stream, and translating it into a B<Diameter::Message> object.  Another
+function (B<encode>) reverses this, creating a network byte-order stream from a B<Diameter::Message> object.
+
+The following methods are defined:
+
+=over 4
+
 =cut
 
 our @EXPORT_OK = qw(length_of_next_complete_diameter_message_in);
@@ -71,13 +81,60 @@ use constant {
 };
 
 
-#
-# $p = Diameter::Message->new( IsRequest => 1|0, IsError => 1|0, IsProxiable => 1|0, CommandCode => $cc,
-#                              ApplicationId => $aid, HopByHopId => $hhid, EndToEndId => $eeid,
-#                              Avps => \@avps, Flags => $flags );
-#
-# where @avps is listrefs of Diameter::Message::AVP objects
-#
+=item I<$m> = Diameter::Message-E<gt>B<new>( I<%params> );
+
+Constructor.  I<%params> include:
+
+=over 8
+
+=item B<CommandCode> => I<$code>
+
+The message command code.  Must be a 32-bit unsigned integer.  Required.  No default.
+
+=item B<ApplicationId> => I<$appid>
+
+The message application-id.  Must be a 32-bit unsigned integer.  Default is 0.
+
+=item B<IsRequest> => I<1|0>
+
+Set the request flag?  Default is 0.
+
+=item B<IsError> => I<1|0>
+
+Set the error flag?  Default is 0.
+
+=item B<IsProxiable> => I<1|0>
+
+Set the proxiable flag?  Default is 0.
+
+=item B<Flags> => I<$flags>
+
+The flags value.  This is the unshifted octet for the message flags.  Thus, if you
+wish to set the request and proxiable flags, I<$flags> would be 0xc0.  If this is
+provided, the values for B<IsRequest>, B<IsError> and B<IsProxiable> are all ignored.
+
+=item B<HopByHopId> => I<$hbh_id>
+
+The message hop-by-hop-id.  Must be a 32-bit unsigned integer.  Default is 0.
+
+=item B<EndToEndId> => I<$ete_id>
+
+The message end-to-end-id.  Must be a 32-bit unsigned integer.  Default is 0.
+
+=item B<Avps> => I<\@avps>
+
+A list of AVPs.  Each entry may be either a B<Diameter::Message::AVP> object,
+a listref or a hashref.  If it's a hashref, B<Diameter::Message::AVP>-E<gt>B<new>
+is invoked, and the hashref is expanded and passed.  If it is a listref, it must
+have 5 elements: [ I<$vendor_id>, I<$avp_code>, I<$is_mandatory>, I<$data_type>, I<$typed_data> ].
+I<$data_type> must be a valid B<DataType> value for the B<Diameter::Message::AVP>
+constructor.
+
+=back
+
+For any parameter, if an invalid value is provided, I<undef> is returned and I<$@> is set.
+
+=cut
 
 sub new {
     my $class = shift;
@@ -170,15 +227,64 @@ sub new {
     return $self;
 }
 
+=item I<$v> = I<$m>-E<gt>B<version>
+
+Return the message Diameter version.
+
+=item I<$l> = I<$m>-E<gt>B<msg_length>
+
+Return the length of the Diameter message as it will be encoded.
+
+=item I<$f> = I<$m>-E<gt>B<flags>
+
+Return the message Diameter flags, unshifted.
+
+=item I<$b> = I<$m>-E<gt>B<is_request>
+
+Boolean.  True if the message request flag is set; false otherwise.
+
+=item I<$c> = I<$m>-E<gt>B<command_code>
+
+Return the message command code.
+
+=item I<$i> = I<$m>-E<gt>B<application_id>
+
+Return the message application id.
+
+=item I<$h> = I<$m>-E<gt>B<hop_by_hop_id>
+
+Return the message hop-by-hop id.
+
+=item I<$h> = I<$m>-E<gt>B<end_to_end_id>
+
+Return the message end-to-end id.
+
+=item I<\@avps> = I<$m>-E<gt>B<avps>
+
+Return the message AVPs as B<Diameter::Message::AVP> objects.  This
+is *not* a deep copy, so any changes to this listref will alter the
+underlying AVP set.  You probably don't want to to this.
+
+=cut
+
 sub version         { return shift->[VERSION] }
 sub msg_length      { return shift->[MSG_LENGTH] }
-sub flags           { return (shift->[FLAGS] >> 4) & 0xff }
+sub flags           { return shift->[FLAGS] }
 sub is_request      { return shift->[FLAGS] & 0x80 }
 sub command_code    { return shift->[COMMAND_CODE] }
 sub application_id  { return shift->[APPLICATION_ID] }
 sub hop_by_hop_id   { return shift->[HOP_BY_HOP_ID] }
 sub end_to_end_id   { return shift->[END_TO_END_ID] }
 sub avps            { return @{ shift->[AVP_LIST] } }
+
+
+=item I<$stream> = I<$m>-E<gt>B<encode>
+
+Encode the message to a network byte-order stream.  The
+encoding is cached, so if this is run repeatedly, the message
+will only pass through the encoder once.
+
+=cut
 
 sub encode {
     my $self = shift;
@@ -206,21 +312,38 @@ sub encode {
 }
 
 
+=item I<$m> = Diameter::Message-E<gt>B<decode>( I<$stream> )
+
+Given a stream of bytes in network byte-order, attempt to create a B<Diameter::Message>
+object.  If a failure occurs, return I<undef> and set I<$@>.  I<$stream> must be exactly
+one Diameter message.
+
+=cut
+
 sub decode {
     my $class  = shift;
     my $stream = shift;
 
-    die "Invalid Diameter Message Exception"  unless length $stream >= 20;    # Diameter header length == 20
+    unless (length $stream >= 20) {
+        $@ = "Invalid Diameter Message Exception: length < 20";    # Diameter header length == 20
+        return undef;
+    }
 
     my ($hdr1, $hdr2, $app_id, $hbh_id, $ete_id) = unpack( "NNNNN", $stream );
 
     my $version = ($hdr1 >> 24) & 0xff;
 
-    die "Invalid Diameter Version Exception\n"  unless $version == 1;
+    unless ($version == 1) {
+        $@ = "Invalid Diameter Message Exception: version is not 1";
+        return undef;
+    };
 
     my $msg_length = $hdr1 & 0x00ffffff;
 
-    die "Invalid Diameter Message Exception: Length Mismatch\n"  unless $msg_length == length $stream;
+    unless ($msg_length == length $stream) {
+        $@ = "Invalid Diameter Message Exception: length mismatch";
+        return undef;
+    }
 
     my $flags = ($hdr2 >> 24) & 0xff;
     my $code  = $hdr2 & 0x00ffffff;
@@ -234,7 +357,8 @@ sub decode {
         my $avp_len = $hdr2 & 0x00ffffff;
 
         if ($stream_length - $stream_offset < $avp_len) {
-            die "Invalid Diameter Message Exception\n";
+            $@ = "Invalid Diameter Message Exception: insufficient data for decoding";
+            return undef;
         }
 
         my $avp = Diameter::Message::AVP->decode( substr $stream, $stream_offset, $avp_len );
@@ -243,12 +367,22 @@ sub decode {
         $stream_offset += $avp->padded_length;
     }
 
-    die "Invalid Diameter Message Exception\n"  if $stream_offset != $stream_length;
+    if ($stream_offset != $stream_length) {
+        $@ = "Invalid Diameter Message Exception: incorrect octet count";
+        return undef;
+    }
 
     return $class->new( Version => $version, ApplicationId => $app_id, Length => $msg_length, CommandCode => $code, Flags => $flags,
                         HopByHopId => $hbh_id, EndToEndId => $ete_id, Avps => \@avps );
 }
 
 
+=back
+
+=head1 BLAME
+
+ Vernon Wells (boguese@hotmail.com) 27 Mar 2018
+
+=cut
 
 1;

@@ -3,11 +3,40 @@ package Diameter::Message::AVP;
 use strict;
 use warnings;
 
-# For each AVP data type, the data are stored in their encoded format (and available as such).
-#  These methods encode data from text or number to underlying type.  These methods are passed
-#  the decoded version and return the encoded version.  Methods may die() with message
-#  starting with "Invalid AVP Value Exception" if the value provided is invalid.  The type
-#  'Grouped' is special.  It must receive a listref of AVPs and it simply returns the same.
+
+=head1 NAME
+
+Diameter::Message::AVP - Interface describing a Diameter AVP, with encoder and decoders
+
+=head1 SYNOPSIS
+
+ $avp = Diameter::Message::AVP->decode( $stream );
+
+ $code = $avp->code;
+ $typed_data = $avp->data;
+
+ $avp = Diameter::Message::AVP->new(
+    Code        => 260,
+    VendorId    => 0,
+    IsMandatory => 1,
+    DataType    => 'Unsigned32',
+    Data        => 0,
+ );
+
+ $socket->send( $avp->encode );
+
+=head1 DESCRIPTION
+
+This package allows one to create objects representing Diameter Messages (see RFC 6733).  There is a package
+method (B<decode>) for reading a data stream, and translating it into a B<Diameter::Message> object.  Another
+function (B<encode>) reverses this, creating a network byte-order stream from a B<Diameter::Message> object.
+
+The following methods are defined:
+
+=over 4
+
+=cut
+
 
 my %AVP_DATA_TYPE_ENCODERS = (
  # IPv4 or IPv6 address as text.
@@ -180,24 +209,63 @@ use constant {
 
 
 
-# $avp = Diameter::Message::AVP->new( Code => $code, VendorId => $vendorid, IsMandatory => 1|0, Flags => $flags,
-#                                     EncodedData => $encoded_data, Data => $data, Type => $type );
-#
-# Provide AVP code ($code), which is required.  If $vendorid is provided and isn't undef, set V flag and add
-# VendorID field.  If IsMandatory is true, set M flag.  If $flags provided, override IsMandatory based on that.
-# If $flags provided and $vendorid is provided, set V flag.  $flags must be packed flags field, which means
-# one unsigned byte, from high-order bit: V, V, P followed by 5 zeroes (this is how the field is stored internally).
-# $encoded_data is trusted as encoded data.  $data is decoded data (which will be encoded for storage).  If $data
-# and $encoded_data are set simultaneously, only $encoded_data is honored
-#
-# $code and either $data or $encoded_data are required.  By default $vendorid is undef (not set) and IsMandatory is 0.
-#
-# If $data (or $encoded_data) is a listref, then it must contain only Diameter::Message::AVP or sub-types
-#
-# $type must be one of: Address DiameterIdentity DiameterURI Enumerated Float32 Float64 Grouped Integer32 Integer64
-#   OctetString Time Unsigned32 Unsigned64 UTF8String
-# If unspecified, it will be OctetString
-#
+=item I<$avp> = Diameter::Message::AVP-E<gt>B<new>( I<%params> );
+
+Constructor.  I<%params> include:
+
+=over 8
+
+=item B<Code> => I<$avp_code>
+
+The AVP code.  Must be a 32-bit unsigned integer.  Required.  No default.
+
+=item B<VendorId> => I<$vendor_id>
+
+The vendor id.  Must be a 32-bit unsigned integer.  Default is 0.  If the value is
+0, then the vendor-specific flag is unset; otherwise it is set.  If B<Flags> has
+a vendor-specific flag value that conflicts with this, the results are undefined.
+
+=item B<IsMandatory> => I<$is_mandatory>
+
+Set the mandatory flag?  Default is false.
+
+=item B<Flags> => I<$flags>
+
+The flags value.  This is the unshifted octet for the message flags.  Thus, if you
+wish to set the mandatory flag only, the value is 0x40.  If this is set, it overrides
+the value of I<IsMandatory>.  As mentioned above, the vendor-specific flag must be
+set sensibly if B<Flags> is provided.  In general, manually setting flags this way is
+required only if the rarely-used Protected flag must be set.  The default value is
+inferred from B<VendorId> and B<IsMandatory>.
+
+=item B<DataType> => I<$data_type>
+
+Indicates what type of data is used for this AVP.  Must be one of: Address,
+DiameterIdentity, DiameterURI, Enumerated, Float32, Float64, Grouped, Integer32,
+Integer64, OctetString, Time, Unsigned32, Unsigned64, UTF8String.  Default is
+OctetString.
+
+=item B<EncodedData> => I<$encoded_data>
+
+=item B<Data> => I<$typed_data>
+
+AVP data can be provided as the "encoded data", meaning data from a network stream (in
+network byte-order), without padding, or it can be "typed data", which is the data
+formatted in a Perl-native way for translation by an encoder, if encoding is needed.
+Address must be an IPv4 address in dotted-quad notation or an IPv6 address in canonical
+format (B<WARNING>: IPv6 is not currently supported by the encoders and decoders).  Float32/64,
+Integer32/64 and Unsigned32/64 are all represented as Perl numbers.  DiameterIdentity,
+DiameterURI and UTF8String are all represented as Perl strings (B<WARNING>: this  means that UTF8String
+may be encoded inappropriately).  Enumerated is encoded as a Perl number.  OctetString and Time
+are represented as their network representation.  Groups is a listref of Diameter::Message::AVP objects.
+
+If both I<$encoded_data> and I<$typed_data> are provided, the result is undefined.
+
+=back
+
+For any parameter, if an invalid value is provided, I<undef> is returned and I<$@> is set.
+
+=cut
 
 sub new {
     my $class = shift;
@@ -289,6 +357,43 @@ sub new {
 }
 
 
+=item I<$code> = I<$avp>-E<gt>B<code>
+
+Return the AVP code.
+
+=item I<$flags> = I<$avp>-E<gt>B<flags>
+
+Return the message Diameter flags, unshifted.
+
+=item I<$len> = I<$avp>-E<gt>B<length>
+
+Return the encoded but unpadded length for this AVP, including the header.
+
+=item I<$plen> = I<$avp>-E<gt>B<padded_length>
+
+Return the encoded length for this AVP, including any required padding, and
+the header.
+
+=item I<$bool> = I<$avp>-E<gt>B<has_vendor_id>
+
+True if the vendor-specific field is present in the header.
+
+=item I<$v> = I<$avp>-E<gt>B<vendor_id>
+
+Return the value for the vendor-specific id, or 0 if it is absent.
+
+=item I<$raw> = I<$avp>-E<gt>B<raw_data>
+
+Return the AVP data in network encoded format, excluding any padding.
+
+=item I<$data> = I<$avp>-E<gt>B<data>
+
+Return the AVP data in decoded format (except for those data types
+where there is no decoding, in which case this will be the same as
+B<raw_data>).
+
+=cut
+
 sub code            { return shift->[AVP_CODE] }
 sub flags           { return (shift->[AVP_FLAGS] >> 5) & 0x07 }
 sub length          { return shift->[AVP_LENGTH] }
@@ -303,12 +408,15 @@ sub data {
 }
 
 
-sub clean_encode {
-    my $self = shift;
-    $self->[AVP_ENCODED] = undef;
-    return $self->encode();
-}
+=item I<$encoded> = I<$avp>-E<gt>B<encode>
 
+Encode the AVP and provide the encoded value is network byte-order.  This will include
+any required padding.
+
+Once encoding is done, that encoding is cached, so subsequent calls to B<encode> will simply
+return the cached value.
+
+=cut
 
 sub encode {
     my $self = shift;
@@ -337,13 +445,38 @@ sub encode {
     return $self->[AVP_ENCODED];
 }
 
+=item I<$encoded> = I<$avp>-E<gt>B<clean_encode>
+
+Force a clean re-encoding of the AVP, then return the encoded value
+in network byte-order.
+
+=cut
+
+sub clean_encode {
+    my $self = shift;
+    $self->[AVP_ENCODED] = undef;
+    return $self->encode();
+}
+
+
+=item I<$avp> = B<Diameter::Message::AVP>-E<gt>B<decode>( I<$stream> )
+
+Given a byte stream in network byte-order, decode the stream into
+a B<Diameter::Message::AVP> object.
+
+On error, return I<undef> and set I<$@> appropriately.
+
+=cut
 
 sub decode {
     my $class  = shift;
     my $stream = shift;
     my %params = @_;
 
-    die "Malformed AVP Exception\n" unless CORE::length $stream >= 8;
+    unless (CORE::length $stream >= 8) {
+        $@ = "Malformed AVP Exception: insufficient stream length";
+        return undef;
+    }
 
     my ($code, $hdr2) = unpack( "NN", $stream );
 
@@ -353,7 +486,10 @@ sub decode {
     my $pm = CORE::length( $stream ) % 4;
     my $data_pad_bytes = ($pm == 0 ? 0 : 4 - $pm);
 
-    die "Malformed AVP Exception\n" unless CORE::length( $stream ) == $length || CORE::length( $stream ) == $length + $data_pad_bytes;
+    unless (CORE::length( $stream ) == $length || CORE::length( $stream ) == $length + $data_pad_bytes) {
+        $@ = "Malformed AVP Exception: stream length mismatch";
+        return undef;
+    }
 
     my $encoded = $stream;  # copy because we substr bits out of $stream, but want to keep $encoded
 
@@ -388,6 +524,14 @@ sub decode {
         'OctetString',          # AVP_DATA_TYPE
     ], $class;
 }
+
+=back
+
+=head1 BLAME
+
+ Vernon Wells (boguese@hotmail.com) 27 Mar 2018
+
+=cut
 
 
 1;
