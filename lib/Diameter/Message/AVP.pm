@@ -524,6 +524,30 @@ sub decode {
     ], $class;
 }
 
+
+# $m->_set_mandatory_flag( 0|1 );
+#
+# Change the mandatory flag.  Intended to be called by self or sub-classes only.  Value
+# must be 0 (false) or 1 (true) only.  No validation occurs.
+#
+sub _set_mandatory_flag {
+    my $self = shift;
+    my $flag = shift;
+
+    if ($flag) {
+        return if ($self->[AVP_FLAGS] & 0x40);  # nothing to be done
+        $self->[AVP_FLAGS] |= 0x40;
+    }
+    else {
+        return if !($self->[AVP_FLAGS] & 0x40);  # nothing to be done
+        $self->[AVP_FLAGS] &= (~0x40);
+    }
+
+    $self->[AVP_ENCODED] = undef;
+}
+
+
+
 =back
 
 =head1 BLAME

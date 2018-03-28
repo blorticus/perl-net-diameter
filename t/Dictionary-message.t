@@ -8,7 +8,7 @@ BEGIN { use_ok 'Diameter::Dictionary' };
 my $yaml_string =<<EOY;
 ---
 MessageTypes:
-   - Code: 272
+   - Code: 257
      ApplicationId: 0
      Proxiable: false
      Request:
@@ -99,8 +99,8 @@ MessageTypes:
          OptionalAvps:
             - AVP:*
      Answer:
-         Name: "Capabilities-Exchange-Answer"
-         AbbreviatedName: "CEA"
+         Name: "Disconnect-Peer-Answer"
+         AbbreviatedName: "DPA"
          AvpOrder:
             - Result-Code
             - Origin-Host
@@ -277,19 +277,32 @@ ok( !$d->message( Name => "foo" ), 'Attempt to create Message with a name not in
 ok( !$d->message( Code => 10 ), 'Attempt to create Message with a code not in the dictionary fails' );
 ok( !$d->message( ApplicationId => 109, Code => 272 ), 'Attempt to create Message with a application_id+code not in the dictionary fails' );
 
-#            - Origin-Host
-#            - Origin-Realm
-#            - Host-IP-Address:1*
-#            - Vendor-Id
-#            - Product-Name
-
 my $m = $d->message( Name => "CER", Avps => [
-        OriginHost => "test.example.com",
-        $d->avp( Name => "Origin-Realm", Value => "example.com" ),
         HostIPAddress => "192.168.1.1",
+        OriginHost => "test.example.com",
         VendorId => 1010,
+        $d->avp( Name => "Origin-Realm", Value => "example.com" ),
         $d->avp( Name => "Product-Name", Value => "tester" ),
     ] );
+
+ok( defined $m && ref $m && $m->isa( 'Diameter::Message' ), 'message() on CER with all but only mandatory AVPs creates Message object' );
+
+# spaces in encoding on word boundaries.  Makes it easier to debug
+my $expected_encoding = join( "", split( / /,
+                       # Message header
+                   "0100006c 80000101 00000000 00000000 00000000" .
+                       # AVP: Origin-Host
+                   "00000108 40000018 74657374 2e657861 6d706c65 2e636f6d" .
+                       # AVP: Origin-Realm
+                   "00000128 40000013 6578616d 706c652e 636f6d00" .
+                       # AVP: Host-IP-Address
+                   "00000101 4000000e 0001c0a8 01010000" .
+                       # AVP: Vendor-Id
+                   "0000010a 4000000c 000003f2" .
+                       # AVP: Product-Name
+                   "0000010d 4000000e 74657374 65720000" ) );
+
+cmp_ok( unpack( "H*", $m->encode ), 'eq', $expected_encoding, 'message() on CER with all but only mandatory AVPs encodes correctly, including AVP re-ordering' );
 
 
 done_testing();

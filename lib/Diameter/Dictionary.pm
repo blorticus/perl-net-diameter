@@ -420,7 +420,13 @@ sub message {
                         $avp_count{$vic}++;
                         push @{ $avp_set{$vic} }, $avp_k;
 
-                        # XXX: MUST SET mandatory IF THIS A MANDATORY ITEM
+                        if (exists $msg_desc->{MandatoryAvps}->{$vic}) {
+                            $avp_k->_set_mandatory_flag( 1 );
+                        }
+                        else {
+                            $avp_k->_set_mandatory_flag( 0 );
+                            
+                        }
 
                         $last_item = "Object";
                     }
