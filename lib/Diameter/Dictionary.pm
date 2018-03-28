@@ -37,25 +37,22 @@ Diameter::Dictionary - A dictionary interface for Diameter and Diameter AVP obje
 This package provides an interface to a Diameter dictionary.  A dictionary
 describes Diameter message structures and AVP structures.  While this is
 intended to be a generic interface, allowing many different types of dictionary
-infomration encoding, currently only a YAML dictionary is defined.  The
+information encoding, currently only a YAML dictionary is defined.  The
 schema for this is described below, in the section B<YAML SCHEMA>.
 
 B<from_yaml> reads a YAML file (if B<File> is supplied) or a YAML string
 (if B<String> is provided).  The YAML is validated.  If an error is encountered,
-the parser stops, set I<$@> and returnsa I<undef>.
+the parser stops, set I<$@> and returns I<undef>.
 
 If the YAML is valid, a B<Diameter::Dictionary> object is returned.  This object
 can be used to create B<Diameter::Message> objects as follows:
 
-=over 4
+ $m = $d->message( Name => $message_name, Avps => \@avps )
+ $m = $d->message( Code => $command_code, Avps => \@avps )
+ $m = $d->message( ApplicationId => $appid, Code => $command_code, Avps => \@avps )
 
-=item I<$m> = I<$d>-E<gt>B<message>( B<Name> => I<$message_name>, B<Avps> => I<\@avps> )
-
-=item I<$m> = I<$d>-E<gt>B<message>( B<Code> => I<$command_code>, B<Avps> => I<\@avps> )
-
-=item I<$m> = I<$d>-E<gt>B<message>( B<ApplicationId> => I<$appid>, B<Code> => I<$command_code>, B<Avps> => I<\@avps> )
-
-=back
+When B<Code> is provided (with or without B<ApplicationId>), B<IsRequest> may also be
+provided.  It defaults to true.
 
 If the identified message type is not defined in the dictionary, set I<$@> and return I<undef>
 
@@ -75,15 +72,9 @@ not checked and are not re-ordered.
 
 B<Diameter::Message::AVP> objects can also be created directly, as follows:
 
-=over 4
-
-=item I<$avp> = I<$d>-E<gt>B<avp>( B<Name> => I<$name>, B<Value> => I<$type_value> )
-
-=item I<$avp> = I<$d>-E<gt>B<avp>( B<Code> => I<$avp_code>, B<Value> => I<$type_value> )
-
-=item I<$avp> = I<$d>-E<gt>B<avp>( B<VendorId> => I<$vendor_id>, B<Code> => I<$avp_code>, B<Value> => I<$type_value> )
-
-=back
+ $avp = $d->avp( Name => $name, Value => $type_value )
+ $avp = $d->avp( Code => $avp_code, Value => $type_value )
+ $avp = $d->avp( VendorId => $vendor_id, Code => $avp_code, Value => $type_value )
 
 If the specified AVP is not in the dictionary, set I<$@> and return I<undef>.  The
 data type is retrieved from the dictionary.
@@ -96,29 +87,20 @@ B<describe_message> and B<describe_avp> return a hashref of information about a 
 and an AVP type, respectively.  For B<describe_message>, the message type can be specified as any
 one of:
 
-=over 4
+ \%info = $d->describe_message( Name => $name )
+ \%info = $d->describe_message( Code => $command_code )
+ \%info = $d->describe_message( ApplicationId => $appid, Code => $command_code )
 
-=item I<\%info> = I<$d>-E<gt>B<describe_message>( B<Name> => I<$name> )
-
-=item I<\%info> = I<$d>-E<gt>B<describe_message>( B<Code> => I<$command_code> )
-
-=item I<\%info> = I<$d>-E<gt>B<describe_message>( B<ApplicationId> => I<$appid>, B<Code> => I<$command_code> )
-
-=back
+When B<Code> is provided (with or without B<ApplicationId>), B<IsRequest> may also be
+provided.  It defaults to false.
 
 If I<$command_code> is given but I<$appid> is not, then I<$appid> is assumed to be 0.
 
 For B<describe_avp>, the AVP type can be specified as any of:
 
-=over 4
-
-=item I<\%info> = I<$d>-E<gt>B<describe_avp>( B<Name> => I<$name> )
-
-=item I<\%info> = I<$d>-E<gt>B<describe_avp>( B<Code> => I<$avp_code> )
-
-=item I<\%info> = I<$d>-E<gt>B<describe_avp>( B<VendorId> => I<$vendor_id>, B<Code> => I<$avp_code> )
-
-=back
+ \%info = $d->describe_avp( Name => $name )
+ \%info = $d->describe_avp( Code=> $avp_code )
+ \%info = $d->describe_avp( VendorId => $vendor_id, Code => $avp_code )
 
 If I<$avp_code> is given but I<$vendor_id> is not, then I<$vendor_id> is assumed to be 0.
 
@@ -313,10 +295,6 @@ use constant {
 };
 
 
-# $d = Diameter::Dictionary->new( FromFile => $filepath, FromString => $string );
-#
-# $d is a blessed listref with elements described above as the DD_* constants.  
-# 
 sub new {
     my $class = shift;
     my %params = @_;
@@ -392,6 +370,7 @@ sub message {
             $msg_desc = $self->[DD_MSGS]->{Name}->{$params{Name}};
         }
         else {
+            $@ = "No Such Dictionary Entry Exception";
             return undef;
         }
     }
@@ -408,13 +387,163 @@ sub message {
             }
         }
         else {
+            $@ = "No Such Dictionary Entry Exception";
             return undef;
         }
     }
     else {
+        $@ = "Invalid Parameter Exception: must have Code, ApplicationId+Code or Name";
         return undef;
     }
 
+    my @avps;
+    if (exists $params{Avps} && defined $params{Avps}) {
+        unless (ref $params{Avps} eq 'ARRAY') {
+            $@ = "Invalid Parameter Exception: Avps must be a listref";
+            return undef;
+        }
+
+        # Avps can be a Diameter::AVP object, or a Label, or a Value.  A Value must
+        # always follow a Label, and a Label must always follow a Value or an object.
+        # An object must only follow a Value.
+        my $last_item = "Value";
+        my $last_label = "";
+
+        my %avp_count;  # indexed by "$vendorid:$code", count of AVPs present
+        my %avp_set;    # indexed by "$vendorid:$code", listref of AVPs of that type
+
+        foreach my $avp_k (@{ $params{Avps} }) {
+            if (ref $avp_k) {
+                if (UNIVERSAL::isa($avp_k, 'Diameter::Message::AVP')) {
+                    if ($last_item eq "Object" || $last_item eq "Value") {
+                        my $vic = $avp_k->vendor_id . ":" . $avp_k->code;
+                        $avp_count{$vic}++;
+                        push @{ $avp_set{$vic} }, $avp_k;
+
+                        # XXX: MUST SET mandatory IF THIS A MANDATORY ITEM
+
+                        $last_item = "Object";
+                    }
+                    else {
+                        $@ = "Invalid Parameter Exception: object follows label in Avps definition";
+                        return undef;
+                    }
+                }
+                else {
+                    $@ = "Invalid Parameter Exception: in Avps, refs must be Diameter::AVP objects";
+                    return undef;
+                }
+            }
+            else {
+                if ($last_item eq "Object" || $last_item eq "Value") {
+                    $last_label = $avp_k;
+                    $last_item = "Label";
+                }
+                else {
+                    if (!exists $self->[DD_AVPS]->{ReducedName}->{$last_label}) {
+                        $@ = "Unknown AVP Exception: $last_label";
+                        return undef;
+                    }
+
+                    my $avp_hr = $self->[DD_AVPS]->{ReducedName}->{$last_label};
+
+                    my $vic = $avp_hr->{VendorId} . ":" . $avp_hr->{Code};
+
+                    my $is_mandatory;
+                    if (exists $msg_desc->{MandatoryAvps}->{$vic}) {
+                        $is_mandatory = 1;
+                    }
+                    elsif (exists $msg_desc->{OptionalAvps}->{$vic} || exists $msg_desc->{OptionalAvps}->{AVP}) {
+                        $is_mandatory = 0;
+                    }
+                    else {
+                        $@ = "AVP Not Allowed Exception: " . $avp_hr->{Name};
+                        return undef;
+                    }
+
+                    my $avp = Diameter::Dictionary::Message::AVP->new(
+                        Name        => $avp_hr->{Name},
+                        Code        => $avp_hr->{Code},
+                        VendorId    => $avp_hr->{VendorId},
+                        IsMandatory => $is_mandatory,
+                        DataType    => $avp_hr->{Type},
+                        Data        => $avp_k,
+                    );
+
+                    if (!defined $avp) {
+                        return undef;  # $@ already set in Diameter::Dictionary::Message::AVP::new
+                    }
+
+                    $avp_count{$vic}++;
+                    push @{ $avp_set{$vic} }, $avp;
+
+                    $last_item = "Value";
+                }
+            }
+        }
+
+        # validate that all mandatory AVPs are present
+        foreach my $vic (keys %{ $msg_desc->{MandatoryAvps} }) {
+            if (!exists $avp_count{$vic}) {
+                $@ = "Missing Mandatory AVP Exception: $vic";
+                return undef;
+            }
+        }
+
+        # validate AVP counts
+        foreach my $vic (keys %avp_count) {
+            my $required_count;
+
+            if (exists $msg_desc->{MandatoryAvps}->{$vic}) {
+                $required_count = $msg_desc->{MandatoryAvps}->{$vic};
+            }
+            elsif (exists $msg_desc->{OptionalAvps}->{$vic}) {
+                $required_count = $msg_desc->{OptionalAvps}->{$vic};
+            }
+            else {
+                # ASSERT: if we're here, then we already validated that $msg_desc->{OptionalAvps}->{AVP} exists
+                next;
+            }
+
+            if ($required_count =~ /^\d+$/) {
+                if ($avp_count{$vic} != $required_count) {
+                    $@ = "Invalid AVP Count Exception: $vic";
+                    return undef;
+                }
+            }
+            elsif ($required_count =~ /^(\d+)\*$/) {
+                if ($avp_count{$vic} < $1) {
+                    $@ = "Invalid AVP Count Exception: $vic";
+                    return undef;
+                }
+            }
+            # ASSERT: $required_count eq '*'
+        }
+
+        # and finally, order the AVPs appropriately
+        foreach my $vic (@{ $msg_desc->{AvpOrder} }) {
+            if (exists $avp_set{$vic}) {
+                push @avps, @{ $avp_set{$vic} };
+                delete $avp_set{$vic};
+            }
+        }
+
+        foreach my $vic (keys %avp_set) {
+            # any remaining AVPs without a specific ordering added in an arbitary order
+            push @avps, @{ $avp_set{$vic} };
+        }
+    }
+
+    return Diameter::Dictionary::Message->new(
+        Name            => $msg_desc->{Name},
+        AbbreviatedName => $msg_desc->{AbbreviatedName},
+        CommandCode     => $msg_desc->{Properties}->{Code},
+        ApplicationId   => $msg_desc->{Properties}->{ApplicationId},
+        IsProxiable     => $msg_desc->{Properties}->{Proxiable},
+        IsError         => $msg_desc->{Properties}->{Error},
+        IsRequest       => $msg_desc->{Request},
+        Avps            => \@avps,
+    );
 }
 
 
@@ -445,9 +574,11 @@ sub avp {
         return undef;
     }
 
+    my $is_mandatory = (exists $params{IsMandatory} ? (defined $params{IsMandatory} && $params{IsMandatory} ? 1 : 0) : 0);
+
     return Diameter::Dictionary::Message::AVP->new( Name     => $avp_desc->{Name},     Code => $avp_desc->{Code},
                                                     VendorId => $avp_desc->{VendorId}, Data => $params{Value},
-                                                    DataType => $avp_desc->{Type} );
+                                                    DataType => $avp_desc->{Type},     IsMandatory => $is_mandatory );
 }
 
 
@@ -508,6 +639,15 @@ sub describe_avp {
 }
 
 
+#
+# \%avp_pointers = $class->_process_yaml_ds_to_avp_pointers( $yaml_ds );
+#
+# Covert the generated datastructure from the YAML file to a hashref indexed by
+# {Code}, {Name} and {ReducedName}.  {Code} is "$vendorid:$code", while {Name} is from the set of
+# names for an AVP.  {ReducedName} is the same as {Name} but with any character not
+# in the class [A-Za-z0-9] removed.  The value is a hashref of {Code}, {Name}, {VendorId}, {Type}.
+# The YAML datastructure must have first been validated.
+#
 sub _process_yaml_ds_to_avp_pointers {
     my $class = shift;
     my $yaml_ds = shift;
@@ -515,13 +655,19 @@ sub _process_yaml_ds_to_avp_pointers {
     my %avp_pointers;
 
     if (!exists $yaml_ds->{AvpTypes}) {
-        return { Code => {}, Name => {} };
+        return { Code => {}, Name => {}, ReducedName => {} };
     }
 
     foreach my $avp_hr (@{ $yaml_ds->{AvpTypes} }) {
         my ($vendor_id, $code) = ($avp_hr->{VendorId}, $avp_hr->{Code});
+
         $avp_pointers{Code}{"$vendor_id:$code"} = $avp_hr;
+
         $avp_pointers{Name}{$avp_hr->{Name}} = $avp_hr;
+
+        my $reduced_name = $avp_hr->{Name};
+           $reduced_name =~ s/[^A-Za-z0-9]//g;
+        $avp_pointers{ReducedName}{$reduced_name} = $avp_hr;
     }
 
     return \%avp_pointers;
@@ -567,7 +713,7 @@ sub _get_normalized_avp {
 # "$vendorid:$code" of Avp order; then {MandatoryAvps}, which is a hashref by
 # "$vendorid:$code"; then {OptionalAvps}, which is a hashref by
 # "$vendorid:$code", then {Properties}, which is a hashref of {ApplicationId},
-# {Codes}, {Name}, {AbbreviatedName}, {Error} and {Proxiable}.  The value for each
+# {Codes}, {Name}, {AbbreviatedName}, {Request} and {Proxiable}.  The value for each
 # {"$vendorid:$code"} hashref key is the count when used with {MandatoryAvps}
 # and {OptionalAvps}.  For {AvpOrder}, the value is simply 1.
 #
@@ -600,7 +746,7 @@ sub _process_yaml_ds_to_message_pointers {
         my @ra_pair;
 
         foreach my $s (qw(Request Answer)) {
-            my %info = (Properties => \%properties);
+            my %info = (Properties => \%properties, Request => ($s eq "Request" ? 1 : 0));
 
             my @normalized_avps;
             foreach my $refd_avp (@{ $message_hr->{$s}->{AvpOrder} }) {
@@ -642,6 +788,12 @@ sub _process_yaml_ds_to_message_pointers {
 
             push @ra_pair, \%info;
         }
+
+        $ra_pair[0]->{Name} = $message_hr->{Request}->{Name};
+        $ra_pair[0]->{AbbreviatedName} = $message_hr->{Request}->{AbbreviatedName};
+
+        $ra_pair[1]->{Name} = $message_hr->{Answer}->{Name};
+        $ra_pair[1]->{AbbreviatedName} = $message_hr->{Answer}->{AbbreviatedName};
 
         $message_ds{Request}    = $ra_pair[0];
         $message_ds{Answer}     = $ra_pair[1];
@@ -774,6 +926,61 @@ sub _validate_and_expand_yaml_element {
 }
 
 
+#
+# $bool = $class->_validate_and_expand_yaml_datastructure( $yaml_serialized_ds );
+#
+# Given $yaml_serialized_ds -- the output from YAML::XS -- validate that it conforms
+# to the definitions in the global %element_structure.  Also, for any optional element
+# with a defined default value, if the element is absent in $yaml_serialized_ds, add
+# it with the given default
+#
+sub _validate_and_expand_yaml_datastructure {
+    my $class = shift;
+    my $yaml_ds = shift;
+
+    if (!defined $yaml_ds || !ref $yaml_ds || ref $yaml_ds ne "HASH") {
+        $@ = "Invalid top level structure";
+        return 0;
+    }
+
+    if (!exists $yaml_ds->{MessageTypes} && !exists $yaml_ds->{AvpTypes}) {
+        $@ = "Neither MessageTypes nor AvpTypes defined";
+        return 0;
+    }
+
+    my $struct_ok = 0;
+    if (exists $yaml_ds->{MessageTypes}) {
+        if (!defined $yaml_ds->{MessageTypes}) {
+            $yaml_ds->{MessageTypes} = [];
+            $struct_ok = 1;
+        }
+        elsif (ref $yaml_ds->{MessageTypes} ne "ARRAY") {
+            $@ = "For (MessageTypes), type must be YAML list";
+            return 0;
+        }
+        else {
+            $struct_ok = $class->_validate_and_expand_yaml_element( "MessageTypes", $yaml_ds->{MessageTypes}, $element_structure{MessageTypes} );
+        }
+    }
+
+    if (exists $yaml_ds->{AvpTypes}) {
+        if (!defined $yaml_ds->{AvpTypes}) {
+            $yaml_ds->{AvpTypes} = [];
+            $struct_ok = 1;
+        }
+        elsif (ref $yaml_ds->{AvpTypes} ne "ARRAY") {
+            $@ = "For (AvpTypes), type must be YAML list";
+            return 0;
+        }
+        else {
+            $struct_ok = $class->_validate_and_expand_yaml_element( "AvpTypes", $yaml_ds->{AvpTypes}, $element_structure{AvpTypes} );
+        }
+    }
+
+    return $struct_ok;
+}
+
+
 # I am preserving this bit of code because I may re-introduce it later.  I don't
 # currently think that it is sensible to specify the allowed contained AVPs in
 # a Grouped AVP -- or rather, that should be a function of MessageType validation --
@@ -837,59 +1044,6 @@ sub _validate_childavps_element {
 }
 
 
-#
-# $bool = $class->_validate_and_expand_yaml_datastructure( $yaml_serialized_ds );
-#
-# Given $yaml_serialized_ds -- the output from YAML::XS -- validate that it conforms
-# to the definitions in the global %element_structure.  Also, for any optional element
-# with a defined default value, if the element is absent in $yaml_serialized_ds, add
-# it with the given default
-#
-sub _validate_and_expand_yaml_datastructure {
-    my $class = shift;
-    my $yaml_ds = shift;
-
-    if (!defined $yaml_ds || !ref $yaml_ds || ref $yaml_ds ne "HASH") {
-        $@ = "Invalid top level structure";
-        return 0;
-    }
-
-    if (!exists $yaml_ds->{MessageTypes} && !exists $yaml_ds->{AvpTypes}) {
-        $@ = "Neither MessageTypes nor AvpTypes defined";
-        return 0;
-    }
-
-    my $struct_ok = 0;
-    if (exists $yaml_ds->{MessageTypes}) {
-        if (!defined $yaml_ds->{MessageTypes}) {
-            $yaml_ds->{MessageTypes} = [];
-            $struct_ok = 1;
-        }
-        elsif (ref $yaml_ds->{MessageTypes} ne "ARRAY") {
-            $@ = "For (MessageTypes), type must be YAML list";
-            return 0;
-        }
-        else {
-            $struct_ok = $class->_validate_and_expand_yaml_element( "MessageTypes", $yaml_ds->{MessageTypes}, $element_structure{MessageTypes} );
-        }
-    }
-
-    if (exists $yaml_ds->{AvpTypes}) {
-        if (!defined $yaml_ds->{AvpTypes}) {
-            $yaml_ds->{AvpTypes} = [];
-            $struct_ok = 1;
-        }
-        elsif (ref $yaml_ds->{AvpTypes} ne "ARRAY") {
-            $@ = "For (AvpTypes), type must be YAML list";
-            return 0;
-        }
-        else {
-            $struct_ok = $class->_validate_and_expand_yaml_element( "AvpTypes", $yaml_ds->{AvpTypes}, $element_structure{AvpTypes} );
-        }
-    }
-
-    return $struct_ok;
-}
 
 
 
@@ -919,6 +1073,10 @@ sub new {
 
     my $self = $class->SUPER::new( %params );
 
+    if (!defined $self) {
+        return undef;   # $@ already set in SUPER::new
+    }
+
     bless $self, $class;
 
     $self->[AVP_NAME] = $params{Name};
@@ -942,22 +1100,39 @@ use parent 'Diameter::Message';
 
 no strict;
 use constant {
-    MESSAGE_NAMES       => Diameter::Message::LAST_ELEMENT + 1,  
+    MESSAGE_NAME                => Diameter::Message::LAST_ELEMENT + 1,  
+    MESSAGE_ABBREVIATED_NAME    => Diameter::Message::LAST_ELEMENT + 2,
 };
+
+use strict;
 
 
 sub new {
+    my $class = shift;
+    my %params = @_;
 
+    my $self = $class->SUPER::new( %params );
+
+    if (!defined $self) {
+        return undef;   # $@ already set in SUPER::new
+    }
+
+    bless $self, $class;
+
+    $self->[MESSAGE_NAME] = $params{Name};
+    $self->[MESSAGE_ABBREVIATED_NAME] = $params{AbbreviatedName};
+
+    return $self;
 }
 
 
 sub name {
-
+    return shift->[MESSAGE_NAME];
 }
 
 
 sub abbreviated_name {
-
+    return shift->[MESSAGE_ABBREVIATED_NAME];
 }
 
 

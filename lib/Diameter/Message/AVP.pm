@@ -120,8 +120,7 @@ my %AVP_DATA_TYPE_DECODERS = (
     my $family = unpack "n", $raw;
 
     if ($family == 0x0001) { # IPv4
-        my $enaddr = unpack "N", substr $raw, 2;
-        return join ".", unpack( "CCCC", $enaddr );
+        return join ".", unpack( "CCCC", substr( $raw, 2 ) );
     }
     else {
         die "Invalid Encoded AVP Exception";

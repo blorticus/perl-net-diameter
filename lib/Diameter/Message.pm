@@ -152,7 +152,7 @@ sub new {
     $params{IsRequest}    = (exists $params{IsRequest}   ? ($params{IsRequest}   ? 1 : 0) : (exists $params{Flags} ? $params{Flags} & 0x80 : 0));
 
     unless (exists $params{CommandCode}) {
-        $@ = "Missing Parameter Exception: Commandcode";
+        $@ = "Missing Parameter Exception: CommandCode";
         return undef;
     }
 
@@ -197,7 +197,7 @@ sub new {
             }
             $avp = Diameter::Message::AVP->new( VendorId => $avp->[0], Code => $avp->[1], IsMandatory => $avp->[2], DataType => $avp->[3], Data => $avp->[4] );
         }
-        elsif (!$avp->isa( 'Diameter::Message::AVP' )) {
+        elsif (!UNIVERSAL::isa( $avp, 'Diameter::Message::AVP' )) {
             $@ = "Invalid Parameter Exception: AVP";
             return undef;
         }

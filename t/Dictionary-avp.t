@@ -438,6 +438,11 @@ validate_avp( $d->avp( Name => "Precedence", Value => 10 ),
               "Precedence", 10, "==", 10415, 1010, 0, "000003f280000010000028af0000000a",
               'Diameter::Dictionary::avp with Name => "Precedence", Value => 10' );
 
+validate_avp( $d->avp( Name => "Host-IP-Address", Value => '192.168.1.245' ),
+              "Host-IP-Address", "192.168.1.245", "eq", 0, 257, 0, "000001010000000e0001c0a801f50000",
+              'Diameter::Dictionary::avp with Name => "Host-IP-Address", Value => 192.168.1.245' );
+
+
 
 sub validate_avp {
     my ($avp, $name, $value, $operator, $vendorid, $code, $is_mandatory, $expected_encoding, $testname) = @_;
