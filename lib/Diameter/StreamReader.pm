@@ -44,13 +44,14 @@ Diameter header.
 
 
 use constant {
-    SR_ACCUMULATED_STREAM   => 0,   # string; must not be undef
-    SR_LAST_ERROR           => 1,   # string; undef if no error
+    ACCUMULATED_STREAM  => 0,   # string; must not be undef
+    LAST_ERROR          => 1,   # string; undef if no error
 };
 
 
 sub new {
     my $class = shift;
+    my %params = @_;
 
     return bless [
         "",
@@ -62,18 +63,18 @@ sub new {
 # $m = $self->_extract_next_message_from_accumulated_stream();
 #
 # Attempt to extract a message from the accumulated stream.  If the
-# stream is not valid, return undef and set $self->[SR_ACCUMULATED_STREAM]
+# stream is not valid, return undef and set $self->[ACCUMULATED_STREAM]
 # appropriately.  If the stream is not a complete message, return the
 # empty string.  Otherwise, return the next message and remove the bytes
-# from the message from $self->[SR_ACCUMULATED_STREAM]
+# from the message from $self->[ACCUMULATED_STREAM]
 #
 sub _extract_next_message_from_accumulated_stream {
     my $self = shift;
-    $self->[SR_LAST_ERROR] = undef;
+    $self->[LAST_ERROR] = undef;
 
-    if (length $self->[SR_ACCUMULATED_STREAM] > 0) {
-        if ((substr $self->[SR_ACCUMULATED_STREAM], 0, 1) ne "\x01") {
-            $self->[SR_LAST_ERROR] = "Invalid Message Exception: first byte is not 0x01";
+    if (length $self->[ACCUMULATED_STREAM] > 0) {
+        if ((substr $self->[ACCUMULATED_STREAM], 0, 1) ne "\x01") {
+            $self->[LAST_ERROR] = "Invalid Message Exception: first byte is not 0x01";
             return undef;
         }
     }
@@ -81,10 +82,10 @@ sub _extract_next_message_from_accumulated_stream {
         return "";
     }
 
-    if (length $self->[SR_ACCUMULATED_STREAM] > 3) {
-        my $w = unpack "N", substr( $self->[SR_ACCUMULATED_STREAM], 0, 4 );
+    if (length $self->[ACCUMULATED_STREAM] > 3) {
+        my $w = unpack "N", substr( $self->[ACCUMULATED_STREAM], 0, 4 );
         if (($w & 0x00ffffff) < 20) {
-            $self->[SR_LAST_ERROR] = "Invalid Message Exception: message length less than 20";
+            $self->[LAST_ERROR] = "Invalid Message Exception: message length less than 20";
             return undef;
         }
     }
@@ -92,10 +93,10 @@ sub _extract_next_message_from_accumulated_stream {
         return "";
     }
 
-    if (length $self->[SR_ACCUMULATED_STREAM] > 4) {
-        my $b = unpack( "C", substr( $self->[SR_ACCUMULATED_STREAM], 4, 1 ) );
+    if (length $self->[ACCUMULATED_STREAM] > 4) {
+        my $b = unpack( "C", substr( $self->[ACCUMULATED_STREAM], 4, 1 ) );
         if ($b & 0x0f) {
-            $self->[SR_LAST_ERROR] = "Invalid Message Exception: low order nibble of high order byte is second word is not zero";
+            $self->[LAST_ERROR] = "Invalid Message Exception: low order nibble of high order byte is second word is not zero";
             return undef;
         }
     }
@@ -103,10 +104,10 @@ sub _extract_next_message_from_accumulated_stream {
         return "";
     }
 
-    if (length $self->[SR_ACCUMULATED_STREAM] > 7) {
-        my $w = unpack "N", substr( $self->[SR_ACCUMULATED_STREAM], 4, 4 );
+    if (length $self->[ACCUMULATED_STREAM] > 7) {
+        my $w = unpack "N", substr( $self->[ACCUMULATED_STREAM], 4, 4 );
         if (($w & 0x00ffffff) == 0) {
-            $self->[SR_LAST_ERROR] = "Invalid Message Exception: command code is 0";
+            $self->[LAST_ERROR] = "Invalid Message Exception: command code is 0";
             return undef;
         }
     }
@@ -114,18 +115,18 @@ sub _extract_next_message_from_accumulated_stream {
         return "";
     }
 
-    if (length $self->[SR_ACCUMULATED_STREAM] < 20) {
+    if (length $self->[ACCUMULATED_STREAM] < 20) {
         return "";
     }
 
-    my ($hdr1, $hdr2) = unpack( "NN", $self->[SR_ACCUMULATED_STREAM] );
+    my ($hdr1, $hdr2) = unpack( "NN", $self->[ACCUMULATED_STREAM] );
 
     my $msg_length = $hdr1 & 0x00ffffff;
 
-    if ($msg_length <= length( $self->[SR_ACCUMULATED_STREAM] )) {
+    if ($msg_length <= length( $self->[ACCUMULATED_STREAM] )) {
         my $message;
-        if (!($message = Diameter::Message->decode( substr $self->[SR_ACCUMULATED_STREAM], 0, $msg_length, "" ))) {
-            $self->[SR_LAST_ERROR] = "Invalid Message Exception: $@";
+        if (!($message = Diameter::Message->decode( substr $self->[ACCUMULATED_STREAM], 0, $msg_length, "" ))) {
+            $self->[LAST_ERROR] = "Invalid Message Exception: $@";
             return undef;
         }
         else {
@@ -142,8 +143,8 @@ sub read {
     my $self = shift;
     my $incoming = shift;
 
-    $self->[SR_LAST_ERROR] = undef;
-    $self->[SR_ACCUMULATED_STREAM] .= $incoming;
+    $self->[LAST_ERROR] = undef;
+    $self->[ACCUMULATED_STREAM] .= $incoming;
 
     my @messages;
     my $nm;
@@ -161,12 +162,12 @@ sub read {
 
 
 sub read_failed {
-    return defined shift->[SR_LAST_ERROR];
+    return defined shift->[LAST_ERROR];
 }
 
 
 sub error {
-    return shift->[SR_LAST_ERROR];
+    return shift->[LAST_ERROR];
 }
 
 

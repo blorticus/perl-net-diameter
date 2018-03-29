@@ -5,46 +5,47 @@ use warnings;
 
 BEGIN { use_ok( 'Diameter::Dictionary' ) }
 
-ok( !Diameter::Dictionary->new(), "Diameter\:\:Dictionary->new() returns undef" );
-ok( !Diameter::Dictionary->new( FromString => undef ), "Diameter\:\:Dictionary->new() FromString cannot be undef" );
-ok( !Diameter::Dictionary->new( FromFile => undef ), "Diameter\:\:Dictionary->new() FromFile cannot be undef" );
-ok( !Diameter::Dictionary->new( FromFile => "" ), "Diameter\:\:Dictionary->new() FromFile cannot be empty string" );
-ok( !Diameter::Dictionary->new( FromFoo => "this" ), "Diameter\:\:Dictionary->new() FromFile or FromString must be defined" );
+ok( !Diameter::Dictionary->from_yaml(), "Diameter\:\:Dictionary->from_yaml() returns undef" );
+ok( !Diameter::Dictionary->from_yaml( FromString => undef ), "Diameter\:\:Dictionary->from_yaml() FromString cannot be undef" );
+ok( !Diameter::Dictionary->from_yaml( FromFile => undef ), "Diameter\:\:Dictionary->from_yaml() FromFile cannot be undef" );
+ok( !Diameter::Dictionary->from_yaml( FromFile => "" ), "Diameter\:\:Dictionary->from_yaml() FromFile cannot be empty string" );
+ok( !Diameter::Dictionary->from_yaml( FromFoo => "this" ), "Diameter\:\:Dictionary->from_yaml() FromFile or FromString must be defined" );
 
-ok( !Diameter::Dictionary->new( FromString => "" ), "Diameter\:\:Dictionary->new() cannot have FromString be empty" );
-ok( !Diameter::Dictionary->new( FromString => "---\n" ), "Diameter\:\:Dictionary->new() string cannot be empty yaml" );
-ok( !Diameter::Dictionary->new( FromString => "---\nFoo:\nBar:\n  - This: that\n" ), "Diameter\:\:Dictionary->new() string must define MessageTypes or AvpTypes" );
+ok( !Diameter::Dictionary->from_yaml( FromString => "" ), "Diameter\:\:Dictionary->from_yaml() cannot have FromString be empty" );
+ok( !Diameter::Dictionary->from_yaml( FromString => "---\n" ), "Diameter\:\:Dictionary->from_yaml() string cannot be empty yaml" );
+ok( !Diameter::Dictionary->from_yaml( FromString => "---\nFoo:\nBar:\n  - This: that\n" ), "Diameter\:\:Dictionary->from_yaml() string must define MessageTypes or AvpTypes" );
 
 my $yaml_string =<<EOY;
 ---
 MessageTypes:
 EOY
 
-my $d = Diameter::Dictionary->new( FromString => $yaml_string );
-ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with only MessageTypes stanza succeeds" );
+my $d = Diameter::Dictionary->from_yaml( FromString => $yaml_string );
+ok( defined $d && ref $d, "Diameter\:\:Dictionary->from_yaml() with only MessageTypes stanza succeeds" );
 
 $yaml_string =<<EOY;
 ---
 MessageTypes:
    - Code: 272
      ApplicationId: 0
-     Proxiable: false
      Request:
          Name: "Capabilities-Exchange-Request"
          AbbreviatedName: "CER"
+         Proxiable: false
          AvpOrder: []
          MandatoryAvps: []
          OptionalAvps: []
      Answer:
          Name: "Capabilities-Exchange-Answer"
          AbbreviatedName: "CEA"
+         Proxiable: false
          AvpOrder: []
          MandatoryAvps: []
          OptionalAvps: []
 EOY
 
-$d = Diameter::Dictionary->new( FromString => $yaml_string );
-ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with only single simple MessageType stanza succeeds" );
+$d = Diameter::Dictionary->from_yaml( FromString => $yaml_string );
+ok( defined $d && ref $d, "Diameter\:\:Dictionary->from_yaml() with only single simple MessageType stanza succeeds" );
 
 $yaml_string =<<EOY;
 ---
@@ -55,8 +56,8 @@ AvpTypes:
      Type: "DiameterIdentity"
 EOY
 
-$d = Diameter::Dictionary->new( FromString => $yaml_string );
-ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with only single simple AvpType stanza succeeds" );
+$d = Diameter::Dictionary->from_yaml( FromString => $yaml_string );
+ok( defined $d && ref $d, "Diameter\:\:Dictionary->from_yaml() with only single simple AvpType stanza succeeds" );
 
 $yaml_string =<<EOY;
 ---
@@ -213,18 +214,18 @@ AvpTypes:
      Type: "Unsigned32"
 EOY
 
-$d = Diameter::Dictionary->new( FromString => $yaml_string );
-ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with AVP definitions but no Message definitions succeeds" );
+$d = Diameter::Dictionary->from_yaml( FromString => $yaml_string );
+ok( defined $d && ref $d, "Diameter\:\:Dictionary->from_yaml() with AVP definitions but no Message definitions succeeds" );
 
 $yaml_string =<<EOY;
 ---
 MessageTypes:
    - Code: 272
      ApplicationId: 0
-     Proxiable: false
      Request:
          Name: "Capabilities-Exchange-Request"
          AbbreviatedName: "CER"
+         Proxiable: false
          AvpOrder:
             - Origin-Host
             - Origin-Realm
@@ -257,6 +258,7 @@ MessageTypes:
      Answer:
          Name: "Capabilities-Exchange-Answer"
          AbbreviatedName: "CEA"
+         Proxiable: false
          AvpOrder:
             - Result-Code
             - Origin-Host
@@ -294,10 +296,10 @@ MessageTypes:
             - AVP:*
    - Code: 282
      ApplicationId: 0
-     Proxiable: false
      Request:
          Name: "Disconnect-Peer-Request"
          AbbreviatedName: "DPR"
+         Proxiable: false
          AvpOrder:
             - Origin-Host
             - Origin-Realm
@@ -312,6 +314,7 @@ MessageTypes:
      Answer:
          Name: "Capabilities-Exchange-Answer"
          AbbreviatedName: "CEA"
+         Proxiable: false
          AvpOrder:
             - Result-Code
             - Origin-Host
@@ -329,8 +332,8 @@ MessageTypes:
             - AVP:*
 EOY
 
-$d = Diameter::Dictionary->new( FromString => $yaml_string );
-ok( !defined $d, "Diameter\:\:Dictionary->new() with Message definitions but no AVPs fails because AVPs are not defined" );
+$d = Diameter::Dictionary->from_yaml( FromString => $yaml_string );
+ok( !defined $d, "Diameter\:\:Dictionary->from_yaml() with Message definitions but no AVPs fails because AVPs are not defined" );
 
 
 $yaml_string =<<EOY;
@@ -338,10 +341,10 @@ $yaml_string =<<EOY;
 MessageTypes:
    - Code: 272
      ApplicationId: 0
-     Proxiable: false
      Request:
          Name: "Capabilities-Exchange-Request"
          AbbreviatedName: "CER"
+         Proxiable: false
          AvpOrder:
             - Origin-Host
             - Origin-Realm
@@ -374,6 +377,7 @@ MessageTypes:
      Answer:
          Name: "Capabilities-Exchange-Answer"
          AbbreviatedName: "CEA"
+         Proxiable: false
          AvpOrder:
             - Result-Code
             - Origin-Host
@@ -411,10 +415,10 @@ MessageTypes:
             - AVP:*
    - Code: 282
      ApplicationId: 0
-     Proxiable: false
      Request:
          Name: "Disconnect-Peer-Request"
          AbbreviatedName: "DPR"
+         Proxiable: false
          AvpOrder:
             - Origin-Host
             - Origin-Realm
@@ -429,6 +433,7 @@ MessageTypes:
      Answer:
          Name: "Capabilities-Exchange-Answer"
          AbbreviatedName: "CEA"
+         Proxiable: false
          AvpOrder:
             - Result-Code
             - Origin-Host
@@ -597,29 +602,28 @@ AvpTypes:
      Type: "Unsigned32"
 EOY
 
-$d = Diameter::Dictionary->new( FromString => $yaml_string );
-ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with Message definitions and all corresponding AVP definitions succeeds" );
+$d = Diameter::Dictionary->from_yaml( FromString => $yaml_string );
+ok( defined $d && ref $d, "Diameter\:\:Dictionary->from_yaml() with Message definitions and all corresponding AVP definitions succeeds" );
 
 my $expected_cer_ds = {
     Name            => 'Capabilities-Exchange-Request',
     AbbreviatedName => 'CER',
-    Properties      => { Code => 272, ApplicationId => 0, Proxiable => 0, Error => 0 },
+    Properties      => { Code => 272, ApplicationId => 0 },
     Request         => 1,
+    Proxiable       => 0,
     AvpOrder        => [qw(0:264 0:296 0:257 0:266 0:269 0:278 0:265 0:258 0:299 0:259 0:260 0:267 AVP)], 
     MandatoryAvps   => {qw(0:264 1 0:296 1 0:257 1* 0:266 1 0:269 1)},
     OptionalAvps    => {qw(0:278 1 0:265 * 0:258 *  0:299 * 0:259 * 0:260 * 0:267 1 AVP *)},
 };
 
 my $msg_ds = $d->describe_message( Name => "CER" );
-foreach my $p (qw(Proxiable Error)) {
-    # normalize these boolean values for the purposes of comparison
-    if (exists $msg_ds->{Properties}->{$p}) {
-        if ($msg_ds->{Properties}->{$p}) { $msg_ds->{Properties}->{$p} = 1 }
-        else                             { $msg_ds->{Properties}->{$p} = 0 }
-    }
-}
+
 if (exists $msg_ds->{Request}) {
     $msg_ds->{Request} = ($msg_ds->{Request} ? 1 : 0);
+}
+
+if (exists $msg_ds->{Proxiable}) {
+    $msg_ds->{Proxiable} = ($msg_ds->{Proxiable} ? 1 : 0);
 }
 
 is_deeply( $msg_ds, $expected_cer_ds, "describe_message() on complete message and avpset 1 returns expected data structure for Name => CER" );

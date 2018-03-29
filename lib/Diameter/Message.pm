@@ -64,7 +64,11 @@ sub length_of_next_complete_diameter_message_in {
 }
 
 
-# Diameter::Message is a blessed list ref.  These are the fields for that list ref
+# Diameter::Message is a blessed list ref.  These are the fields for that list ref.
+#
+# If a subtype is created from this, then the subclass should create
+# $self->[SUBTYPE_DATA]->{$subclass}.  This will contain private data for the
+# subclass.
 #
 use constant {
     VERSION             => 0,
@@ -76,8 +80,7 @@ use constant {
     END_TO_END_ID       => 6,
     AVP_LIST            => 7,
     ENCODED             => 8,
-
-    LAST_ELEMENT        => 8,
+    SUBTYPE_DATA        => 9,
 };
 
 
@@ -222,6 +225,7 @@ sub new {
         $params{EndToEndId},
         \@avps,
         undef,
+        {},
     ], $class;
 
     return $self;

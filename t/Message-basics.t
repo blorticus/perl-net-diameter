@@ -4,6 +4,8 @@ use strict;
 use warnings;
 
 BEGIN { use_ok( 'Diameter::Message' ) };
+use Diameter::Dictionary;
+
 
 $@ = ''; ok( !Diameter::Message->new()                         && $@ =~ /^Missing Parameter Exception/, 'Diameter::Message->new with no params fails' );
 $@ = ''; ok( !Diameter::Message->new( CommandCode => '' )      && $@ =~ /^Invalid Parameter Exception/, 'Diameter::Message->new( CommandCode => "" ) fails' );

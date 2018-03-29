@@ -1,0 +1,4724 @@
+---
+MessageTypes:
+   - Code: 258
+     ApplicationId: 0
+     Request:
+        Name: Re-Auth-Request
+        AbbreviatedName: RAR
+        Proxiable: true
+        AvpOrder:
+           - Session-Id
+           - Origin-Host
+           - Origin-Realm
+           - Destination-Realm
+           - Destination-Host
+           - Auth-Application-Id
+           - Re-Auth-Request-Type
+           - User-Name
+           - Origin-State-Id
+           - Proxy-Info
+           - Route-Record
+           - AVP
+        MandatoryAvps:
+           - Session-Id
+           - Origin-Host
+           - Origin-Realm
+           - Destination-Realm
+           - Destination-Host
+           - Auth-Application-Id
+           - Re-Auth-Request-Type
+        OptionalAvps: ["User-Name", "Origin-State-Id", "Proxy-Info:*", "Route-Record:*", "AVP:*"]
+     Answer:
+        Name: Re-Auth-Answer
+        AbbreviatedName: RAA
+        Proxiable: true
+        AvpOrder:
+           - Session-Id
+           - Result-Code
+           - Origin-Host
+           - Origin-Realm
+           - User-Name
+           - Origin-State-Id
+           - Error-Message
+           - Error-Reporting-Host
+           - Failed-AVP
+           - Redirect-Host
+           - Redirect-Host-Usage
+           - Redirect-Max-Cache-Time
+           - Proxy-Info
+           - AVP
+        MandatoryAvps: ["Session-Id", "Result-Code", "Origin-Host", "Origin-Realm"]
+        OptionalAvps:
+           - User-Name
+           - Origin-State-Id
+           - Error-Message
+           - Error-Reporting-Host
+           - Failed-AVP
+           - Redirect-Host:*
+           - Redirect-Host-Usage
+           - Redirect-Max-Cache-Time
+           - Proxy-Info:*
+           - AVP:*
+   - Code: 272
+     ApplicationId: 0
+     Request:
+         Name: "Capabilities-Exchange-Request"
+         AbbreviatedName: "CER"
+         Proxiable: false
+         AvpOrder:
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address
+            - Vendor-Id
+            - Product-Name
+            - Origin-State-Id
+            - Supported-Vendor-Id
+            - Auth-Application-Id
+            - Inband-Security-Id
+            - Acct-Application-Id
+            - Vendor-Specific-Application-Id
+            - Firmware-Revision
+            - AVP
+         MandatoryAvps:
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address:1*
+            - Vendor-Id
+            - Product-Name
+         OptionalAvps:
+            - Origin-State-Id
+            - Supported-Vendor-Id:*
+            - Auth-Application-Id:*
+            - Inband-Security-Id:*
+            - Acct-Application-Id:*
+            - Vendor-Specific-Application-Id:*
+            - Firmware-Revision
+            - AVP:*
+     Answer:
+         Name: "Capabilities-Exchange-Answer"
+         AbbreviatedName: "CEA"
+         Proxiable: false
+         AvpOrder:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address
+            - Vendor-Id
+            - Product-Name
+            - Origin-State-Id
+            - Error-Message
+            - Failed-AVP
+            - Supported-Vendor-Id
+            - Auth-Application-Id
+            - Inband-Security-Id
+            - Acct-Application-Id
+            - Vendor-Specific-Application-Id
+            - Firmware-Revision
+            - AVP
+         MandatoryAvps:
+            - Result-Code
+            - Origin-Host
+            - Origin-Realm
+            - Host-IP-Address:1*
+            - Vendor-Id
+            - Product-Name
+         OptionalAvps:
+            - Origin-State-Id
+            - Error-Message
+            - Failed-AVP
+            - Supported-Vendor-Id:*
+            - Auth-Application-Id:*
+            - Inband-Security-Id:*
+            - Acct-Application-Id:*
+            - Vendor-Specific-Application-Id:*
+            - Firmware-Revision
+            - AVP:*
+   - Code: 274
+     ApplicationId: 0
+     Request:
+        Name: Abort-Session-Request
+        AbbreviatedName: ASR
+        Proxiable: true
+        AvpOrder:
+           - Session-Id
+           - Origin-Host
+           - Origin-Realm
+           - Destination-Realm
+           - Destination-Host
+           - Auth-Application-Id
+           - User-Name
+           - Origin-State-Id
+           - Proxy-Info
+           - Route-Record
+           - AVP
+        MandatoryAvps: ["Session-Id", "Origin-Host", "Origin-Realm", "Destination-Realm", "Destination-Host", "Auth-Application-Id"]
+        OptionalAvps: ["User-Name", "Origin-State-Id", "Proxy-Info:*", "Route-Record:*", "AVP:*"]
+     Answer:
+        Name: Abort-Session-Answer
+        AbbreviatedName: ASA
+        Proxiable: true
+        AvpOrder:
+           - Session-Id
+           - Result-Code
+           - Origin-Host
+           - Origin-Realm
+           - User-Name
+           - Origin-State-Id
+           - Error-Message
+           - Error-Reporting-Host
+           - Failed-AVP
+           - Redirect-Host
+           - Redirect-Host-Usage
+           - Redirect-Max-Cache-Time
+           - Proxy-Info
+           - AVP
+        MandatoryAvps: ["Session-Id", "Result-Code", "Origin-Host", "Origin-Realm"]
+        OptionalAvps:
+           - User-Name
+           - Origin-State-Id
+           - Error-Message
+           - Error-Reporting-Host
+           - Failed-AVP
+           - Redirect-Host:*
+           - Redirect-Host-Usage
+           - Redirect-Max-Cache-Time
+           - Proxy-Info:*
+           - AVP:*
+   - Code: 271
+     ApplicationId: 0
+     Request:
+        Name: Accounting-Request
+        AbbreviatedName: ACR
+        Proxiable: true
+        AvpOrder:
+           - Session-Id
+           - Origin-Host
+           - Origin-Realm
+           - Destination-Realm
+           - Accounting-Record-Type
+           - Accounting-Record-Number
+           - Acct-Application-Id
+           - Vendor-Specific-Application-Id
+           - User-Name
+           - Destination-Host
+           - Accounting-Sub-Session-Id
+           - Acct-Session-Id
+           - Acct-Multi-Session-Id
+           - Acct-Interim-Interval
+           - Accounting-Realtime-Required
+           - Origin-State-Id
+           - Event-Timestamp
+           - Proxy-Info
+           - Route-Record
+           - AVP
+        MandatoryAvps: ["Session-Id", "Origin-Host", "Origin-Realm", "Destination-Realm", "Accounting-Record-Type", "Accounting-Record-Number"]
+        OptionalAvps:
+           - Acct-Application-Id
+           - Vendor-Specific-Application-Id
+           - User-Name
+           - Destination-Host
+           - Accounting-Sub-Session-Id
+           - Acct-Session-Id
+           - Acct-Multi-Session-Id
+           - Acct-Interim-Interval
+           - Accounting-Realtime-Required
+           - Origin-State-Id
+           - Event-Timestamp
+           - Proxy-Info:*
+           - Route-Record:*
+           - AVP:*
+     Answer:
+        Name: Accounting-Answer
+        AbbreviatedName: ACA
+        Proxiable: true
+        AvpOrder:
+           - Session-Id
+           - Result-Code
+           - Origin-Host
+           - Origin-Realm
+           - Accounting-Record-Type
+           - Accounting-Record-Number
+           - Acct-Application-Id
+           - Vendor-Specific-Application-Id
+           - User-Name
+           - Accounting-Sub-Session-Id
+           - Acct-Session-Id
+           - Acct-Multi-Session-Id
+           - Error-Message
+           - Error-Reporting-Host
+           - Failed-AVP
+           - Acct-Interim-Interval
+           - Accounting-Realtime-Required
+           - Origin-State-Id
+           - Event-Timestamp
+           - Proxy-Info
+           - AVP
+        MandatoryAvps: ["Session-Id", "Result-Code", "Origin-Host", "Origin-Realm", "Accounting-Record-Type", "Accounting-Record-Number"]
+        OptionalAvps:
+           - Acct-Application-Id
+           - Vendor-Specific-Application-Id
+           - User-Name
+           - Accounting-Sub-Session-Id
+           - Acct-Session-Id
+           - Acct-Multi-Session-Id
+           - Error-Message
+           - Error-Reporting-Host
+           - Failed-AVP
+           - Acct-Interim-Interval
+           - Accounting-Realtime-Required
+           - Origin-State-Id
+           - Event-Timestamp
+           - Proxy-Info:*
+           - AVP:*
+   - Code: 275
+     ApplicationId: 0
+     Request:
+        Name: Session-Termination-Request
+        AbbreviatedName: STR
+        Proxiable: true
+        AvpOrder:
+           - Session-Id
+           - Origin-Host
+           - Origin-Realm
+           - Destination-Realm
+           - Auth-Application-Id
+           - Termination-Cause
+           - User-Name
+           - Destination-Host
+           - Class
+           - Origin-State-Id
+           - Proxy-Info
+           - Route-Record
+           - AVP
+        MandatoryAvps: ["Session-Id", "Origin-Host", "Origin-Realm", "Destination-Realm", "Auth-Application-Id", "Termination-Cause"]
+        OptionalAvps:
+           - User-Name
+           - Destination-Host
+           - Class:*
+           - Origin-State-Id
+           - Proxy-Info:*
+           - Route-Record:*
+           - AVP:*
+     Answer:
+        Name: Session-Termination-Answer
+        AbbreviatedName: STA
+        Proxiable: true
+        AvpOrder:
+           - Session-Id
+           - Result-Code
+           - Origin-Host
+           - Origin-Realm
+           - User-Name
+           - Class
+           - Error-Message
+           - Error-Reporting-Host
+           - Failed-AVP
+           - Origin-State-Id
+           - Redirect-Host
+           - Redirect-Host-Usage
+           - Redirect-Max-Cache-Time
+           - Proxy-Info
+           - AVP
+        MandatoryAvps: ["Session-Id", "Result-Code", "Origin-Host", "Origin-Realm"]
+        OptionalAvps:
+           - User-Name
+           - Class:*
+           - Error-Message
+           - Error-Reporting-Host
+           - Failed-AVP
+           - Origin-State-Id
+           - Redirect-Host:*
+           - Redirect-Host-Usage
+           - Redirect-Max-Cache-Time
+           - Proxy-Info:*
+           - AVP:*
+   - Code: 280
+     ApplicationId: 0
+     Request:
+        Name: "Device-Watchdog-Request"
+        AbbreviatedName: "DWR"
+        Proxiable: false
+        AvpOrder: ["Origin-Host", "Origin-Realm", "Origin-State-Id", "AVP"]
+        MandatoryAvps: ["Origin-Host", "Origin-Realm"]
+        OptionalAvps: ["Origin-State-Id", "AVP:*"]
+     Answer:
+        Name: "Device-Watchdog-Answer"
+        AbbreviatedName: "DWA"
+        Proxiable: false
+        AvpOrder: ["Result-Code", "Origin-Host", "Origin-Realm", "Error-Message", "Failed-AVP", "Origin-State-Id", "AVP"]
+        MandatoryAvps: ["Result-Code", "Origin-Host", "Origin-Realm"]
+        OptionalAvps: ["Error-Message", "Failed-AVP", "Origin-State-Id", "AVP:*"]
+   - Code: 282
+     ApplicationId: 0
+     Request:
+         Name: "Disconnect-Peer-Request"
+         AbbreviatedName: "DPR"
+         Proxiable: false
+         AvpOrder: ["Origin-Host", "Origin-Realm", "Disconnect-Cause", "AVP"]
+         MandatoryAvps: ["Origin-Host", "Origin-Realm", "Disconnect-Cause"]
+         OptionalAvps: ["AVP:*"]
+     Answer:
+         Name: "Disconnect-Peer-Answer"
+         AbbreviatedName: "DPA"
+         Proxiable: false
+         AvpOrder: ["Result-Code", "Origin-Host", "Origin-Realm", "Error-Message", "Failed-AVP", "AVP"]
+         MandatoryAvps: ["Result-Code", "Origin-Host", "Origin-Realm"]
+         OptionalAvps: ["Error-Message", "Failed-AVP", "AVP:*"]
+
+AvpTypes:
+   - Code: 1
+     VendorId: 0
+     Name: User-Name
+     Type: UTF8String
+   - Code: 4
+     VendorId: 0
+     Name: NAS-IP-Address
+     Type: OctetString
+   - Code: 5
+     VendorId: 0
+     Name: NAS-Port
+     Type: Unsigned32
+   - Code: 7
+     VendorId: 0
+     Name: Framed-Protocol
+     Type: Enumerated
+   - Code: 8
+     VendorId: 0
+     Name: Framed-IP-Address
+     Type: OctetString
+   - Code: 9
+     VendorId: 0
+     Name: Framed-IP-Netmask
+     Type: OctetString
+   - Code: 10
+     VendorId: 0
+     Name: Framed-Routing
+     Type: Enumerated
+   - Code: 11
+     VendorId: 0
+     Name: Filter-Id
+     Type: UTF8String
+   - Code: 12
+     VendorId: 0
+     Name: Framed-MTU
+     Type: Unsigned32
+   - Code: 13
+     VendorId: 0
+     Name: Framed-Compression
+     Type: Enumerated
+   - Code: 18
+     VendorId: 0
+     Name: Reply-Message
+     Type: UTF8String
+   - Code: 19
+     VendorId: 0
+     Name: Callback-Number
+     Type: UTF8String
+   - Code: 20
+     VendorId: 0
+     Name: Callback-Id
+     Type: UTF8String
+   - Code: 22
+     VendorId: 0
+     Name: Framed-Route
+     Type: UTF8String
+   - Code: 23
+     VendorId: 0
+     Name: Framed-IPX-Network
+     Type: UTF8String
+   - Code: 24
+     VendorId: 0
+     Name: State
+     Type: OctetString
+   - Code: 25
+     VendorId: 0
+     Name: Class
+     Type: OctetString
+   - Code: 27
+     VendorId: 0
+     Name: Session-Timeout
+     Type: Unsigned32
+   - Code: 28
+     VendorId: 0
+     Name: Idle-Timeout
+     Type: Unsigned32
+   - Code: 30
+     VendorId: 0
+     Name: Called-Station-Id
+     Type: UTF8String
+   - Code: 31
+     VendorId: 0
+     Name: Calling-Station-Id
+     Type: UTF8String
+   - Code: 32
+     VendorId: 0
+     Name: NAS-Identifier
+     Type: UTF8String
+   - Code: 33
+     VendorId: 0
+     Name: Proxy-State
+     Type: OctetString
+   - Code: 37
+     VendorId: 0
+     Name: Framed-AppleTalk-Link
+     Type: Unsigned32
+   - Code: 38
+     VendorId: 0
+     Name: Framed-AppleTalk-Network
+     Type: Unsigned32
+   - Code: 39
+     VendorId: 0
+     Name: Framed-AppleTalk-Zone
+     Type: OctetString
+   - Code: 44
+     VendorId: 0
+     Name: Accounting-Session-Id
+     Type: OctetString
+   - Code: 44
+     VendorId: 0
+     Name: Acct-Session-Id
+     Type: OctetString
+   - Code: 44
+     VendorId: 0
+     Name: Acct-Session-Id
+     Type: OctetString
+   - Code: 50
+     VendorId: 0
+     Name: Acct-Multi-Session-Id
+     Type: UTF8String
+   - Code: 55
+     VendorId: 0
+     Name: Event-Timestamp
+     Type: Time
+   - Code: 61
+     VendorId: 0
+     Name: NAS-Port-Type
+     Type: Enumerated
+   - Code: 62
+     VendorId: 0
+     Name: Port-Limit
+     Type: Unsigned32
+   - Code: 64
+     VendorId: 0
+     Name: Tunnel-Type
+     Type: Enumerated
+   - Code: 65
+     VendorId: 0
+     Name: Tunnel-Medium-Type
+     Type: Enumerated
+   - Code: 66
+     VendorId: 0
+     Name: Tunnel-Client-Endpoint
+     Type: UTF8String
+   - Code: 67
+     VendorId: 0
+     Name: Tunnel-Server-Endpoint
+     Type: UTF8String
+   - Code: 69
+     VendorId: 0
+     Name: Tunnel-Password
+     Type: OctetString
+   - Code: 77
+     VendorId: 0
+     Name: Connect-Info
+     Type: UTF8String
+   - Code: 78
+     VendorId: 0
+     Name: Configuration-Token
+     Type: OctetString
+   - Code: 81
+     VendorId: 0
+     Name: Tunnel-Private-Group-Id
+     Type: OctetString
+   - Code: 82
+     VendorId: 0
+     Name: Tunnel-Assignment-Id
+     Type: OctetString
+   - Code: 83
+     VendorId: 0
+     Name: Tunnel-Preference
+     Type: Unsigned32
+   - Code: 85
+     VendorId: 0
+     Name: Accounting-Interim-Interval
+     Type: Unsigned32
+   - Code: 85
+     VendorId: 0
+     Name: Acct-Interim-Interval
+     Type: Unsigned32
+   - Code: 85
+     VendorId: 0
+     Name: Accounting-Interim-Interval
+     Type: Unsigned32
+   - Code: 87
+     VendorId: 0
+     Name: NAS-Port-Id
+     Type: UTF8String
+   - Code: 88
+     VendorId: 0
+     Name: Framed-Pool
+     Type: OctetString
+   - Code: 89
+     VendorId: 0
+     Name: CUI
+     Type: OctetString
+   - Code: 90
+     VendorId: 0
+     Name: Tunnel-Client-Auth-Id
+     Type: UTF8String
+   - Code: 91
+     VendorId: 0
+     Name: Tunnel-Server-Auth-Id
+     Type: UTF8String
+   - Code: 94
+     VendorId: 0
+     Name: Originating-Line-Info
+     Type: OctetString
+   - Code: 95
+     VendorId: 0
+     Name: NAS-IPv6-Address
+     Type: OctetString
+   - Code: 96
+     VendorId: 0
+     Name: Framed-Interface-Id
+     Type: Unsigned64
+   - Code: 97
+     VendorId: 0
+     Name: Framed-IPv6-Prefix
+     Type: OctetString
+   - Code: 99
+     VendorId: 0
+     Name: Framed-IPv6-Route
+     Type: UTF8String
+   - Code: 100
+     VendorId: 0
+     Name: Framed-IPv6-Pool
+     Type: OctetString
+   - Code: 102
+     VendorId: 0
+     Name: EAP-Key-Name
+     Type: OctetString
+   - Code: 104
+     VendorId: 0
+     Name: Digest-Realm
+     Type: UTF8String
+   - Code: 110
+     VendorId: 0
+     Name: Digest-QoP
+     Type: UTF8String
+   - Code: 111
+     VendorId: 0
+     Name: Digest-Algorithm
+     Type: UTF8String
+   - Code: 121
+     VendorId: 0
+     Name: Digest-HA1
+     Type: UTF8String
+   - Code: 125
+     VendorId: 0
+     Name: MIP6-Home-Link-Prefix
+     Type: OctetString
+   - Code: 257
+     VendorId: 0
+     Name: Host-IP-Address
+     Type: Address
+   - Code: 258
+     VendorId: 0
+     Name: Auth-Application-Id
+     Type: Unsigned32
+   - Code: 259
+     VendorId: 0
+     Name: Acct-Application-Id
+     Type: Unsigned32
+   - Code: 260
+     VendorId: 0
+     Name: Vendor-Specific-Application-Id
+     Type: Grouped
+   - Code: 261
+     VendorId: 0
+     Name: Redirect-Host-Usage
+     Type: Enumerated
+   - Code: 262
+     VendorId: 0
+     Name: Redirect-Max-Cache-Time
+     Type: Unsigned32
+   - Code: 263
+     VendorId: 0
+     Name: Session-Id
+     Type: UTF8String
+   - Code: 264
+     VendorId: 0
+     Name: Origin-Host
+     Type: DiameterIdentity
+   - Code: 265
+     VendorId: 0
+     Name: Supported-Vendor-Id
+     Type: Unsigned32
+   - Code: 266
+     VendorId: 0
+     Name: Vendor-Id
+     Type: Unsigned32
+   - Code: 267
+     VendorId: 0
+     Name: Firmware-Revision
+     Type: Unsigned32
+   - Code: 268
+     VendorId: 0
+     Name: Result-Code
+     Type: Unsigned32
+   - Code: 269
+     VendorId: 0
+     Name: Product-Name
+     Type: UTF8String
+   - Code: 270
+     VendorId: 0
+     Name: Session-Binding
+     Type: Unsigned32
+   - Code: 271
+     VendorId: 0
+     Name: Session-Server-Failover
+     Type: Enumerated
+   - Code: 272
+     VendorId: 0
+     Name: Multi-Round-Time-Out
+     Type: Unsigned32
+   - Code: 273
+     VendorId: 0
+     Name: Disconnect-Cause
+     Type: Enumerated
+   - Code: 274
+     VendorId: 0
+     Name: Auth-Request-Type
+     Type: Enumerated
+   - Code: 276
+     VendorId: 0
+     Name: Auth-Grace-Period
+     Type: Unsigned32
+   - Code: 277
+     VendorId: 0
+     Name: Auth-Session-State
+     Type: Enumerated
+   - Code: 278
+     VendorId: 0
+     Name: Origin-State-Id
+     Type: Unsigned32
+   - Code: 279
+     VendorId: 0
+     Name: Failed-AVP
+     Type: Grouped
+   - Code: 280
+     VendorId: 0
+     Name: Proxy-Host
+     Type: DiameterIdentity
+   - Code: 281
+     VendorId: 0
+     Name: Error-Message
+     Type: UTF8String
+   - Code: 282
+     VendorId: 0
+     Name: Route-Record
+     Type: DiameterIdentity
+   - Code: 283
+     VendorId: 0
+     Name: Destination-Realm
+     Type: DiameterIdentity
+   - Code: 284
+     VendorId: 0
+     Name: Proxy-Info
+     Type: Grouped
+   - Code: 285
+     VendorId: 0
+     Name: Re-Auth-Request-Type
+     Type: Enumerated
+   - Code: 287
+     VendorId: 0
+     Name: Accounting-Sub-Session-Id
+     Type: Unsigned64
+   - Code: 291
+     VendorId: 0
+     Name: Authorization-Lifetime
+     Type: Unsigned32
+   - Code: 292
+     VendorId: 0
+     Name: Redirect-Host
+     Type: DiameterURI
+   - Code: 293
+     VendorId: 0
+     Name: Destination-Host
+     Type: DiameterIdentity
+   - Code: 294
+     VendorId: 0
+     Name: Error-Reporting-Host
+     Type: DiameterIdentity
+   - Code: 295
+     VendorId: 0
+     Name: Termination-Cause
+     Type: Enumerated
+   - Code: 296
+     VendorId: 0
+     Name: Origin-Realm
+     Type: DiameterIdentity
+   - Code: 297
+     VendorId: 0
+     Name: Experimental-Result
+     Type: Grouped
+   - Code: 298
+     VendorId: 0
+     Name: Experimental-Result-Code
+     Type: Unsigned32
+   - Code: 299
+     VendorId: 0
+     Name: Inband-Security-Id
+     Type: Unsigned32
+   - Code: 334
+     VendorId: 0
+     Name: MIP-Home-Agent-Address
+     Type: Address
+   - Code: 348
+     VendorId: 0
+     Name: MIP-Home-Agent-Host
+     Type: Grouped
+   - Code: 363
+     VendorId: 0
+     Name: Accounting-Input-Octets
+     Type: Unsigned64
+   - Code: 364
+     VendorId: 0
+     Name: Accounting-Output-Octets
+     Type: Unsigned64
+   - Code: 365
+     VendorId: 0
+     Name: Accounting-Input-Packets
+     Type: Unsigned64
+   - Code: 366
+     VendorId: 0
+     Name: Accounting-Output-Packets
+     Type: Unsigned64
+   - Code: 400
+     VendorId: 0
+     Name: NAS-Filter-Rule
+     Type: IPFilterRule
+   - Code: 401
+     VendorId: 0
+     Name: Tunneling
+     Type: Grouped
+   - Code: 407
+     VendorId: 0
+     Name: QoS-Filter-Rule
+     Type: QosFilterRule
+   - Code: 411
+     VendorId: 0
+     Name: CC-Correlation-Id
+     Type: OctetString
+   - Code: 412
+     VendorId: 0
+     Name: CC-Input-Octets
+     Type: Unsigned64
+   - Code: 413
+     VendorId: 0
+     Name: CC-Money
+     Type: Grouped
+   - Code: 414
+     VendorId: 0
+     Name: CC-Output-Octets
+     Type: Unsigned64
+   - Code: 415
+     VendorId: 0
+     Name: CC-Request-Number
+     Type: Unsigned32
+   - Code: 416
+     VendorId: 0
+     Name: CC-Request-Type
+     Type: Enumerated
+   - Code: 417
+     VendorId: 0
+     Name: CC-Service-Specific-Units
+     Type: Unsigned64
+   - Code: 418
+     VendorId: 0
+     Name: CC-Session-Failover
+     Type: Enumerated
+   - Code: 419
+     VendorId: 0
+     Name: CC-Sub-Session-Id
+     Type: Unsigned64
+   - Code: 420
+     VendorId: 0
+     Name: CC-Time
+     Type: Unsigned32
+   - Code: 421
+     VendorId: 0
+     Name: CC-Total-Octets
+     Type: Unsigned64
+   - Code: 422
+     VendorId: 0
+     Name: Check-Balance-Result
+     Type: Enumerated
+   - Code: 423
+     VendorId: 0
+     Name: Cost-Information
+     Type: Grouped
+   - Code: 424
+     VendorId: 0
+     Name: Cost-Unit
+     Type: UTF8String
+   - Code: 425
+     VendorId: 0
+     Name: Currency-Code
+     Type: Unsigned32
+   - Code: 426
+     VendorId: 0
+     Name: Credit-Control
+     Type: Enumerated
+   - Code: 427
+     VendorId: 0
+     Name: Credit-Control-Failure-Handling
+     Type: Enumerated
+   - Code: 428
+     VendorId: 0
+     Name: Direct-Debiting-Failure-Handling
+     Type: Enumerated
+   - Code: 429
+     VendorId: 0
+     Name: Exponent
+     Type: Integer32
+   - Code: 430
+     VendorId: 0
+     Name: Final-Unit-Indication
+     Type: Grouped
+   - Code: 431
+     VendorId: 0
+     Name: Granted-Service-Unit
+     Type: Grouped
+   - Code: 432
+     VendorId: 0
+     Name: Rating-Group
+     Type: Unsigned32
+   - Code: 433
+     VendorId: 0
+     Name: Redirect-Address-Type
+     Type: Enumerated
+   - Code: 434
+     VendorId: 0
+     Name: Redirect-Server
+     Type: Grouped
+   - Code: 435
+     VendorId: 0
+     Name: Redirect-Server-Address
+     Type: UTF8String
+   - Code: 436
+     VendorId: 0
+     Name: Requested-Action
+     Type: Enumerated
+   - Code: 437
+     VendorId: 0
+     Name: Requested-Service-Unit
+     Type: Grouped
+   - Code: 438
+     VendorId: 0
+     Name: Restriction-Filter-Rule
+     Type: IPFilterRule
+   - Code: 439
+     VendorId: 0
+     Name: Service-Identifier
+     Type: Unsigned32
+   - Code: 440
+     VendorId: 0
+     Name: Service-Parameter-Info
+     Type: Grouped
+   - Code: 441
+     VendorId: 0
+     Name: Service-Parameter-Type
+     Type: Unsigned32
+   - Code: 442
+     VendorId: 0
+     Name: Service-Parameter-Value
+     Type: OctetString
+   - Code: 443
+     VendorId: 0
+     Name: Subscription-Id
+     Type: Grouped
+   - Code: 444
+     VendorId: 0
+     Name: Subscription-Id-Data
+     Type: UTF8String
+   - Code: 445
+     VendorId: 0
+     Name: Unit-Value
+     Type: Grouped
+   - Code: 446
+     VendorId: 0
+     Name: Used-Service-Unit
+     Type: Grouped
+   - Code: 447
+     VendorId: 0
+     Name: Value-Digits
+     Type: Integer64
+   - Code: 448
+     VendorId: 0
+     Name: Validity-Time
+     Type: Unsigned32
+   - Code: 449
+     VendorId: 0
+     Name: Final-Unit-Action
+     Type: Enumerated
+   - Code: 450
+     VendorId: 0
+     Name: Subscription-Id-Type
+     Type: Enumerated
+   - Code: 451
+     VendorId: 0
+     Name: Tariff-Time-Change
+     Type: Time
+   - Code: 452
+     VendorId: 0
+     Name: Tariff-Change-Usage
+     Type: Enumerated
+   - Code: 453
+     VendorId: 0
+     Name: G-S-U-Pool-Identifier
+     Type: Unsigned32
+   - Code: 454
+     VendorId: 0
+     Name: CC-Unit-Type
+     Type: Enumerated
+   - Code: 455
+     VendorId: 0
+     Name: Multiple-Services-Indicator
+     Type: Enumerated
+   - Code: 456
+     VendorId: 0
+     Name: Multiple-Services-Credit-Control
+     Type: Grouped
+   - Code: 457
+     VendorId: 0
+     Name: G-S-U-Pool-Reference
+     Type: Grouped
+   - Code: 458
+     VendorId: 0
+     Name: User-Equipment-Info
+     Type: Grouped
+   - Code: 459
+     VendorId: 0
+     Name: User-Equipment-Info-Type
+     Type: Enumerated
+   - Code: 460
+     VendorId: 0
+     Name: User-Equipment-Info-Value
+     Type: OctetString
+   - Code: 461
+     VendorId: 0
+     Name: Service-Context-Id
+     Type: UTF8String
+   - Code: 462
+     VendorId: 0
+     Name: EAP-Payload
+     Type: OctetString
+   - Code: 463
+     VendorId: 0
+     Name: EAP-Reissued-Payload
+     Type: OctetString
+   - Code: 464
+     VendorId: 0
+     Name: EAP-Master-Session-Key
+     Type: OctetString
+   - Code: 465
+     VendorId: 0
+     Name: Accounting-EAP-Auth-Method
+     Type: Unsigned64
+   - Code: 480
+     VendorId: 0
+     Name: Accounting-Record-Type
+     Type: Enumerated
+   - Code: 483
+     VendorId: 0
+     Name: Accounting-Realtime-Required
+     Type: Enumerated
+   - Code: 485
+     VendorId: 0
+     Name: Accounting-Record-Number
+     Type: Unsigned32
+   - Code: 486
+     VendorId: 0
+     Name: MIP6-Agent-Info
+     Type: Grouped
+   - Code: 1411
+     VendorId: 0
+     Name: Re-synchronization-Info
+     Type: OctetString
+   - Code: 1462
+     VendorId: 0
+     Name: Trace-Depth
+     Type: Enumerated
+   - Code: 2066
+     VendorId: 0
+     Name: Charging-Characteristics-Selection-Mode
+     Type: Enumerated
+   - Code: 2117
+     VendorId: 0
+     Name: Content-Provider-ID
+     Type: UTF8String
+   - Code: 2321
+     VendorId: 0
+     Name: Initial-IMS-Charging-Identifier
+     Type: UTF8String
+   - Code: 2320
+     VendorId: 0
+     Name: Outgoing-Session-Id
+     Type: UTF8String
+   - Code: 2067
+     VendorId: 0
+     Name: SGW-Address
+     Type: Address
+   - Code: 5100
+     VendorId: 94
+     Name: Nokia-Access-Method
+     Type: Unsigned32
+   - Code: 5101
+     VendorId: 94
+     Name: Nokia-IMS-Media-Component-Id
+     Type: Unsigned32
+   - Code: 5102
+     VendorId: 94
+     Name: Nokia-Reporting-Reason
+     Type: Unsigned32
+   - Code: 5103
+     VendorId: 94
+     Name: Nokia-Time-Of-First-Usage
+     Type: Time
+   - Code: 5104
+     VendorId: 94
+     Name: Nokia-Time-Of-Last-Usage
+     Type: Time
+   - Code: 5105
+     VendorId: 94
+     Name: Nokia-Session-Start-Indicator
+     Type: OctetString
+   - Code: 5106
+     VendorId: 94
+     Name: Nokia-Rulebase-ID
+     Type: UTF8String
+   - Code: 5107
+     VendorId: 94
+     Name: Nokia-Trigger
+     Type: Grouped
+   - Code: 5108
+     VendorId: 94
+     Name: Nokia-Trigger-Type
+     Type: Unsigned32
+   - Code: 5109
+     VendorId: 94
+     Name: Nokia-Quota-Consumption-Time
+     Type: Unsigned32
+   - Code: 5110
+     VendorId: 94
+     Name: Nokia-Quota-Holding-Time
+     Type: Unsigned32
+   - Code: 5111
+     VendorId: 94
+     Name: Nokia-Default-Quota
+     Type: Grouped
+   - Code: 5112
+     VendorId: 94
+     Name: Nokia-URI
+     Type: UTF8String
+   - Code: 11000
+     VendorId: 236
+     Name: Dir
+     Type: UTF8String
+   - Code: 9010
+     VendorId: 5535
+     Name: 3GPP2-BSID
+     Type: OctetString
+   - Code: 1
+     VendorId: 10415
+     Name: 3GPP-IMSI
+     Type: UTF8String
+   - Code: 2
+     VendorId: 10415
+     Name: 3GPP-Charging-Id
+     Type: OctetString
+   - Code: 3
+     VendorId: 10415
+     Name: 3GPP-PDP-Type
+     Type: Enumerated
+   - Code: 4
+     VendorId: 10415
+     Name: 3GPP-CG-Address
+     Type: Address
+   - Code: 5
+     VendorId: 10415
+     Name: 3GPP-GPRS-Negotiated-QoS-Profile
+     Type: UTF8String
+   - Code: 6
+     VendorId: 10415
+     Name: 3GPP-SGSN-Address
+     Type: Address
+   - Code: 7
+     VendorId: 10415
+     Name: 3GPP-GGSN-Address
+     Type: Address
+   - Code: 8
+     VendorId: 10415
+     Name: 3GPP-IMSI-MCC-MNC
+     Type: UTF8String
+   - Code: 9
+     VendorId: 10415
+     Name: 3GPP-GGSN-MCC-MNC
+     Type: UTF8String
+   - Code: 10
+     VendorId: 10415
+     Name: 3GPP-NSAPI
+     Type: UTF8String
+   - Code: 11
+     VendorId: 10415
+     Name: 3GPP-Session-Stop-Indicator
+     Type: UTF8String
+   - Code: 12
+     VendorId: 10415
+     Name: 3GPP-Selection-Mode
+     Type: UTF8String
+   - Code: 13
+     VendorId: 10415
+     Name: 3GPP-Charging-Characteristics
+     Type: UTF8String
+   - Code: 14
+     VendorId: 10415
+     Name: 3GPP-CG-IPv6-Address
+     Type: OctetString
+   - Code: 15
+     VendorId: 10415
+     Name: 3GPP-SGSN-IPv6-Address
+     Type: OctetString
+   - Code: 16
+     VendorId: 10415
+     Name: 3GPP-GGSN-IPv6-Address
+     Type: OctetString
+   - Code: 17
+     VendorId: 10415
+     Name: 3GPP-IPv6-DNS-Server
+     Type: OctetString
+   - Code: 18
+     VendorId: 10415
+     Name: 3GPP-SGSN-MCC-MNC
+     Type: UTF8String
+   - Code: 19
+     VendorId: 10415
+     Name: 3GPP-Teardown-Indicator
+     Type: OctetString
+   - Code: 20
+     VendorId: 10415
+     Name: 3GPP-IMEISV
+     Type: OctetString
+   - Code: 21
+     VendorId: 10415
+     Name: 3GPP-RAT-Type
+     Type: OctetString
+   - Code: 22
+     VendorId: 10415
+     Name: 3GPP-User-Location-Info
+     Type: OctetString
+   - Code: 23
+     VendorId: 10415
+     Name: 3GPP-MS-TimeZone
+     Type: OctetString
+   - Code: 24
+     VendorId: 10415
+     Name: 3GPP-CAMEL-Charging-Info
+     Type: OctetString
+   - Code: 25
+     VendorId: 10415
+     Name: 3GPP-Packet-Filter
+     Type: OctetString
+   - Code: 26
+     VendorId: 10415
+     Name: 3GPP-Negotiated-DSCP
+     Type: OctetString
+   - Code: 27
+     VendorId: 10415
+     Name: 3GPP-Allocate-IP-Type
+     Type: OctetString
+   - Code: 29
+     VendorId: 10415
+     Name: TWAN-Identifier
+     Type: OctetString
+   - Code: 100
+     VendorId: 10415
+     Name: 3GPP-WLAN-APN-Id
+     Type: OctetString
+   - Code: 124
+     VendorId: 10415
+     Name: MIP6-Feature-Vector
+     Type: Unsigned64
+   - Code: 300
+     VendorId: 10415
+     Name: Authentication-Method
+     Type: Enumerated
+   - Code: 301
+     VendorId: 10415
+     Name: Authentication-Information-SIM
+     Type: OctetString
+   - Code: 302
+     VendorId: 10415
+     Name: Authorization-Information-SIM
+     Type: OctetString
+   - Code: 303
+     VendorId: 10415
+     Name: WLAN-User-Data
+     Type: Grouped
+   - Code: 304
+     VendorId: 10415
+     Name: Charging-Data
+     Type: Grouped
+   - Code: 305
+     VendorId: 10415
+     Name: WLAN-Access
+     Type: Enumerated
+   - Code: 306
+     VendorId: 10415
+     Name: WLAN-3GPP-IP-Access
+     Type: Enumerated
+   - Code: 307
+     VendorId: 10415
+     Name: APN-Authorized
+     Type: Grouped
+   - Code: 308
+     VendorId: 10415
+     Name: APN-Id
+     Type: OctetString
+   - Code: 309
+     VendorId: 10415
+     Name: APN-Barring-Type
+     Type: Enumerated
+   - Code: 310
+     VendorId: 10415
+     Name: WLAN-Direct-IP-Access
+     Type: Enumerated
+   - Code: 311
+     VendorId: 10415
+     Name: Session-Request-Type
+     Type: Enumerated
+   - Code: 312
+     VendorId: 10415
+     Name: Routing-Policy
+     Type: IPFilterRule
+   - Code: 313
+     VendorId: 10415
+     Name: Max-Requested-Bandwidth
+     Type: OctetString
+   - Code: 314
+     VendorId: 10415
+     Name: Charging-Characteristics
+     Type: Integer32
+   - Code: 315
+     VendorId: 10415
+     Name: Charging-Nodes
+     Type: Grouped
+   - Code: 300
+     VendorId: 10415
+     Name: Globally-Unique-Address
+     Type: Grouped
+   - Code: 301
+     VendorId: 10415
+     Name: Address-Realm
+     Type: OctetString
+   - Code: 303
+     VendorId: 10415
+     Name: Initial-Gate-Setting-Description
+     Type: Grouped
+   - Code: 304
+     VendorId: 10415
+     Name: QoS-Profile-Description
+     Type: Grouped
+   - Code: 305
+     VendorId: 10415
+     Name: IP-Connectivity-Status
+     Type: Enumerated
+   - Code: 306
+     VendorId: 10415
+     Name: Access-Network-Type
+     Type: Grouped
+   - Code: 307
+     VendorId: 10415
+     Name: Aggregation-Network-Type
+     Type: Enumerated
+   - Code: 308
+     VendorId: 10415
+     Name: Maximum-Allowed-Bandwidth-UL
+     Type: Unsigned32
+   - Code: 309
+     VendorId: 10415
+     Name: Maximum-Allowed-Bandwidth-DL
+     Type: Unsigned32
+   - Code: 311
+     VendorId: 10415
+     Name: Transport-Class
+     Type: Unsigned32
+   - Code: 312
+     VendorId: 10415
+     Name: Application-Class-ID
+     Type: UTF8String
+   - Code: 313
+     VendorId: 10415
+     Name: Physical-Access-ID
+     Type: UTF8String
+   - Code: 314
+     VendorId: 10415
+     Name: Initial-Gate-Setting-ID
+     Type: Unsigned32
+   - Code: 315
+     VendorId: 10415
+     Name: QoS-Profile-ID
+     Type: Unsigned32
+   - Code: 316
+     VendorId: 10415
+     Name: Primary-OCS-Charging-Function-Name
+     Type: DiameterIdentity
+   - Code: 317
+     VendorId: 10415
+     Name: Secondary-OCS-Charging-Function-Name
+     Type: DiameterIdentity
+   - Code: 318
+     VendorId: 10415
+     Name: 3GPP-AAA-Server-Name
+     Type: DiameterIdentity
+   - Code: 319
+     VendorId: 10415
+     Name: Maximum-Number-Accesses
+     Type: Unsigned32
+   - Code: 400
+     VendorId: 10415
+     Name: GBA-UserSecSettings
+     Type: OctetString
+   - Code: 401
+     VendorId: 10415
+     Name: Transaction-Identifier
+     Type: OctetString
+   - Code: 402
+     VendorId: 10415
+     Name: NAF-Id
+     Type: OctetString
+   - Code: 403
+     VendorId: 10415
+     Name: GAA-Service-Identifier
+     Type: OctetString
+   - Code: 404
+     VendorId: 10415
+     Name: Key-ExpiryTime
+     Type: Time
+   - Code: 405
+     VendorId: 10415
+     Name: ME-Key-Material
+     Type: OctetString
+   - Code: 406
+     VendorId: 10415
+     Name: UICC-Key-Material
+     Type: OctetString
+   - Code: 407
+     VendorId: 10415
+     Name: GBA_U-Awareness-Indicator
+     Type: Enumerated
+   - Code: 408
+     VendorId: 10415
+     Name: BootstrapInfoCreationTime
+     Type: Time
+   - Code: 409
+     VendorId: 10415
+     Name: GUSS-Timestamp
+     Type: Time
+   - Code: 410
+     VendorId: 10415
+     Name: GBA-Type
+     Type: Enumerated
+   - Code: 411
+     VendorId: 10415
+     Name: UE-Id
+     Type: OctetString
+   - Code: 412
+     VendorId: 10415
+     Name: UE-Id-Type
+     Type: Enumerated
+   - Code: 413
+     VendorId: 10415
+     Name: UICC-App-Label
+     Type: OctetString
+   - Code: 414
+     VendorId: 10415
+     Name: UICC-ME
+     Type: Enumerated
+   - Code: 415
+     VendorId: 10415
+     Name: Requested-Key-Lifetime
+     Type: Time
+   - Code: 416
+     VendorId: 10415
+     Name: Private-Identity-Request
+     Type: Enumerated
+   - Code: 417
+     VendorId: 10415
+     Name: GBA-Push-Info
+     Type: OctetString
+   - Code: 418
+     VendorId: 10415
+     Name: NAF-SA-Identifier
+     Type: OctetString
+   - Code: 419
+     VendorId: 10415
+     Name: Security-Feature-Request
+     Type: OctetString
+   - Code: 420
+     VendorId: 10415
+     Name: Security-Feature-Response
+     Type: OctetString
+   - Code: 458
+     VendorId: 10415
+     Name: Reservation-Priority
+     Type: Enumerated
+   - Code: 493
+     VendorId: 10415
+     Name: Service-Selection
+     Type: UTF8String
+   - Code: 500
+     VendorId: 10415
+     Name: Abort-Cause
+     Type: Enumerated
+   - Code: 501
+     VendorId: 10415
+     Name: Access-Network-Charging-Address
+     Type: Address
+   - Code: 502
+     VendorId: 10415
+     Name: Access-Network-Charging-Identifier
+     Type: Grouped
+   - Code: 503
+     VendorId: 10415
+     Name: Access-Network-Charging-Identifier-Value
+     Type: OctetString
+   - Code: 504
+     VendorId: 10415
+     Name: AF-Application-Identifier
+     Type: OctetString
+   - Code: 505
+     VendorId: 10415
+     Name: AF-Charging-Identifier
+     Type: OctetString
+   - Code: 506
+     VendorId: 10415
+     Name: Mobile-Node-Identifier
+     Type: UTF8String
+   - Code: 507
+     VendorId: 10415
+     Name: Flow-Description
+     Type: IPFilterRule
+   - Code: 508
+     VendorId: 10415
+     Name: QoS-Resources
+     Type: Grouped
+   - Code: 509
+     VendorId: 10415
+     Name: Flow-Number
+     Type: Unsigned32
+   - Code: 510
+     VendorId: 10415
+     Name: Flows
+     Type: Grouped
+   - Code: 511
+     VendorId: 10415
+     Name: Flow-Status
+     Type: Enumerated
+   - Code: 512
+     VendorId: 10415
+     Name: Flow-Usage
+     Type: Enumerated
+   - Code: 513
+     VendorId: 10415
+     Name: Specific-Action
+     Type: Enumerated
+   - Code: 515
+     VendorId: 10415
+     Name: Max-Requested-Bandwidth-DL
+     Type: Unsigned32
+   - Code: 516
+     VendorId: 10415
+     Name: Max-Requested-Bandwidth-UL
+     Type: Unsigned32
+   - Code: 517
+     VendorId: 10415
+     Name: Media-Component-Description
+     Type: Grouped
+   - Code: 518
+     VendorId: 10415
+     Name: Media-Component-Number
+     Type: Unsigned32
+   - Code: 519
+     VendorId: 10415
+     Name: Media-Sub-Component
+     Type: Grouped
+   - Code: 520
+     VendorId: 10415
+     Name: Media-Type
+     Type: Enumerated
+   - Code: 521
+     VendorId: 10415
+     Name: RR-Bandwidth
+     Type: Unsigned32
+   - Code: 522
+     VendorId: 10415
+     Name: RS-Bandwidth
+     Type: Unsigned32
+   - Code: 523
+     VendorId: 10415
+     Name: SIP-Forking-Indication
+     Type: Enumerated
+   - Code: 524
+     VendorId: 10415
+     Name: Codec-Data
+     Type: OctetString
+   - Code: 525
+     VendorId: 10415
+     Name: Service-URN
+     Type: OctetString
+   - Code: 526
+     VendorId: 10415
+     Name: Acceptable-Service-Info
+     Type: Grouped
+   - Code: 527
+     VendorId: 10415
+     Name: Service-Info-Status
+     Type: Enumerated
+   - Code: 531
+     VendorId: 10415
+     Name: Sponsor-Identity
+     Type: UTF8String
+   - Code: 532
+     VendorId: 10415
+     Name: Application-Service-Provider-Identity
+     Type: UTF8String
+   - Code: 536
+     VendorId: 10415
+     Name: Required-Access-Info
+     Type: Enumerated
+   - Code: 578
+     VendorId: 10415
+     Name: QoS-Capability
+     Type: Grouped
+   - Code: 600
+     VendorId: 10415
+     Name: Visited-Network-Identifier
+     Type: OctetString
+   - Code: 601
+     VendorId: 10415
+     Name: Public-Identity
+     Type: UTF8String
+   - Code: 602
+     VendorId: 10415
+     Name: Server-Name
+     Type: UTF8String
+   - Code: 603
+     VendorId: 10415
+     Name: Server-Capabilities
+     Type: Grouped
+   - Code: 604
+     VendorId: 10415
+     Name: Mandatory-Capability
+     Type: Unsigned32
+   - Code: 605
+     VendorId: 10415
+     Name: Optional-Capability
+     Type: Unsigned32
+   - Code: 606
+     VendorId: 10415
+     Name: User-Data
+     Type: OctetString
+   - Code: 607
+     VendorId: 10415
+     Name: SIP-Number-Auth-Items
+     Type: Unsigned32
+   - Code: 608
+     VendorId: 10415
+     Name: SIP-Authentication-Scheme
+     Type: UTF8String
+   - Code: 609
+     VendorId: 10415
+     Name: SIP-Authenticate
+     Type: OctetString
+   - Code: 610
+     VendorId: 10415
+     Name: SIP-Authorization
+     Type: OctetString
+   - Code: 611
+     VendorId: 10415
+     Name: SIP-Authentication-Context
+     Type: OctetString
+   - Code: 612
+     VendorId: 10415
+     Name: SIP-Auth-Data-Item
+     Type: Grouped
+   - Code: 613
+     VendorId: 10415
+     Name: SIP-Item-Number
+     Type: Unsigned32
+   - Code: 614
+     VendorId: 10415
+     Name: Server-Assignment-Type
+     Type: Enumerated
+   - Code: 615
+     VendorId: 10415
+     Name: Deregistration-Reason
+     Type: Grouped
+   - Code: 616
+     VendorId: 10415
+     Name: Reason-Code-Unsigned32
+     Type: Unsigned32
+   - Code: 2316
+     VendorId: 10415
+     Name: Reason-Code-Enumerated
+     Type: Enumerated
+   - Code: 617
+     VendorId: 10415
+     Name: Reason-Info
+     Type: UTF8String
+   - Code: 618
+     VendorId: 10415
+     Name: Charging-Information
+     Type: Grouped
+   - Code: 619
+     VendorId: 10415
+     Name: Primary-Event-Charging-Function-Name
+     Type: DiameterURI
+   - Code: 620
+     VendorId: 10415
+     Name: Secondary-Event-Charging-Function-Name
+     Type: DiameterURI
+   - Code: 621
+     VendorId: 10415
+     Name: Primary-Charging-Collection-Function-Name
+     Type: DiameterURI
+   - Code: 622
+     VendorId: 10415
+     Name: Secondary-Charging-Collection-Function-Name
+     Type: DiameterURI
+   - Code: 623
+     VendorId: 10415
+     Name: User-Authorization-Type
+     Type: Enumerated
+   - Code: 624
+     VendorId: 10415
+     Name: User-Data-Already-Available
+     Type: Enumerated
+   - Code: 625
+     VendorId: 10415
+     Name: Confidentiality-Key
+     Type: OctetString
+   - Code: 626
+     VendorId: 10415
+     Name: Integrity-Key
+     Type: OctetString
+   - Code: 628
+     VendorId: 10415
+     Name: Supported-Features
+     Type: Grouped
+   - Code: 629
+     VendorId: 10415
+     Name: Feature-List-ID
+     Type: Unsigned32
+   - Code: 630
+     VendorId: 10415
+     Name: Feature-List
+     Type: Unsigned32
+   - Code: 631
+     VendorId: 10415
+     Name: Supported-Applications
+     Type: Grouped
+   - Code: 632
+     VendorId: 10415
+     Name: Associated-Identities
+     Type: Grouped
+   - Code: 633
+     VendorId: 10415
+     Name: Originating-Request
+     Type: Enumerated
+   - Code: 634
+     VendorId: 10415
+     Name: Wildcarded-PSI
+     Type: UTF8String
+   - Code: 635
+     VendorId: 10415
+     Name: SIP-Digest-Authenticate
+     Type: Grouped
+   - Code: 636
+     VendorId: 10415
+     Name: Wildcarded-IMPU
+     Type: UTF8String
+   - Code: 650
+     VendorId: 10415
+     Name: Session-Priority
+     Type: Enumerated
+   - Code: 700
+     VendorId: 10415
+     Name: User-Identity
+     Type: Grouped
+   - Code: 701
+     VendorId: 10415
+     Name: MSISDN
+     Type: OctetString
+   - Code: 703
+     VendorId: 10415
+     Name: Data-Reference
+     Type: Enumerated
+   - Code: 704
+     VendorId: 10415
+     Name: Service-Indication
+     Type: OctetString
+   - Code: 705
+     VendorId: 10415
+     Name: Subs-Req-Type
+     Type: Enumerated
+   - Code: 706
+     VendorId: 10415
+     Name: Requested-Domain
+     Type: Enumerated
+   - Code: 707
+     VendorId: 10415
+     Name: Current-Location
+     Type: Enumerated
+   - Code: 708
+     VendorId: 10415
+     Name: Identity-Set
+     Type: Enumerated
+   - Code: 709
+     VendorId: 10415
+     Name: Expiry-Time
+     Type: Time
+   - Code: 710
+     VendorId: 10415
+     Name: Send-Data-Indication
+     Type: Enumerated
+   - Code: 711
+     VendorId: 10415
+     Name: DSAI-Tag
+     Type: OctetString
+   - Code: 712
+     VendorId: 10415
+     Name: One-Time-Notification
+     Type: Enumerated
+   - Code: 713
+     VendorId: 10415
+     Name: Requested-Nodes
+     Type: Unsigned32
+   - Code: 714
+     VendorId: 10415
+     Name: Serving-Node-Indication
+     Type: Enumerated
+   - Code: 715
+     VendorId: 10415
+     Name: Repository-Data-ID
+     Type: Grouped
+   - Code: 716
+     VendorId: 10415
+     Name: Sequence-Number
+     Type: Unsigned32
+   - Code: 719
+     VendorId: 10415
+     Name: UDR-Flags
+     Type: Unsigned32
+   - Code: 823
+     VendorId: 10415
+     Name: Event-Type
+     Type: Grouped
+   - Code: 824
+     VendorId: 10415
+     Name: SIP-Method
+     Type: UTF8String
+   - Code: 825
+     VendorId: 10415
+     Name: Event
+     Type: UTF8String
+   - Code: 826
+     VendorId: 10415
+     Name: Content-Type
+     Type: UTF8String
+   - Code: 827
+     VendorId: 10415
+     Name: Content-Length
+     Type: Unsigned32
+   - Code: 828
+     VendorId: 10415
+     Name: Content-Disposition
+     Type: UTF8String
+   - Code: 829
+     VendorId: 10415
+     Name: Role-Of-Node
+     Type: Enumerated
+   - Code: 830
+     VendorId: 10415
+     Name: User-Session-ID
+     Type: UTF8String
+   - Code: 831
+     VendorId: 10415
+     Name: Calling-Party-Address
+     Type: UTF8String
+   - Code: 832
+     VendorId: 10415
+     Name: Called-Party-Address
+     Type: UTF8String
+   - Code: 833
+     VendorId: 10415
+     Name: Time-Stamps
+     Type: Grouped
+   - Code: 834
+     VendorId: 10415
+     Name: SIP-Request-Timestamp
+     Type: Time
+   - Code: 835
+     VendorId: 10415
+     Name: SIP-Response-Timestamp
+     Type: Time
+   - Code: 836
+     VendorId: 10415
+     Name: Application-Server
+     Type: UTF8String
+   - Code: 837
+     VendorId: 10415
+     Name: Application-Provided-Called-Party-Address
+     Type: UTF8String
+   - Code: 838
+     VendorId: 10415
+     Name: Inter-Operator-Identifier
+     Type: Grouped
+   - Code: 839
+     VendorId: 10415
+     Name: Originating-IOI
+     Type: UTF8String
+   - Code: 840
+     VendorId: 10415
+     Name: Terminating-IOI
+     Type: UTF8String
+   - Code: 841
+     VendorId: 10415
+     Name: IMS-Charging-Identifier
+     Type: UTF8String
+   - Code: 842
+     VendorId: 10415
+     Name: SDP-Session-Description
+     Type: UTF8String
+   - Code: 843
+     VendorId: 10415
+     Name: SDP-Media-Component
+     Type: Grouped
+   - Code: 844
+     VendorId: 10415
+     Name: SDP-Media-Name
+     Type: UTF8String
+   - Code: 845
+     VendorId: 10415
+     Name: SDP-Media-Description
+     Type: UTF8String
+   - Code: 846
+     VendorId: 10415
+     Name: CG-Address
+     Type: Address
+   - Code: 847
+     VendorId: 10415
+     Name: GGSN-Address
+     Type: Address
+   - Code: 848
+     VendorId: 10415
+     Name: Served-Party-IP-Address
+     Type: Address
+   - Code: 248
+     VendorId: 10415
+     Name: Served-Party-Ip-Address
+     Type: Address
+   - Code: 849
+     VendorId: 10415
+     Name: Authorized-QoS
+     Type: UTF8String
+   - Code: 850
+     VendorId: 10415
+     Name: Application-Server-Information
+     Type: Grouped
+   - Code: 851
+     VendorId: 10415
+     Name: Trunk-Group-ID
+     Type: Grouped
+   - Code: 852
+     VendorId: 10415
+     Name: Incoming-Trunk-Group-ID
+     Type: UTF8String
+   - Code: 853
+     VendorId: 10415
+     Name: Outgoing-Trunk-Group-ID
+     Type: UTF8String
+   - Code: 854
+     VendorId: 10415
+     Name: Bearer-Service
+     Type: OctetString
+   - Code: 855
+     VendorId: 10415
+     Name: Service-Id
+     Type: UTF8String
+   - Code: 856
+     VendorId: 10415
+     Name: Associated-URI
+     Type: UTF8String
+   - Code: 857
+     VendorId: 10415
+     Name: Charged-Party
+     Type: UTF8String
+   - Code: 858
+     VendorId: 10415
+     Name: PoC-Controlling-Address
+     Type: UTF8String
+   - Code: 859
+     VendorId: 10415
+     Name: PoC-Group-Name
+     Type: UTF8String
+   - Code: 861
+     VendorId: 10415
+     Name: Cause-Code
+     Type: Integer32
+   - Code: 862
+     VendorId: 10415
+     Name: Node-Functionality
+     Type: Enumerated
+   - Code: 863
+     VendorId: 10415
+     Name: Service-Specific-Data
+     Type: UTF8String
+   - Code: 864
+     VendorId: 10415
+     Name: Originator
+     Type: Enumerated
+   - Code: 865
+     VendorId: 10415
+     Name: PS-Furnish-Charging-Information
+     Type: Grouped
+   - Code: 866
+     VendorId: 10415
+     Name: PS-Free-Format-Data
+     Type: OctetString
+   - Code: 867
+     VendorId: 10415
+     Name: PS-Append-Free-Format-Data
+     Type: Enumerated
+   - Code: 868
+     VendorId: 10415
+     Name: Time-Quota-Threshold
+     Type: Unsigned32
+   - Code: 869
+     VendorId: 10415
+     Name: Volume-Quota-Threshold
+     Type: Unsigned32
+   - Code: 870
+     VendorId: 10415
+     Name: Trigger-Type
+     Type: Enumerated
+   - Code: 871
+     VendorId: 10415
+     Name: Quota-Holding-Time
+     Type: Unsigned32
+   - Code: 872
+     VendorId: 10415
+     Name: Reporting-Reason
+     Type: Enumerated
+   - Code: 873
+     VendorId: 10415
+     Name: Service-Information
+     Type: Grouped
+   - Code: 874
+     VendorId: 10415
+     Name: PS-Information
+     Type: Grouped
+   - Code: 875
+     VendorId: 10415
+     Name: WLAN-Information
+     Type: Grouped
+   - Code: 876
+     VendorId: 10415
+     Name: IMS-Information
+     Type: Grouped
+   - Code: 877
+     VendorId: 10415
+     Name: MMS-Information
+     Type: Grouped
+   - Code: 878
+     VendorId: 10415
+     Name: LCS-Information
+     Type: Grouped
+   - Code: 879
+     VendorId: 10415
+     Name: PoC-Information
+     Type: Grouped
+   - Code: 880
+     VendorId: 10415
+     Name: MBMS-Information
+     Type: Grouped
+   - Code: 881
+     VendorId: 10415
+     Name: Quota-Consumption-Time
+     Type: Unsigned32
+   - Code: 882
+     VendorId: 10415
+     Name: Media-Initiator-Flag
+     Type: Enumerated
+   - Code: 883
+     VendorId: 10415
+     Name: PoC-Server-Role
+     Type: Enumerated
+   - Code: 884
+     VendorId: 10415
+     Name: PoC-Session-Type
+     Type: Enumerated
+   - Code: 885
+     VendorId: 10415
+     Name: Number-Of-Participants
+     Type: Unsigned32
+   - Code: 886
+     VendorId: 10415
+     Name: Originator-Address
+     Type: Grouped
+   - Code: 887
+     VendorId: 10415
+     Name: Participants-Involved
+     Type: UTF8String
+   - Code: 888
+     VendorId: 10415
+     Name: Expires
+     Type: Unsigned32
+   - Code: 889
+     VendorId: 10415
+     Name: Message-Body
+     Type: Grouped
+   - Code: 890
+     VendorId: 10415
+     Name: WAG-Address
+     Type: Address
+   - Code: 891
+     VendorId: 10415
+     Name: WAG-PLMN-Id
+     Type: OctetString
+   - Code: 892
+     VendorId: 10415
+     Name: WLAN-Radio-Container
+     Type: Grouped
+   - Code: 893
+     VendorId: 10415
+     Name: WLAN-Technology
+     Type: Unsigned32
+   - Code: 894
+     VendorId: 10415
+     Name: WLAN-UE-Local-IPAddress
+     Type: Address
+   - Code: 895
+     VendorId: 10415
+     Name: PDG-Address
+     Type: Address
+   - Code: 896
+     VendorId: 10415
+     Name: PDG-Charging-Id
+     Type: Unsigned32
+   - Code: 897
+     VendorId: 10415
+     Name: Address-Data
+     Type: UTF8String
+   - Code: 898
+     VendorId: 10415
+     Name: Address-Domain
+     Type: Grouped
+   - Code: 899
+     VendorId: 10415
+     Name: Address-Type
+     Type: Enumerated
+   - Code: 900
+     VendorId: 10415
+     Name: TMGI
+     Type: OctetString
+   - Code: 901
+     VendorId: 10415
+     Name: Required-MBMS-Bearer-Capabilities
+     Type: UTF8String
+   - Code: 902
+     VendorId: 10415
+     Name: MBMS-StartStop-Indication
+     Type: Enumerated
+   - Code: 903
+     VendorId: 10415
+     Name: MBMS-Service-Area
+     Type: OctetString
+   - Code: 904
+     VendorId: 10415
+     Name: MBMS-Session-Duration
+     Type: OctetString
+   - Code: 905
+     VendorId: 10415
+     Name: Alternative-APN
+     Type: UTF8String
+   - Code: 906
+     VendorId: 10415
+     Name: MBMS-Service-Type
+     Type: Enumerated
+   - Code: 907
+     VendorId: 10415
+     Name: MBMS-2G-3G-Indicator
+     Type: Enumerated
+   - Code: 908
+     VendorId: 10415
+     Name: MBMS-Session-Identity
+     Type: OctetString
+   - Code: 909
+     VendorId: 10415
+     Name: RAI
+     Type: UTF8String
+   - Code: 910
+     VendorId: 10415
+     Name: Additional-MBMS-Trace-Info
+     Type: OctetString
+   - Code: 911
+     VendorId: 10415
+     Name: MBMS-Time-To-Data-Transfer
+     Type: OctetString
+   - Code: 912
+     VendorId: 10415
+     Name: MBMS-Session-Repetition-Number
+     Type: OctetString
+   - Code: 913
+     VendorId: 10415
+     Name: MBMS-Required-QoS
+     Type: UTF8String
+   - Code: 914
+     VendorId: 10415
+     Name: MBMS-Counting-Information
+     Type: Enumerated
+   - Code: 915
+     VendorId: 10415
+     Name: MBMS-User-Data-Mode-Indication
+     Type: Enumerated
+   - Code: 916
+     VendorId: 10415
+     Name: MBMS-GGSN-Address
+     Type: OctetString
+   - Code: 917
+     VendorId: 10415
+     Name: MBMS-GGSN-IPv6-Address
+     Type: OctetString
+   - Code: 918
+     VendorId: 10415
+     Name: MBMS-BMSC-SSM-IP-Address
+     Type: OctetString
+   - Code: 919
+     VendorId: 10415
+     Name: MBMS-BMSC-SSM-IPv6-Address
+     Type: OctetString
+   - Code: 920
+     VendorId: 10415
+     Name: MBMS-Flow-Identifier
+     Type: OctetString
+   - Code: 921
+     VendorId: 10415
+     Name: CN-IP-Multicast-Distribution
+     Type: Enumerated
+   - Code: 922
+     VendorId: 10415
+     Name: MBMS-HC-Indicator
+     Type: Enumerated
+   - Code: 923
+     VendorId: 10415
+     Name: MBMS-Access-Indicator
+     Type: Enumerated
+   - Code: 924
+     VendorId: 10415
+     Name: MBMS-GW-SSM-IP-Address
+     Type: OctetString
+   - Code: 925
+     VendorId: 10415
+     Name: MBMS-GW-SSM-IPv6-Address
+     Type: OctetString
+   - Code: 926
+     VendorId: 10415
+     Name: MBMS-BMSC-SSM-UDP-Port
+     Type: OctetString
+   - Code: 927
+     VendorId: 10415
+     Name: MBMS-GW-UDP-Port
+     Type: OctetString
+   - Code: 928
+     VendorId: 10415
+     Name: MBMS-GW-UDP-Port-Indicator
+     Type: Enumerated
+   - Code: 929
+     VendorId: 10415
+     Name: MBMS-Data-Transfer-Start
+     Type: Unsigned64
+   - Code: 930
+     VendorId: 10415
+     Name: MBMS-Data-Transfer-Stop
+     Type: Unsigned64
+   - Code: 1000
+     VendorId: 10415
+     Name: Bearer-Usage
+     Type: Enumerated
+   - Code: 1001
+     VendorId: 10415
+     Name: Charging-Rule-Install
+     Type: Grouped
+   - Code: 1002
+     VendorId: 10415
+     Name: Charging-Rule-Remove
+     Type: Grouped
+   - Code: 1003
+     VendorId: 10415
+     Name: Charging-Rule-Definition
+     Type: Grouped
+   - Code: 1004
+     VendorId: 10415
+     Name: Charging-Rule-Base-Name
+     Type: UTF8String
+   - Code: 1005
+     VendorId: 10415
+     Name: Charging-Rule-Name
+     Type: OctetString
+   - Code: 1006
+     VendorId: 10415
+     Name: Event-Trigger
+     Type: Enumerated
+   - Code: 1007
+     VendorId: 10415
+     Name: Metering-Method
+     Type: Enumerated
+   - Code: 1008
+     VendorId: 10415
+     Name: Offline
+     Type: Enumerated
+   - Code: 1009
+     VendorId: 10415
+     Name: Online
+     Type: Enumerated
+   - Code: 1010
+     VendorId: 10415
+     Name: Precedence
+     Type: Unsigned32
+   - Code: 1011
+     VendorId: 10415
+     Name: Reporting-Level
+     Type: Enumerated
+   - Code: 1012
+     VendorId: 10415
+     Name: TFT-Filter
+     Type: IPFilterRule
+   - Code: 1013
+     VendorId: 10415
+     Name: TFT-Packet-Filter-Information
+     Type: Grouped
+   - Code: 1014
+     VendorId: 10415
+     Name: ToS-Traffic-Class
+     Type: OctetString
+   - Code: 1016
+     VendorId: 10415
+     Name: QoS-Information
+     Type: Grouped
+   - Code: 1018
+     VendorId: 10415
+     Name: Charging-Rule-Report
+     Type: Grouped
+   - Code: 1019
+     VendorId: 10415
+     Name: PCC-Rule-Status
+     Type: Enumerated
+   - Code: 1020
+     VendorId: 10415
+     Name: Bearer-Identifier
+     Type: OctetString
+   - Code: 1021
+     VendorId: 10415
+     Name: Bearer-Operation
+     Type: Enumerated
+   - Code: 1022
+     VendorId: 10415
+     Name: Access-Network-Charging-Identifier-Gx
+     Type: Grouped
+   - Code: 1023
+     VendorId: 10415
+     Name: Bearer-Control-Mode
+     Type: Enumerated
+   - Code: 1024
+     VendorId: 10415
+     Name: Network-Request-Support
+     Type: Enumerated
+   - Code: 1025
+     VendorId: 10415
+     Name: Guaranteed-Bitrate-DL
+     Type: Unsigned32
+   - Code: 1026
+     VendorId: 10415
+     Name: Guaranteed-Bitrate-UL
+     Type: Unsigned32
+   - Code: 1027
+     VendorId: 10415
+     Name: IP-CAN-Type
+     Type: Enumerated
+   - Code: 1028
+     VendorId: 10415
+     Name: QoS-Class-Identifier
+     Type: Enumerated
+   - Code: 1029
+     VendorId: 10415
+     Name: QoS-Negotiation
+     Type: Enumerated
+   - Code: 1030
+     VendorId: 10415
+     Name: QoS-Upgrade
+     Type: Enumerated
+   - Code: 1031
+     VendorId: 10415
+     Name: Rule-Failure-Code
+     Type: Enumerated
+   - Code: 1032
+     VendorId: 10415
+     Name: RAT-Type
+     Type: Enumerated
+   - Code: 1033
+     VendorId: 10415
+     Name: Event-Report-Indication
+     Type: Grouped
+   - Code: 1034
+     VendorId: 10415
+     Name: Allocation-Retention-Priority
+     Type: Grouped
+   - Code: 1035
+     VendorId: 10415
+     Name: CoA-IP-Address
+     Type: Address
+   - Code: 1036
+     VendorId: 10415
+     Name: Tunnel-Header-Filter
+     Type: IPFilterRule
+   - Code: 1037
+     VendorId: 10415
+     Name: Tunnel-Header-Length
+     Type: Unsigned32
+   - Code: 1038
+     VendorId: 10415
+     Name: Tunnel-Information
+     Type: Grouped
+   - Code: 1039
+     VendorId: 10415
+     Name: CoA-Information
+     Type: Grouped
+   - Code: 1040
+     VendorId: 10415
+     Name: APN-Aggregate-Max-Bitrate-DL
+     Type: Unsigned32
+   - Code: 1041
+     VendorId: 10415
+     Name: APN-Aggregate-Max-Bitrate-UL
+     Type: Unsigned32
+   - Code: 1042
+     VendorId: 10415
+     Name: Revalidation-Time
+     Type: Time
+   - Code: 1043
+     VendorId: 10415
+     Name: Rule-Activation-Time
+     Type: Time
+   - Code: 1044
+     VendorId: 10415
+     Name: Rule-Deactivation-Time
+     Type: Time
+   - Code: 1045
+     VendorId: 10415
+     Name: Session-Release-Cause
+     Type: Enumerated
+   - Code: 1046
+     VendorId: 10415
+     Name: Priority-Level
+     Type: Unsigned32
+   - Code: 1047
+     VendorId: 10415
+     Name: Pre-emption-Capability
+     Type: Enumerated
+   - Code: 1048
+     VendorId: 10415
+     Name: Pre-emption-Vulnerability
+     Type: Enumerated
+   - Code: 1049
+     VendorId: 10415
+     Name: Default-EPS-Bearer-QoS
+     Type: Grouped
+   - Code: 1050
+     VendorId: 10415
+     Name: AN-GW-Address
+     Type: Address
+   - Code: 1051
+     VendorId: 10415
+     Name: QoS-Rule-Install
+     Type: Grouped
+   - Code: 1052
+     VendorId: 10415
+     Name: QoS-Rule-Remove
+     Type: Grouped
+   - Code: 1053
+     VendorId: 10415
+     Name: QoS-Rule-Definition
+     Type: Grouped
+   - Code: 1054
+     VendorId: 10415
+     Name: QoS-Rule-Name
+     Type: OctetString
+   - Code: 1055
+     VendorId: 10415
+     Name: QoS-Rule-Report
+     Type: Grouped
+   - Code: 1056
+     VendorId: 10415
+     Name: Security-Parameter-Index
+     Type: OctetString
+   - Code: 1057
+     VendorId: 10415
+     Name: Flow-Label
+     Type: OctetString
+   - Code: 1058
+     VendorId: 10415
+     Name: Flow-Information
+     Type: Grouped
+   - Code: 1059
+     VendorId: 10415
+     Name: Packet-Filter-Content
+     Type: IPFilterRule
+   - Code: 1060
+     VendorId: 10415
+     Name: Packet-Filter-Identifier
+     Type: OctetString
+   - Code: 1061
+     VendorId: 10415
+     Name: Packet-Filter-Information
+     Type: Grouped
+   - Code: 1062
+     VendorId: 10415
+     Name: Packet-Filter-Operation
+     Type: Enumerated
+   - Code: 1063
+     VendorId: 10415
+     Name: Resource-Allocation-Notification
+     Type: Enumerated
+   - Code: 1064
+     VendorId: 10415
+     Name: Session-Linking-Indicator
+     Type: Enumerated
+   - Code: 1065
+     VendorId: 10415
+     Name: PDN-Connection-ID
+     Type: OctetString
+   - Code: 1066
+     VendorId: 10415
+     Name: Monitoring-Key
+     Type: OctetString
+   - Code: 1067
+     VendorId: 10415
+     Name: Usage-Monitoring-Information
+     Type: Grouped
+   - Code: 1068
+     VendorId: 10415
+     Name: Usage-Monitoring-Level
+     Type: Enumerated
+   - Code: 1069
+     VendorId: 10415
+     Name: Usage-Monitoring-Report
+     Type: Enumerated
+   - Code: 1070
+     VendorId: 10415
+     Name: Usage-Monitoring-Support
+     Type: Enumerated
+   - Code: 1071
+     VendorId: 10415
+     Name: CSG-Information-Reporting
+     Type: Enumerated
+   - Code: 1072
+     VendorId: 10415
+     Name: Packet-Filter-Usage
+     Type: Enumerated
+   - Code: 1073
+     VendorId: 10415
+     Name: Charging-Correlation-Indicator
+     Type: Enumerated
+   - Code: 1074
+     VendorId: 10415
+     Name: QoS-Rule-Base-Name
+     Type: UTF8String
+   - Code: 1075
+     VendorId: 10415
+     Name: Routing-Rule-Remove
+     Type: Grouped
+   - Code: 1076
+     VendorId: 10415
+     Name: Routing-Rule-Definition
+     Type: Grouped
+   - Code: 1077
+     VendorId: 10415
+     Name: Routing-Rule-Identifier
+     Type: OctetString
+   - Code: 1078
+     VendorId: 10415
+     Name: Routing-Filter
+     Type: Grouped
+   - Code: 1079
+     VendorId: 10415
+     Name: Routing-IP-Address
+     Type: Address
+   - Code: 1080
+     VendorId: 10415
+     Name: Flow-Direction
+     Type: Enumerated
+   - Code: 1081
+     VendorId: 10415
+     Name: Routing-Rule-Install
+     Type: Grouped
+   - Code: 1082
+     VendorId: 10415
+     Name: Credit-Management-Status
+     Type: Unsigned32
+   - Code: 1085
+     VendorId: 10415
+     Name: Redirect-Information
+     Type: Grouped
+   - Code: 1086
+     VendorId: 10415
+     Name: Redirect-Support
+     Type: Enumerated
+   - Code: 1087
+     VendorId: 10415
+     Name: TDF-Information
+     Type: Grouped
+   - Code: 1088
+     VendorId: 10415
+     Name: TDF-Application-Identifier
+     Type: OctetString
+   - Code: 1089
+     VendorId: 10415
+     Name: TDF-Destination-Host
+     Type: DiameterIdentity
+   - Code: 1090
+     VendorId: 10415
+     Name: TDF-Destination-Realm
+     Type: DiameterIdentity
+   - Code: 1091
+     VendorId: 10415
+     Name: TDF-IP-Address
+     Type: Address
+   - Code: 1092
+     VendorId: 10415
+     Name: ADC-Rule-Install
+     Type: Grouped
+   - Code: 1093
+     VendorId: 10415
+     Name: ADC-Rule-Remove
+     Type: Grouped
+   - Code: 1094
+     VendorId: 10415
+     Name: ADC-Rule-Definition
+     Type: Grouped
+   - Code: 1095
+     VendorId: 10415
+     Name: ADC-Rule-Base-Name
+     Type: UTF8String
+   - Code: 1096
+     VendorId: 10415
+     Name: ADC-Rule-Name
+     Type: OctetString
+   - Code: 1097
+     VendorId: 10415
+     Name: ADC-Rule-Report
+     Type: Grouped
+   - Code: 1098
+     VendorId: 10415
+     Name: Application-Detection-Information
+     Type: Grouped
+   - Code: 1099
+     VendorId: 10415
+     Name: PS-to-CS-Session-Continuity
+     Type: Enumerated
+   - Code: 1100
+     VendorId: 10415
+     Name: Served-User-Identity
+     Type: Grouped
+   - Code: 1101
+     VendorId: 10415
+     Name: VASP-ID
+     Type: UTF8String
+   - Code: 1102
+     VendorId: 10415
+     Name: VAS-ID
+     Type: UTF8String
+   - Code: 1103
+     VendorId: 10415
+     Name: Trigger-Event
+     Type: Enumerated
+   - Code: 1104
+     VendorId: 10415
+     Name: Sender-Address
+     Type: UTF8String
+   - Code: 1105
+     VendorId: 10415
+     Name: Initial-Recipient-Address
+     Type: Grouped
+   - Code: 1106
+     VendorId: 10415
+     Name: Result-Recipient-Address
+     Type: Grouped
+   - Code: 1107
+     VendorId: 10415
+     Name: 3GPP-Sequence-Number
+     Type: Unsigned32
+   - Code: 1108
+     VendorId: 10415
+     Name: Recipient-Address
+     Type: UTF8String
+   - Code: 1109
+     VendorId: 10415
+     Name: Routeing-Address
+     Type: UTF8String
+   - Code: 1110
+     VendorId: 10415
+     Name: Originating-Interface
+     Type: Enumerated
+   - Code: 1111
+     VendorId: 10415
+     Name: Delivery-Report
+     Type: Enumerated
+   - Code: 1112
+     VendorId: 10415
+     Name: Read-Reply
+     Type: Enumerated
+   - Code: 1113
+     VendorId: 10415
+     Name: Sender-Visibility
+     Type: Enumerated
+   - Code: 1114
+     VendorId: 10415
+     Name: Service-Key
+     Type: UTF8String
+   - Code: 1115
+     VendorId: 10415
+     Name: Billing-Information
+     Type: UTF8String
+   - Code: 1116
+     VendorId: 10415
+     Name: Status
+     Type: Grouped
+   - Code: 1117
+     VendorId: 10415
+     Name: Status-Code
+     Type: UTF8String
+   - Code: 1118
+     VendorId: 10415
+     Name: Status-Text
+     Type: UTF8String
+   - Code: 1101
+     VendorId: 10415
+     Name: VASP-ID
+     Type: UTF8String
+   - Code: 1102
+     VendorId: 10415
+     Name: VAS-ID
+     Type: UTF8String
+   - Code: 1200
+     VendorId: 10415
+     Name: Domain-Name
+     Type: UTF8String
+   - Code: 1201
+     VendorId: 10415
+     Name: Recipient-Address-Grouped
+     Type: Grouped
+   - Code: 1202
+     VendorId: 10415
+     Name: Submission-Time
+     Type: Time
+   - Code: 1203
+     VendorId: 10415
+     Name: MM-Content-Type
+     Type: Grouped
+   - Code: 1204
+     VendorId: 10415
+     Name: Type-Number
+     Type: Enumerated
+   - Code: 1205
+     VendorId: 10415
+     Name: Additional-Type-Information
+     Type: UTF8String
+   - Code: 1206
+     VendorId: 10415
+     Name: Content-Size
+     Type: Unsigned32
+   - Code: 1207
+     VendorId: 10415
+     Name: Additional-Content-Information
+     Type: Grouped
+   - Code: 1208
+     VendorId: 10415
+     Name: Addressee-Type
+     Type: Enumerated
+   - Code: 1209
+     VendorId: 10415
+     Name: Priority
+     Type: Enumerated
+   - Code: 1210
+     VendorId: 10415
+     Name: Message-ID
+     Type: UTF8String
+   - Code: 1211
+     VendorId: 10415
+     Name: Message-Type
+     Type: Enumerated
+   - Code: 1212
+     VendorId: 10415
+     Name: Message-Size
+     Type: Unsigned32
+   - Code: 1213
+     VendorId: 10415
+     Name: Message-Class
+     Type: Grouped
+   - Code: 1214
+     VendorId: 10415
+     Name: Class-Identifier
+     Type: Enumerated
+   - Code: 1215
+     VendorId: 10415
+     Name: Token-Text
+     Type: UTF8String
+   - Code: 1216
+     VendorId: 10415
+     Name: Delivery-Report-Requested
+     Type: Enumerated
+   - Code: 1217
+     VendorId: 10415
+     Name: Adaptations
+     Type: Enumerated
+   - Code: 1218
+     VendorId: 10415
+     Name: Applic-ID
+     Type: UTF8String
+   - Code: 1219
+     VendorId: 10415
+     Name: Aux-Applic-Info
+     Type: UTF8String
+   - Code: 1220
+     VendorId: 10415
+     Name: Content-Class
+     Type: Enumerated
+   - Code: 1221
+     VendorId: 10415
+     Name: DRM-Content
+     Type: Enumerated
+   - Code: 1222
+     VendorId: 10415
+     Name: Read-Reply-Report-Requested
+     Type: Enumerated
+   - Code: 1223
+     VendorId: 10415
+     Name: Reply-Applic-ID
+     Type: UTF8String
+   - Code: 1224
+     VendorId: 10415
+     Name: File-Repair-Supported
+     Type: Enumerated
+   - Code: 1225
+     VendorId: 10415
+     Name: MBMS-User-Service-Type
+     Type: Enumerated
+   - Code: 1226
+     VendorId: 10415
+     Name: Unit-Quota-Threshold
+     Type: Unsigned32
+   - Code: 1227
+     VendorId: 10415
+     Name: PDP-Address
+     Type: Address
+   - Code: 1228
+     VendorId: 10415
+     Name: SGSN-Address
+     Type: Address
+   - Code: 1229
+     VendorId: 10415
+     Name: PoC-Session-Id
+     Type: UTF8String
+   - Code: 1230
+     VendorId: 10415
+     Name: Deferred-Location-Event-Type
+     Type: UTF8String
+   - Code: 1231
+     VendorId: 10415
+     Name: LCS-APN
+     Type: UTF8String
+   - Code: 1232
+     VendorId: 10415
+     Name: LCS-Client-ID
+     Type: Grouped
+   - Code: 1233
+     VendorId: 10415
+     Name: LCS-Client-Dialed-By-MS
+     Type: UTF8String
+   - Code: 1234
+     VendorId: 10415
+     Name: LCS-Client-External-ID
+     Type: UTF8String
+   - Code: 1235
+     VendorId: 10415
+     Name: LCS-Client-Name
+     Type: Grouped
+   - Code: 1236
+     VendorId: 10415
+     Name: LCS-Data-Coding-Scheme
+     Type: UTF8String
+   - Code: 1237
+     VendorId: 10415
+     Name: LCS-Format-Indicator
+     Type: Enumerated
+   - Code: 1238
+     VendorId: 10415
+     Name: LCS-Name-String
+     Type: UTF8String
+   - Code: 1239
+     VendorId: 10415
+     Name: LCS-Requestor-ID
+     Type: Grouped
+   - Code: 1240
+     VendorId: 10415
+     Name: LCS-Requestor-ID-String
+     Type: UTF8String
+   - Code: 1241
+     VendorId: 10415
+     Name: LCS-Client-Type
+     Type: Enumerated
+   - Code: 1242
+     VendorId: 10415
+     Name: Location-Estimate
+     Type: OctetString
+   - Code: 1243
+     VendorId: 10415
+     Name: Location-Estimate-Type
+     Type: Enumerated
+   - Code: 1244
+     VendorId: 10415
+     Name: Location-Type-Grouped
+     Type: Grouped
+   - Code: 2500
+     VendorId: 10415
+     Name: Location-Type-Enumerated
+     Type: Enumerated
+   - Code: 1245
+     VendorId: 10415
+     Name: Positioning-Data
+     Type: UTF8String
+   - Code: 1246
+     VendorId: 10415
+     Name: WLAN-Session-Id
+     Type: UTF8String
+   - Code: 1247
+     VendorId: 10415
+     Name: PDP-Context-Type
+     Type: Enumerated
+   - Code: 1248
+     VendorId: 10415
+     Name: MMBox-Storage-Requested
+     Type: Enumerated
+   - Code: 1249
+     VendorId: 10415
+     Name: Service-Specific-Info
+     Type: Grouped
+   - Code: 1250
+     VendorId: 10415
+     Name: Called-Asserted-Identity
+     Type: UTF8String
+   - Code: 1251
+     VendorId: 10415
+     Name: Requested-Party-Address
+     Type: UTF8String
+   - Code: 1252
+     VendorId: 10415
+     Name: PoC-User-Role
+     Type: Grouped
+   - Code: 1253
+     VendorId: 10415
+     Name: PoC-User-Role-IDs
+     Type: UTF8String
+   - Code: 1254
+     VendorId: 10415
+     Name: PoC-User-Role-Info-Units
+     Type: Enumerated
+   - Code: 1255
+     VendorId: 10415
+     Name: Talk-Burst-Exchange
+     Type: Grouped
+   - Code: 1256
+     VendorId: 10415
+     Name: Service-Generic-Information
+     Type: Grouped
+   - Code: 1257
+     VendorId: 10415
+     Name: Service-Specific-Type
+     Type: Unsigned32
+   - Code: 1258
+     VendorId: 10415
+     Name: Event-Charging-TimeStamp
+     Type: Time
+   - Code: 1259
+     VendorId: 10415
+     Name: Participant-Access-Priority
+     Type: Enumerated
+   - Code: 1260
+     VendorId: 10415
+     Name: Participant-Group
+     Type: Grouped
+   - Code: 1261
+     VendorId: 10415
+     Name: PoC-Change-Condition
+     Type: Enumerated
+   - Code: 1262
+     VendorId: 10415
+     Name: PoC-Change-Time
+     Type: Time
+   - Code: 1263
+     VendorId: 10415
+     Name: Access-Network-Information
+     Type: OctetString
+   - Code: 1264
+     VendorId: 10415
+     Name: Trigger
+     Type: Grouped
+   - Code: 1265
+     VendorId: 10415
+     Name: Base-Time-Interval
+     Type: Unsigned32
+   - Code: 1266
+     VendorId: 10415
+     Name: Envelope
+     Type: Grouped
+   - Code: 1267
+     VendorId: 10415
+     Name: Envelope-End-Time
+     Type: Time
+   - Code: 1268
+     VendorId: 10415
+     Name: Envelope-Reporting
+     Type: Enumerated
+   - Code: 1269
+     VendorId: 10415
+     Name: Envelope-Start-Time
+     Type: Time
+   - Code: 1270
+     VendorId: 10415
+     Name: Time-Quota-Mechanism
+     Type: Grouped
+   - Code: 1271
+     VendorId: 10415
+     Name: Time-Quota-Type
+     Type: Enumerated
+   - Code: 1272
+     VendorId: 10415
+     Name: Early-Media-Description
+     Type: Grouped
+   - Code: 1273
+     VendorId: 10415
+     Name: SDP-TimeStamps
+     Type: Grouped
+   - Code: 1274
+     VendorId: 10415
+     Name: SDP-Offer-Timestamp
+     Type: Time
+   - Code: 1275
+     VendorId: 10415
+     Name: SDP-Answer-Timestamp
+     Type: Time
+   - Code: 1276
+     VendorId: 10415
+     Name: AF-Correlation-Information
+     Type: Grouped
+   - Code: 1277
+     VendorId: 10415
+     Name: PoC-Session-Initiation-Type
+     Type: Enumerated
+   - Code: 1278
+     VendorId: 10415
+     Name: Offline-Charging
+     Type: Grouped
+   - Code: 1279
+     VendorId: 10415
+     Name: User-Participating-Type
+     Type: Enumerated
+   - Code: 1280
+     VendorId: 10415
+     Name: Alternate-Charged-Party-Address
+     Type: UTF8String
+   - Code: 1281
+     VendorId: 10415
+     Name: IMS-Communication-Service-Identifier
+     Type: UTF8String
+   - Code: 1282
+     VendorId: 10415
+     Name: Number-Of-Received-Talk-Bursts
+     Type: Unsigned32
+   - Code: 1283
+     VendorId: 10415
+     Name: Number-Of-Talk-Bursts
+     Type: Unsigned32
+   - Code: 1284
+     VendorId: 10415
+     Name: Received-Talk-Burst-Time
+     Type: Unsigned32
+   - Code: 1285
+     VendorId: 10415
+     Name: Received-Talk-Burst-Volume
+     Type: Unsigned32
+   - Code: 1286
+     VendorId: 10415
+     Name: Talk-Burst-Time
+     Type: Unsigned32
+   - Code: 1287
+     VendorId: 10415
+     Name: Talk-Burst-Volume
+     Type: Unsigned32
+   - Code: 1288
+     VendorId: 10415
+     Name: Media-Initiator-Party
+     Type: UTF8String
+   - Code: 1400
+     VendorId: 10415
+     Name: Subscription-Data
+     Type: Grouped
+   - Code: 1401
+     VendorId: 10415
+     Name: Terminal-Information
+     Type: Grouped
+   - Code: 1402
+     VendorId: 10415
+     Name: IMEI
+     Type: UTF8String
+   - Code: 1403
+     VendorId: 10415
+     Name: Software-Version
+     Type: UTF8String
+   - Code: 1404
+     VendorId: 10415
+     Name: QoS-Subscribed
+     Type: OctetString
+   - Code: 1405
+     VendorId: 10415
+     Name: ULR-Flags
+     Type: Unsigned32
+   - Code: 1406
+     VendorId: 10415
+     Name: ULA-Flags
+     Type: Unsigned32
+   - Code: 1407
+     VendorId: 10415
+     Name: Visited-PLMN-Id
+     Type: OctetString
+   - Code: 1408
+     VendorId: 10415
+     Name: Requested-EUTRAN-Authentication-Info
+     Type: Grouped
+   - Code: 1409
+     VendorId: 10415
+     Name: Requested-UTRAN-GERAN-Authentication-Info
+     Type: Grouped
+   - Code: 1410
+     VendorId: 10415
+     Name: Number-Of-Requested-Vectors
+     Type: Unsigned32
+   - Code: 1412
+     VendorId: 10415
+     Name: Immediate-Response-Preferred
+     Type: Unsigned32
+   - Code: 1413
+     VendorId: 10415
+     Name: Authentication-Info
+     Type: Grouped
+   - Code: 1414
+     VendorId: 10415
+     Name: E-UTRAN-Vector
+     Type: Grouped
+   - Code: 1415
+     VendorId: 10415
+     Name: UTRAN-Vector
+     Type: Grouped
+   - Code: 1416
+     VendorId: 10415
+     Name: GERAN-Vector
+     Type: Grouped
+   - Code: 1417
+     VendorId: 10415
+     Name: Network-Access-Mode
+     Type: Enumerated
+   - Code: 1418
+     VendorId: 10415
+     Name: HPLMN-ODB
+     Type: Unsigned32
+   - Code: 1419
+     VendorId: 10415
+     Name: Item-Number
+     Type: Unsigned32
+   - Code: 1420
+     VendorId: 10415
+     Name: Cancellation-Type
+     Type: Enumerated
+   - Code: 1421
+     VendorId: 10415
+     Name: DSR-Flags
+     Type: Unsigned32
+   - Code: 1422
+     VendorId: 10415
+     Name: DSA-Flags
+     Type: Unsigned32
+   - Code: 1423
+     VendorId: 10415
+     Name: Context-Identifier
+     Type: Unsigned32
+   - Code: 1424
+     VendorId: 10415
+     Name: Subscriber-Status
+     Type: Enumerated
+   - Code: 1425
+     VendorId: 10415
+     Name: Operator-Determined-Barring
+     Type: Unsigned32
+   - Code: 1426
+     VendorId: 10415
+     Name: Access-Restriction-Data
+     Type: Unsigned32
+   - Code: 1427
+     VendorId: 10415
+     Name: APN-OI-Replacement
+     Type: UTF8String
+   - Code: 1428
+     VendorId: 10415
+     Name: All-APN-Configurations-Included-Indicator
+     Type: Enumerated
+   - Code: 1429
+     VendorId: 10415
+     Name: APN-Configuration-Profile
+     Type: Grouped
+   - Code: 1430
+     VendorId: 10415
+     Name: APN-Configuration
+     Type: Grouped
+   - Code: 1431
+     VendorId: 10415
+     Name: EPS-Subscribed-QoS-Profile
+     Type: Grouped
+   - Code: 1432
+     VendorId: 10415
+     Name: VPLMN-Dynamic-Address-Allowed
+     Type: Enumerated
+   - Code: 1433
+     VendorId: 10415
+     Name: STN-SR
+     Type: OctetString
+   - Code: 1434
+     VendorId: 10415
+     Name: Alert-Reason
+     Type: Enumerated
+   - Code: 1435
+     VendorId: 10415
+     Name: AMBR
+     Type: Grouped
+   - Code: 1436
+     VendorId: 10415
+     Name: CSG-Subscription-Data
+     Type: Grouped
+   - Code: 1437
+     VendorId: 10415
+     Name: CSG-Id
+     Type: Unsigned32
+   - Code: 1438
+     VendorId: 10415
+     Name: PDN-GW-Allocation-Type
+     Type: Enumerated
+   - Code: 1439
+     VendorId: 10415
+     Name: Expiration-Date
+     Type: Time
+   - Code: 1440
+     VendorId: 10415
+     Name: RAT-Frequency-Selection-Priority-ID
+     Type: Unsigned32
+   - Code: 1441
+     VendorId: 10415
+     Name: IDA-Flags
+     Type: Unsigned32
+   - Code: 1442
+     VendorId: 10415
+     Name: PUA-Flags
+     Type: Unsigned32
+   - Code: 1443
+     VendorId: 10415
+     Name: NOR-Flags
+     Type: Unsigned32
+   - Code: 1444
+     VendorId: 10415
+     Name: User-Id
+     Type: UTF8String
+   - Code: 1445
+     VendorId: 10415
+     Name: Equipment-Status
+     Type: Enumerated
+   - Code: 1446
+     VendorId: 10415
+     Name: Regional-Subscription-Zone-Code
+     Type: OctetString
+   - Code: 1447
+     VendorId: 10415
+     Name: RAND
+     Type: OctetString
+   - Code: 1448
+     VendorId: 10415
+     Name: XRES
+     Type: OctetString
+   - Code: 1449
+     VendorId: 10415
+     Name: AUTN
+     Type: OctetString
+   - Code: 1450
+     VendorId: 10415
+     Name: KASME
+     Type: OctetString
+   - Code: 1452
+     VendorId: 10415
+     Name: Trace-Collection-Entity
+     Type: Address
+   - Code: 1453
+     VendorId: 10415
+     Name: Kc
+     Type: OctetString
+   - Code: 1454
+     VendorId: 10415
+     Name: SRES
+     Type: OctetString
+   - Code: 1456
+     VendorId: 10415
+     Name: PDN-Type
+     Type: Enumerated
+   - Code: 1457
+     VendorId: 10415
+     Name: Roaming-Restricted-Due-To-Unsupported-Feature
+     Type: Enumerated
+   - Code: 1458
+     VendorId: 10415
+     Name: Trace-Data
+     Type: Grouped
+   - Code: 1459
+     VendorId: 10415
+     Name: Trace-Reference
+     Type: OctetString
+   - Code: 1463
+     VendorId: 10415
+     Name: Trace-NE-Type-List
+     Type: OctetString
+   - Code: 1464
+     VendorId: 10415
+     Name: Trace-Interface-List
+     Type: OctetString
+   - Code: 1465
+     VendorId: 10415
+     Name: Trace-Event-List
+     Type: OctetString
+   - Code: 1466
+     VendorId: 10415
+     Name: OMC-Id
+     Type: OctetString
+   - Code: 1467
+     VendorId: 10415
+     Name: GPRS-Subscription-Data
+     Type: Grouped
+   - Code: 1468
+     VendorId: 10415
+     Name: Complete-Data-List-Included-Indicator
+     Type: Enumerated
+   - Code: 1469
+     VendorId: 10415
+     Name: PDP-Context
+     Type: Grouped
+   - Code: 1470
+     VendorId: 10415
+     Name: PDP-Type
+     Type: OctetString
+   - Code: 1471
+     VendorId: 10415
+     Name: 3GPP2-MEID
+     Type: OctetString
+   - Code: 1472
+     VendorId: 10415
+     Name: Specific-APN-Info
+     Type: Grouped
+   - Code: 1473
+     VendorId: 10415
+     Name: LCS-Info
+     Type: Grouped
+   - Code: 1474
+     VendorId: 10415
+     Name: GMLC-Number
+     Type: OctetString
+   - Code: 1475
+     VendorId: 10415
+     Name: LCS-PrivacyException
+     Type: Grouped
+   - Code: 1476
+     VendorId: 10415
+     Name: SS-Code
+     Type: OctetString
+   - Code: 1477
+     VendorId: 10415
+     Name: SS-Status
+     Type: OctetString
+   - Code: 1478
+     VendorId: 10415
+     Name: Notification-To-UE-User
+     Type: Enumerated
+   - Code: 1479
+     VendorId: 10415
+     Name: External-Client
+     Type: Grouped
+   - Code: 1480
+     VendorId: 10415
+     Name: Client-Identity
+     Type: OctetString
+   - Code: 1481
+     VendorId: 10415
+     Name: GMLC-Restriction
+     Type: Enumerated
+   - Code: 1482
+     VendorId: 10415
+     Name: PLMN-Client
+     Type: Enumerated
+   - Code: 1483
+     VendorId: 10415
+     Name: Service-Type-Grouped
+     Type: Grouped
+   - Code: 2031
+     VendorId: 10415
+     Name: Service-Type-Unsigned32
+     Type: Unsigned32
+   - Code: 6
+     VendorId: 10415
+     Name: Service-Type-Enumerated
+     Type: Enumerated
+   - Code: 1484
+     VendorId: 10415
+     Name: ServiceTypeIdentity
+     Type: Unsigned32
+   - Code: 1485
+     VendorId: 10415
+     Name: MO-LR
+     Type: Grouped
+   - Code: 1486
+     VendorId: 10415
+     Name: Teleservice-List
+     Type: Grouped
+   - Code: 1487
+     VendorId: 10415
+     Name: TS-Code
+     Type: OctetString
+   - Code: 1488
+     VendorId: 10415
+     Name: Call-Barring-Infor-List
+     Type: Grouped
+   - Code: 1489
+     VendorId: 10415
+     Name: SGSN-Number
+     Type: OctetString
+   - Code: 1490
+     VendorId: 10415
+     Name: IDR-Flags
+     Type: Unsigned32
+   - Code: 1491
+     VendorId: 10415
+     Name: ICS-Indicator
+     Type: Enumerated
+   - Code: 1492
+     VendorId: 10415
+     Name: IMS-Voice-Over-PS-Sessions-Supported
+     Type: Enumerated
+   - Code: 1493
+     VendorId: 10415
+     Name: Homogeneous-Support-of-IMS-Voice-Over-PS-Sessions
+     Type: Enumerated
+   - Code: 1494
+     VendorId: 10415
+     Name: Last-UE-Activity-Time
+     Type: Time
+   - Code: 1495
+     VendorId: 10415
+     Name: EPS-User-State
+     Type: Grouped
+   - Code: 1496
+     VendorId: 10415
+     Name: EPS-Location-Information
+     Type: Grouped
+   - Code: 1497
+     VendorId: 10415
+     Name: MME-User-State
+     Type: Grouped
+   - Code: 1498
+     VendorId: 10415
+     Name: SGSN-User-State
+     Type: Grouped
+   - Code: 1499
+     VendorId: 10415
+     Name: User-State
+     Type: Enumerated
+   - Code: 1500
+     VendorId: 10415
+     Name: Non-3GPP-User-Data
+     Type: Grouped
+   - Code: 1501
+     VendorId: 10415
+     Name: Non-3GPP-IP-Access
+     Type: Enumerated
+   - Code: 1502
+     VendorId: 10415
+     Name: Non-3GPP-IP-Access-APN
+     Type: Enumerated
+   - Code: 1503
+     VendorId: 10415
+     Name: AN-Trusted
+     Type: Enumerated
+   - Code: 1504
+     VendorId: 10415
+     Name: ANID
+     Type: UTF8String
+   - Code: 1505
+     VendorId: 10415
+     Name: Trace-Info
+     Type: Grouped
+   - Code: 1600
+     VendorId: 10415
+     Name: MME-Location-Information
+     Type: Grouped
+   - Code: 1601
+     VendorId: 10415
+     Name: SGSN-Location-Information
+     Type: Grouped
+   - Code: 1602
+     VendorId: 10415
+     Name: E-UTRAN-Cell-Global-Identity
+     Type: OctetString
+   - Code: 1603
+     VendorId: 10415
+     Name: Tracking-Area-Identity
+     Type: OctetString
+   - Code: 1604
+     VendorId: 10415
+     Name: Cell-Global-Identity
+     Type: OctetString
+   - Code: 1605
+     VendorId: 10415
+     Name: Routing-Area-Identity
+     Type: OctetString
+   - Code: 1606
+     VendorId: 10415
+     Name: Location-Area-Identity
+     Type: OctetString
+   - Code: 1607
+     VendorId: 10415
+     Name: Service-Area-Identity
+     Type: OctetString
+   - Code: 1608
+     VendorId: 10415
+     Name: Geographical-Information
+     Type: OctetString
+   - Code: 1609
+     VendorId: 10415
+     Name: Geodetic-Information
+     Type: OctetString
+   - Code: 1610
+     VendorId: 10415
+     Name: Current-Location-Retrieved
+     Type: Enumerated
+   - Code: 1611
+     VendorId: 10415
+     Name: Age-Of-Location-Information
+     Type: Unsigned32
+   - Code: 1612
+     VendorId: 10415
+     Name: Active-APN
+     Type: Grouped
+   - Code: 1613
+     VendorId: 10415
+     Name: SIPTO-Permission
+     Type: Enumerated
+   - Code: 1614
+     VendorId: 10415
+     Name: Error-Diagnostic
+     Type: Enumerated
+   - Code: 1620
+     VendorId: 10415
+     Name: Ext-PDP-Type
+     Type: OctetString
+   - Code: 1621
+     VendorId: 10415
+     Name: Ext-PDP-Address
+     Type: Address
+   - Code: 1615
+     VendorId: 10415
+     Name: UE-SRVCC-Capability
+     Type: Enumerated
+   - Code: 1616
+     VendorId: 10415
+     Name: MPS-Priority
+     Type: Unsigned32
+   - Code: 1617
+     VendorId: 10415
+     Name: VPLMN-LIPA-Allowed
+     Type: Enumerated
+   - Code: 1618
+     VendorId: 10415
+     Name: LIPA-Permission
+     Type: Enumerated
+   - Code: 1619
+     VendorId: 10415
+     Name: Subscribed-Periodic-RAU-TAU-Timer
+     Type: Unsigned32
+   - Code: 1620
+     VendorId: 10415
+     Name: Ext-PDP-Type
+     Type: OctetString
+   - Code: 1622
+     VendorId: 10415
+     Name: MDT-Configuration
+     Type: Grouped
+   - Code: 1623
+     VendorId: 10415
+     Name: Job-Type
+     Type: Enumerated
+   - Code: 1624
+     VendorId: 10415
+     Name: Area-Scope
+     Type: Grouped
+   - Code: 1625
+     VendorId: 10415
+     Name: List-Of-Measurements
+     Type: Unsigned32
+   - Code: 1626
+     VendorId: 10415
+     Name: Reporting-Trigger
+     Type: Unsigned32
+   - Code: 1627
+     VendorId: 10415
+     Name: Report-Interval
+     Type: Enumerated
+   - Code: 1628
+     VendorId: 10415
+     Name: Report-Amount
+     Type: Enumerated
+   - Code: 1629
+     VendorId: 10415
+     Name: Event-Threshold-RSRP
+     Type: Unsigned32
+   - Code: 1630
+     VendorId: 10415
+     Name: Event-Threshold-RSRQ
+     Type: Unsigned32
+   - Code: 1631
+     VendorId: 10415
+     Name: Logging-Interval
+     Type: Enumerated
+   - Code: 1632
+     VendorId: 10415
+     Name: Logging-Duration
+     Type: Enumerated
+   - Code: 1633
+     VendorId: 10415
+     Name: Relay-Node-Indicator
+     Type: Enumerated
+   - Code: 1634
+     VendorId: 10415
+     Name: MDT-User-Consent
+     Type: Enumerated
+   - Code: 1635
+     VendorId: 10415
+     Name: PUR-Flags
+     Type: Unsigned32
+   - Code: 1636
+     VendorId: 10415
+     Name: Subscribed-VSRVCC
+     Type: Enumerated
+   - Code: 1637
+     VendorId: 10415
+     Name: Equivalent-PLMN-List
+     Type: Grouped
+   - Code: 1638
+     VendorId: 10415
+     Name: CLR-Flags
+     Type: Unsigned32
+   - Code: 1639
+     VendorId: 10415
+     Name: UVR-Flags
+     Type: Unsigned32
+   - Code: 1640
+     VendorId: 10415
+     Name: UVA-Flags
+     Type: Unsigned32
+   - Code: 1641
+     VendorId: 10415
+     Name: VPLMN-CSG-Subscription-Data
+     Type: Grouped
+   - Code: 1642
+     VendorId: 10415
+     Name: Time-Zone
+     Type: UTF8String
+   - Code: 1643
+     VendorId: 10415
+     Name: A-MSISDN
+     Type: OctetString
+   - Code: 1645
+     VendorId: 10415
+     Name: MME-Number-for-MT-SMS
+     Type: OctetString
+   - Code: 1648
+     VendorId: 10415
+     Name: SMS-Register-Request
+     Type: Enumerated
+   - Code: 1649
+     VendorId: 10415
+     Name: Local-Time-Zone
+     Type: Grouped
+   - Code: 1650
+     VendorId: 10415
+     Name: Daylight-Saving-Time
+     Type: Enumerated
+   - Code: 1654
+     VendorId: 10415
+     Name: Subscription-Data-Flags
+     Type: Unsigned32
+   - Code: 1655
+     VendorId: 10415
+     Name: Measurement-Period-UMTS
+     Type: Enumerated
+   - Code: 1656
+     VendorId: 10415
+     Name: Measurement-Period-LTE
+     Type: Enumerated
+   - Code: 1657
+     VendorId: 10415
+     Name: Collection-Period-RRM-LTE
+     Type: Enumerated
+   - Code: 1658
+     VendorId: 10415
+     Name: Collection-Period-RRM-UMTS
+     Type: Enumerated
+   - Code: 1659
+     VendorId: 10415
+     Name: Positioning-Method
+     Type: OctetString
+   - Code: 1660
+     VendorId: 10415
+     Name: Measurement-Quantity
+     Type: OctetString
+   - Code: 1661
+     VendorId: 10415
+     Name: Event-Threshold-Event-1F
+     Type: Integer32
+   - Code: 1662
+     VendorId: 10415
+     Name: Event-Threshold-Event-1I
+     Type: Integer32
+   - Code: 1663
+     VendorId: 10415
+     Name: Restoration-Priority
+     Type: Unsigned32
+   - Code: 1664
+     VendorId: 10415
+     Name: SGs-MME-Identity
+     Type: UTF8String
+   - Code: 1665
+     VendorId: 10415
+     Name: SIPTO-Local-Network-Permission
+     Type: Unsigned32
+   - Code: 2000
+     VendorId: 10415
+     Name: SMS-Information
+     Type: Grouped
+   - Code: 2001
+     VendorId: 10415
+     Name: Data-Coding-Scheme
+     Type: Integer32
+   - Code: 2002
+     VendorId: 10415
+     Name: Destination-Interface
+     Type: Grouped
+   - Code: 2003
+     VendorId: 10415
+     Name: Interface-Id
+     Type: UTF8String
+   - Code: 2004
+     VendorId: 10415
+     Name: Interface-Port
+     Type: UTF8String
+   - Code: 2005
+     VendorId: 10415
+     Name: Interface-Text
+     Type: UTF8String
+   - Code: 2006
+     VendorId: 10415
+     Name: Interface-Type
+     Type: Enumerated
+   - Code: 2007
+     VendorId: 10415
+     Name: SM-Message-Type
+     Type: Enumerated
+   - Code: 2008
+     VendorId: 10415
+     Name: Originator-SCCP-Address
+     Type: Address
+   - Code: 2009
+     VendorId: 10415
+     Name: Originator-Interface
+     Type: Grouped
+   - Code: 2010
+     VendorId: 10415
+     Name: Recipient-SCCP-Address
+     Type: Address
+   - Code: 2011
+     VendorId: 10415
+     Name: Reply-Path-Requested
+     Type: Enumerated
+   - Code: 2012
+     VendorId: 10415
+     Name: SM-Discharge-Time
+     Type: Time
+   - Code: 2013
+     VendorId: 10415
+     Name: SM-Protocol-ID
+     Type: OctetString
+   - Code: 2014
+     VendorId: 10415
+     Name: SM-Status
+     Type: OctetString
+   - Code: 2015
+     VendorId: 10415
+     Name: SM-User-Data-Header
+     Type: OctetString
+   - Code: 2016
+     VendorId: 10415
+     Name: SMS-Node
+     Type: Enumerated
+   - Code: 2017
+     VendorId: 10415
+     Name: SMSC-Address
+     Type: Address
+   - Code: 2018
+     VendorId: 10415
+     Name: Client-Address
+     Type: Address
+   - Code: 2019
+     VendorId: 10415
+     Name: Number-Of-Messages-Sent
+     Type: Unsigned32
+   - Code: 2020
+     VendorId: 10415
+     Name: Low-Balance-Indication
+     Type: Enumerated
+   - Code: 2021
+     VendorId: 10415
+     Name: Remaining-Balance
+     Type: Grouped
+   - Code: 2022
+     VendorId: 10415
+     Name: Refund-Information
+     Type: OctetString
+   - Code: 2023
+     VendorId: 10415
+     Name: Carrier-Select-Routing-Information
+     Type: UTF8String
+   - Code: 2024
+     VendorId: 10415
+     Name: Number-Portability-Routing-Information
+     Type: UTF8String
+   - Code: 2025
+     VendorId: 10415
+     Name: PoC-Event-Type
+     Type: Enumerated
+   - Code: 2026
+     VendorId: 10415
+     Name: Recipient-Info
+     Type: Grouped
+   - Code: 2027
+     VendorId: 10415
+     Name: Originator-Received-Address
+     Type: Grouped
+   - Code: 2028
+     VendorId: 10415
+     Name: Recipient-Received-Address
+     Type: Grouped
+   - Code: 2029
+     VendorId: 10415
+     Name: SM-Service-Type
+     Type: Enumerated
+   - Code: 2030
+     VendorId: 10415
+     Name: MMTel-Information
+     Type: Grouped
+   - Code: 2031
+     VendorId: 10415
+     Name: Service-Type
+     Type: Unsigned32
+   - Code: 2032
+     VendorId: 10415
+     Name: Service-Mode
+     Type: Unsigned32
+   - Code: 2033
+     VendorId: 10415
+     Name: Subscriber-Role
+     Type: Enumerated
+   - Code: 2034
+     VendorId: 10415
+     Name: Number-Of-Diversions
+     Type: Unsigned32
+   - Code: 2035
+     VendorId: 10415
+     Name: Associated-Party-Address
+     Type: UTF8String
+   - Code: 2036
+     VendorId: 10415
+     Name: SDP-Type
+     Type: Enumerated
+   - Code: 2037
+     VendorId: 10415
+     Name: Change-Condition
+     Type: Integer32
+   - Code: 2038
+     VendorId: 10415
+     Name: Change-Time
+     Type: Time
+   - Code: 2039
+     VendorId: 10415
+     Name: Diagnostics
+     Type: Integer32
+   - Code: 2040
+     VendorId: 10415
+     Name: Service-Data-Container
+     Type: Grouped
+   - Code: 2041
+     VendorId: 10415
+     Name: Start-Time
+     Type: Time
+   - Code: 2042
+     VendorId: 10415
+     Name: Stop-Time
+     Type: Time
+   - Code: 2043
+     VendorId: 10415
+     Name: Time-First-Usage
+     Type: Time
+   - Code: 2044
+     VendorId: 10415
+     Name: Time-Last-Usage
+     Type: Time
+   - Code: 2045
+     VendorId: 10415
+     Name: Time-Usage
+     Type: Unsigned32
+   - Code: 2046
+     VendorId: 10415
+     Name: Traffic-Data-Volumes
+     Type: Grouped
+   - Code: 2047
+     VendorId: 10415
+     Name: Serving-Node-Type
+     Type: Enumerated
+   - Code: 2048
+     VendorId: 10415
+     Name: Supplementary-Service
+     Type: Grouped
+   - Code: 2049
+     VendorId: 10415
+     Name: Participant-Action-Type
+     Type: Enumerated
+   - Code: 2050
+     VendorId: 10415
+     Name: PDN-Connection-Id
+     Type: Enumerated
+   - Code: 2051
+     VendorId: 10415
+     Name: Dynamic-Address-Flag
+     Type: Enumerated
+   - Code: 2052
+     VendorId: 10415
+     Name: Accumulated-Cost
+     Type: Grouped
+   - Code: 2053
+     VendorId: 10415
+     Name: AoC-Cost-Information
+     Type: Grouped
+   - Code: 2054
+     VendorId: 10415
+     Name: AoC-Information
+     Type: Grouped
+   - Code: 2055
+     VendorId: 10415
+     Name: AoC-Request-Type
+     Type: Enumerated
+   - Code: 2056
+     VendorId: 10415
+     Name: Current-Tariff
+     Type: Grouped
+   - Code: 2057
+     VendorId: 10415
+     Name: Next-Tariff
+     Type: Grouped
+   - Code: 2058
+     VendorId: 10415
+     Name: Rate-Element
+     Type: Grouped
+   - Code: 2059
+     VendorId: 10415
+     Name: Scale-Factor
+     Type: Grouped
+   - Code: 2060
+     VendorId: 10415
+     Name: Tariff-Information
+     Type: Grouped
+   - Code: 2061
+     VendorId: 10415
+     Name: Unit-Cost
+     Type: Grouped
+   - Code: 2062
+     VendorId: 10415
+     Name: Incremental-Cost
+     Type: Grouped
+   - Code: 2063
+     VendorId: 10415
+     Name: Local-Sequence-Number
+     Type: Unsigned32
+   - Code: 2064
+     VendorId: 10415
+     Name: Node-Id
+     Type: UTF8String
+   - Code: 2065
+     VendorId: 10415
+     Name: SGW-Change
+     Type: Enumerated
+   - Code: 2066
+     VendorId: 10415
+     Name: Charging-Characteristic-Selection-Mode
+     Type: Enumerated
+   - Code: 2101
+     VendorId: 10415
+     Name: Application-Server-ID
+     Type: UTF8String
+   - Code: 2102
+     VendorId: 10415
+     Name: Application-Service-Type
+     Type: Enumerated
+   - Code: 2103
+     VendorId: 10415
+     Name: Application-Session-ID
+     Type: Unsigned32
+   - Code: 2104
+     VendorId: 10415
+     Name: Delivery-Status
+     Type: UTF8String
+   - Code: 2110
+     VendorId: 10415
+     Name: IM-Information
+     Type: Grouped
+   - Code: 2111
+     VendorId: 10415
+     Name: Number-Of-Messages-Successfully-Exploded
+     Type: Unsigned32
+   - Code: 2112
+     VendorId: 10415
+     Name: Number-Of-Messages-Successfully-Sent
+     Type: Unsigned32
+   - Code: 2113
+     VendorId: 10415
+     Name: Total-Number-Of-Messages-Exploded
+     Type: Unsigned32
+   - Code: 2114
+     VendorId: 10415
+     Name: Total-Number-Of-Messages-Sent
+     Type: Unsigned32
+   - Code: 2115
+     VendorId: 10415
+     Name: DCD-Information
+     Type: Grouped
+   - Code: 2116
+     VendorId: 10415
+     Name: Content-ID
+     Type: UTF8String
+   - Code: 2117
+     VendorId: 10415
+     Name: Content-provider-ID
+     Type: UTF8String
+   - Code: 2200
+     VendorId: 10415
+     Name: Subsession-Decision-Info
+     Type: Grouped
+   - Code: 2201
+     VendorId: 10415
+     Name: Subsession-Enforcement-Info
+     Type: Grouped
+   - Code: 2202
+     VendorId: 10415
+     Name: Subsession-Id
+     Type: Unsigned32
+   - Code: 2203
+     VendorId: 10415
+     Name: Subsession-Operation
+     Type: Enumerated
+   - Code: 2204
+     VendorId: 10415
+     Name: Multiple-BBERF-Action
+     Type: Enumerated
+   - Code: 2205
+     VendorId: 10415
+     Name: UE-Local-IPv6-Prefix
+     Type: OctetString
+   - Code: 2207
+     VendorId: 10415
+     Name: PCRF-Address
+     Type: DiameterIdentity
+   - Code: 2301
+     VendorId: 10415
+     Name: SIP-Request-Timestamp-Fraction
+     Type: Unsigned32
+   - Code: 2302
+     VendorId: 10415
+     Name: SIP-Response-Timestamp-Fraction
+     Type: Unsigned32
+   - Code: 2303
+     VendorId: 10415
+     Name: Online-Charging-Flag
+     Type: Enumerated
+   - Code: 2304
+     VendorId: 10415
+     Name: CUG-Information
+     Type: OctetString
+   - Code: 2305
+     VendorId: 10415
+     Name: Real-Time-Tariff-Information
+     Type: Grouped
+   - Code: 2306
+     VendorId: 10415
+     Name: Tariff-XML
+     Type: UTF8String
+   - Code: 2307
+     VendorId: 10415
+     Name: MBMS GW-Address
+     Type: Address
+   - Code: 2308
+     VendorId: 10415
+     Name: IMSI-Unauthenticated-Flag
+     Type: Enumerated
+   - Code: 2309
+     VendorId: 10415
+     Name: Account-Expiration
+     Type: Time
+   - Code: 2310
+     VendorId: 10415
+     Name: AoC-Format
+     Type: Enumerated
+   - Code: 2311
+     VendorId: 10415
+     Name: AoC-Service
+     Type: Enumerated
+   - Code: 2312
+     VendorId: 10415
+     Name: AoC-Service-Obligatory-Type
+     Type: Grouped
+   - Code: 2313
+     VendorId: 10415
+     Name: AoC-Service-Type
+     Type: Enumerated
+   - Code: 2314
+     VendorId: 10415
+     Name: AoC-Subscription-Information
+     Type: Grouped
+   - Code: 2315
+     VendorId: 10415
+     Name: Preferred-AoC-Currency
+     Type: Unsigned32
+   - Code: 2317
+     VendorId: 10415
+     Name: CSG-Access-Mode
+     Type: Enumerated
+   - Code: 2318
+     VendorId: 10415
+     Name: CSG-Membership-Indication
+     Type: Enumerated
+   - Code: 2319
+     VendorId: 10415
+     Name: User-CSG-Information
+     Type: Grouped
+   - Code: 2400
+     VendorId: 10415
+     Name: LMSI
+     Type: OctetString
+   - Code: 2401
+     VendorId: 10415
+     Name: Serving-Node
+     Type: Grouped
+   - Code: 2402
+     VendorId: 10415
+     Name: MME-Name
+     Type: DiameterIdentity
+   - Code: 2403
+     VendorId: 10415
+     Name: MSC-Number
+     Type: OctetString
+   - Code: 2404
+     VendorId: 10415
+     Name: LCS-Capabilities-Sets
+     Type: Unsigned32
+   - Code: 2405
+     VendorId: 10415
+     Name: GMLC-Address
+     Type: Address
+   - Code: 2406
+     VendorId: 10415
+     Name: Additional-Serving-Node
+     Type: Grouped
+   - Code: 2407
+     VendorId: 10415
+     Name: PPR-Address
+     Type: Address
+   - Code: 2408
+     VendorId: 10415
+     Name: MME-Realm
+     Type: DiameterIdentity
+   - Code: 2409
+     VendorId: 10415
+     Name: SGSN-Name
+     Type: DiameterIdentity
+   - Code: 2410
+     VendorId: 10415
+     Name: SGSN-Realm
+     Type: DiameterIdentity
+   - Code: 2501
+     VendorId: 10415
+     Name: LCS-EPS-Client-Name
+     Type: Grouped
+   - Code: 2502
+     VendorId: 10415
+     Name: LCS-Requestor-Name
+     Type: Grouped
+   - Code: 2503
+     VendorId: 10415
+     Name: LCS-Priority
+     Type: Unsigned32
+   - Code: 2504
+     VendorId: 10415
+     Name: LCS-QoS
+     Type: Grouped
+   - Code: 2505
+     VendorId: 10415
+     Name: Horizontal-Accuracy
+     Type: Unsigned32
+   - Code: 2506
+     VendorId: 10415
+     Name: Vertical-Accuracy
+     Type: Unsigned32
+   - Code: 2507
+     VendorId: 10415
+     Name: Vertical-Requested
+     Type: Enumerated
+   - Code: 2508
+     VendorId: 10415
+     Name: Velocity-Requested
+     Type: Enumerated
+   - Code: 2509
+     VendorId: 10415
+     Name: Response-Time
+     Type: Enumerated
+   - Code: 2510
+     VendorId: 10415
+     Name: Supported-GAD-Shapes
+     Type: Unsigned32
+   - Code: 2511
+     VendorId: 10415
+     Name: LCS-Codeword
+     Type: UTF8String
+   - Code: 2512
+     VendorId: 10415
+     Name: LCS-Privacy-Check
+     Type: Enumerated
+   - Code: 2513
+     VendorId: 10415
+     Name: Accuracy-Fulfilment-Indicator
+     Type: Enumerated
+   - Code: 2514
+     VendorId: 10415
+     Name: Age-Of-Location-Estimate
+     Type: Unsigned32
+   - Code: 2515
+     VendorId: 10415
+     Name: Velocity-Estimate
+     Type: OctetString
+   - Code: 2516
+     VendorId: 10415
+     Name: EUTRAN-Positioning-Data
+     Type: OctetString
+   - Code: 2517
+     VendorId: 10415
+     Name: ECGI
+     Type: OctetString
+   - Code: 2518
+     VendorId: 10415
+     Name: Location-Event
+     Type: Enumerated
+   - Code: 2519
+     VendorId: 10415
+     Name: Pseudonym-Indicator
+     Type: Enumerated
+   - Code: 2520
+     VendorId: 10415
+     Name: LCS-Service-Type-ID
+     Type: Unsigned32
+   - Code: 2521
+     VendorId: 10415
+     Name: LCS-Privacy-Check-Non-Session
+     Type: Grouped
+   - Code: 2522
+     VendorId: 10415
+     Name: LCS-Privacy-Check-Session
+     Type: Grouped
+   - Code: 2523
+     VendorId: 10415
+     Name: LCS-QoS-Class
+     Type: Enumerated
+   - Code: 2901
+     VendorId: 10415
+     Name: Policy-Counter-Identifier
+     Type: UTF8String
+   - Code: 2902
+     VendorId: 10415
+     Name: Policy-Counter-Status
+     Type: UTF8String
+   - Code: 2903
+     VendorId: 10415
+     Name: Policy-Counter-Status-Report
+     Type: Grouped
+   - Code: 2904
+     VendorId: 10415
+     Name: SL-Request-Type
+     Type: Enumerated
+   - Code: 9003
+     VendorId: 10415
+     Name: Operator-Name
+     Type: OctetString
+   - Code: 9990
+     VendorId: 10415
+     Name: AF-Signalling-Protocol
+     Type: Enumerated
+   - Code: 9990
+     VendorId: 10415
+     Name: Location-Information
+     Type: UTF8String
+   - Code: 1
+     VendorId: 10415
+     Name: Served-User-IMSI
+     Type: OctetString
+   - Code: 1100
+     VendorId: 10415
+     Name: Served-User-Identity
+     Type: Grouped
+   - Code: 1103
+     VendorId: 10415
+     Name: Trigger-Event
+     Type: Enumerated
+   - Code: 1104
+     VendorId: 10415
+     Name: Sender-Address
+     Type: UTF8String
+   - Code: 1105
+     VendorId: 10415
+     Name: Initial-Recipient-Address
+     Type: Grouped
+   - Code: 1106
+     VendorId: 10415
+     Name: Result-Recipient-Address
+     Type: Grouped
+   - Code: 1108
+     VendorId: 10415
+     Name: Recipient-Address-Utf8String
+     Type: UTF8String
+   - Code: 1109
+     VendorId: 10415
+     Name: Routeing-Address
+     Type: UTF8String
+   - Code: 1110
+     VendorId: 10415
+     Name: Originating-Interface
+     Type: Enumerated
+   - Code: 1111
+     VendorId: 10415
+     Name: Delivery-Report
+     Type: Enumerated
+   - Code: 1112
+     VendorId: 10415
+     Name: Read-Reply
+     Type: Enumerated
+   - Code: 1113
+     VendorId: 10415
+     Name: Sender-Visibility
+     Type: Enumerated
+   - Code: 1114
+     VendorId: 10415
+     Name: Service-Key
+     Type: UTF8String
+   - Code: 1115
+     VendorId: 10415
+     Name: Billing-Information
+     Type: UTF8String
+   - Code: 1116
+     VendorId: 10415
+     Name: Status
+     Type: Grouped
+   - Code: 1117
+     VendorId: 10415
+     Name: Status-Code
+     Type: UTF8String
+   - Code: 1118
+     VendorId: 10415
+     Name: Status-Text
+     Type: UTF8String
+   - Code: 2801
+     VendorId: 10415
+     Name: ADC-Revalidation-Time
+     Type: Time
+   - Code: 2802
+     VendorId: 10415
+     Name: TDF-Application-Instance-Identifier
+     Type: OctetString
+   - Code: 2803
+     VendorId: 10415
+     Name: HeNB-BBF-FQDN
+     Type: UTF8String
+   - Code: 2804
+     VendorId: 10415
+     Name: HeNB-Local-IP-Address
+     Type: Address
+   - Code: 2805
+     VendorId: 10415
+     Name: UE-Local-IP-Address
+     Type: Address
+   - Code: 2806
+     VendorId: 10415
+     Name: UDP-Source-Port
+     Type: Address
+   - Code: 2807
+     VendorId: 10415
+     Name: CS-Service-Qos-Request-Identifier
+     Type: OctetString
+   - Code: 2808
+     VendorId: 10415
+     Name: CS-Service-QoS-Request-Operation
+     Type: Enumerated
+   - Code: 2809
+     VendorId: 10415
+     Name: Mute-Notification
+     Type: Enumerated
+   - Code: 2810
+     VendorId: 10415
+     Name: Monitoring-Time
+     Type: Time
+   - Code: 2811
+     VendorId: 10415
+     Name: AN-GW-Status
+     Type: Enumerated
+   - Code: 2812
+     VendorId: 10415
+     Name: User-Location-Info-Age
+     Type: Time
+   - Code: 3300
+     VendorId: 10415
+     Name: SC-Address
+     Type: OctetString
+   - Code: 3301
+     VendorId: 10415
+     Name: SM-RP-UI
+     Type: OctetString
+   - Code: 3302
+     VendorId: 10415
+     Name: TFR-Flags
+     Type: Unsigned32
+   - Code: 3303
+     VendorId: 10415
+     Name: SM-Delivery-Failure-Cause
+     Type: Grouped
+   - Code: 3304
+     VendorId: 10415
+     Name: SM-Enumerated-Delivery-Failure-Cause
+     Type: Enumerated
+   - Code: 3305
+     VendorId: 10415
+     Name: SM-Diagnostic-Info
+     Type: OctetString
+   - Code: 3306
+     VendorId: 10415
+     Name: SM-Delivery-Timer
+     Type: Unsigned32
+   - Code: 3307
+     VendorId: 10415
+     Name: SM-Delivery-Start-Time
+     Type: Time
+   - Code: 3308
+     VendorId: 10415
+     Name: SM-RP-MTI
+     Type: Enumerated
+   - Code: 3309
+     VendorId: 10415
+     Name: SM-RP-SMEA
+     Type: OctetString
+   - Code: 3310
+     VendorId: 10415
+     Name: SRR-Flags
+     Type: Unsigned32
+   - Code: 3311
+     VendorId: 10415
+     Name: SM-Delivery-Not-Intended
+     Type: Enumerated
+   - Code: 3312
+     VendorId: 10415
+     Name: MWD-Status
+     Type: Unsigned32
+   - Code: 3313
+     VendorId: 10415
+     Name: MME-Absent-User-Diagnostic-SM
+     Type: Enumerated
+   - Code: 3314
+     VendorId: 10415
+     Name: MSC-Absent-User-Diagnostic-SM
+     Type: Enumerated
+   - Code: 3315
+     VendorId: 10415
+     Name: SGSN-Absent-User-Diagnostic-SM
+     Type: Enumerated
+   - Code: 3316
+     VendorId: 10415
+     Name: SM-Delivery-Outcome
+     Type: Grouped
+   - Code: 3317
+     VendorId: 10415
+     Name: MME-SM-Delivery-Outcome
+     Type: Grouped
+   - Code: 3318
+     VendorId: 10415
+     Name: MSC-SM-Delivery-Outcome
+     Type: Grouped
+   - Code: 3319
+     VendorId: 10415
+     Name: SGSN-SM-Delivery-Outcome
+     Type: Grouped
+   - Code: 3320
+     VendorId: 10415
+     Name: IP-SM-GW-SM-Delivery-Outcome
+     Type: Grouped
+   - Code: 3321
+     VendorId: 10415
+     Name: SM-Delivery-Cause
+     Type: Enumerated
+   - Code: 3322
+     VendorId: 10415
+     Name: Absent-User-Diagnostic-SM
+     Type: OctetString
+   - Code: 302
+     VendorId: 13019
+     Name: Logical-Access-Id
+     Type: OctetString
+   - Code: 313
+     VendorId: 13019
+     Name: Physical-Access-Id
+     Type: UTF8String
+   - Code: 500
+     VendorId: 13019
+     Name: Line-Identifier
+     Type: OctetString
+   - Code: 1000
+     VendorId: 15044
+     Name: Service-Control
+     Type: Grouped
+   - Code: 1
+     VendorId: 24757
+     Name: WiMAX-Capability
+     Type: Grouped
+   - Code: 3
+     VendorId: 24757
+     Name: GMT-TimeZone-Offset
+     Type: Integer32
+   - Code: 4
+     VendorId: 24757
+     Name: AAA-Session-ID
+     Type: UTF8String
+   - Code: 6
+     VendorId: 24757
+     Name: HA-IP-MIP4
+     Type: Address
+   - Code: 10
+     VendorId: 24757
+     Name: MN-HA-MIP4-KEY
+     Type: OctetString
+   - Code: 11
+     VendorId: 24757
+     Name: MN-HA-MIP4-SPI
+     Type: Unsigned32
+   - Code: 14
+     VendorId: 24757
+     Name: FA-RK-Key
+     Type: OctetString
+   - Code: 15
+     VendorId: 24757
+     Name: HA-RK-Key
+     Type: OctetString
+   - Code: 16
+     VendorId: 24757
+     Name: HA-RK-SPI
+     Type: Unsigned32
+   - Code: 21
+     VendorId: 24757
+     Name: Session-Continue
+     Type: Unsigned32
+   - Code: 22
+     VendorId: 24757
+     Name: Wimax-Framed-Route
+     Type: UTF8String
+   - Code: 23
+     VendorId: 24757
+     Name: IP-Technology
+     Type: Unsigned32
+   - Code: 29
+     VendorId: 24757
+     Name: QoSDescriptor
+     Type: Grouped
+   - Code: 45
+     VendorId: 24757
+     Name: NAP-ID
+     Type: Integer32
+   - Code: 46
+     VendorId: 24757
+     Name: BS-ID
+     Type: OctetString
+   - Code: 1025
+     VendorId: 24757
+     Name: Accounting-Capabilities
+     Type: Unsigned32
+   - Code: 1026
+     VendorId: 24757
+     Name: Hotlining-Capabilities
+     Type: Unsigned32
+   - Code: 1027
+     VendorId: 24757
+     Name: Idle-Mode-Notification-Capabilities
+     Type: Unsigned32
+   - Code: 1028
+     VendorId: 24757
+     Name: QoS-ID
+     Type: Unsigned32
+   - Code: 1030
+     VendorId: 24757
+     Name: Service-Class-Name
+     Type: UTF8String
+   - Code: 2016
+     VendorId: 28458
+     Name: User-Agent-Type
+     Type: Unsigned32
+   - Code: 260
+     VendorId: 12645
+     Name: Vodafone-Radio-Access-Technology
+     Type: Enumerated
+   - Code: 256
+     VendorId: 12645
+     Name: Vodafone-Context-Type
+     Type: Enumerated
+   - Code: 262
+     VendorId: 12645
+     Name: Vodafone-Rulebase-Id
+     Type: UTF8String
+   - Code: 257
+     VendorId: 12645
+     Name: Vodafone-Quota-Consumption-Time
+     Type: Unsigned32
+   - Code: 258
+     VendorId: 12645
+     Name: Vodafone-Quota-Holding-Time
+     Type: Unsigned32
+   - Code: 259
+     VendorId: 12645
+     Name: Vodafone-Time-Quota-Threshold
+     Type: Unsigned32
+   - Code: 261
+     VendorId: 12645
+     Name: Vodafone-Reporting-Reason
+     Type: Enumerated
+   - Code: 263
+     VendorId: 12645
+     Name: Vodafone-Time-Of-First-Usage
+     Type: Time
+   - Code: 264
+     VendorId: 12645
+     Name: Vodafone-Time-Of-Last-Usage
+     Type: Time
+   - Code: 265
+     VendorId: 12645
+     Name: Vodafone-Trigger
+     Type: Grouped
+   - Code: 266
+     VendorId: 12645
+     Name: Vodafone-Trigger-Type
+     Type: Enumerated
+   - Code: 267
+     VendorId: 12645
+     Name: Vodafone-User-Location-Information
+     Type: OctetString
+   - Code: 268
+     VendorId: 12645
+     Name: Vodafone-Volume-Quota-Threshold
+     Type: Unsigned32
+   - Code: 269
+     VendorId: 12645
+     Name: Vodafone-Envelope
+     Type: Grouped
+   - Code: 270
+     VendorId: 12645
+     Name: Vodafone-Envelope-Start-Time
+     Type: Time
+   - Code: 271
+     VendorId: 12645
+     Name: Vodafone-Envelope-End-Time
+     Type: Time
+   - Code: 272
+     VendorId: 12645
+     Name: Vodafone-Envelope-Reporting
+     Type: Enumerated
+   - Code: 274
+     VendorId: 12645
+     Name: Vodafone-Time-Quota-Mechanism
+     Type: Grouped
+   - Code: 275
+     VendorId: 12645
+     Name: Vodafone-Time-Quota-Type
+     Type: Enumerated
+   - Code: 276
+     VendorId: 12645
+     Name: Vodafone-Base-Time-Interval
+     Type: Unsigned32
+   - Code: 277
+     VendorId: 12645
+     Name: Vodafone-Offline-Charging
+     Type: Grouped
+   - Code: 278
+     VendorId: 12645
+     Name: Vodafone-Traffic-Redirected
+     Type: Grouped
+   - Code: 279
+     VendorId: 12645
+     Name: Vodafone-User-Agent
+     Type: UTF8String
+   - Code: 280
+     VendorId: 12645
+     Name: Vodafone-User-URL
+     Type: UTF8String
+   - Code: 281
+     VendorId: 12645
+     Name: Vodafone-URL-Append
+     Type: Enumerated

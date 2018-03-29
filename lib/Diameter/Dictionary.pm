@@ -32,6 +32,12 @@ Diameter::Dictionary - A dictionary interface for Diameter and Diameter AVP obje
  \%info = $d->describe_message( ApplicationId => 16777232, Code => 520 );
  \%info = $d->describe_avp( Name => "Host-IP-Address" );
 
+ $e = $d->expand_message( $message );
+ $e = $d->expand_avp( $message );
+
+ $bool = $d->is_expanded_message( $message );
+ $bool = $d->is_expanded_avp( $avp );
+
 =head1 DESCRIPTION
 
 This package provides an interface to a Diameter dictionary.  A dictionary
@@ -169,6 +175,32 @@ The data type for the AVP.
 
 =back
 
+A plain B<Diameter::Message> or plain B<Diameter::Message::AVP> object can be expanded with
+meta-data from the dictionary (including creation of correct TypedData field for an AVP) by
+using B<expand_message> and B<expand_avp>, respectively.  In either case, if the corresponding
+type is not defined in the dictionary, then the plain message or AVP is returned.  If an error
+occur, set I<$@> and return undef.
+
+For efficiency, both of these methods work on the original message or AVP object, changing its
+type.
+
+With B<expand_message>, additional parameters can be passed:
+
+ $m = $d->expand_message( $message, ExpandAvps => 1, StopOnError => 0 );
+
+If B<ExpandAvps> is set to true (the default), then an attempt is made to execute B<expand_avp>
+on each of the message AVPs.  If B<StopOnError> is false (the default), then on AVP expansion,
+if an error occurs, an effort will be made to continue expanding subsequent AVPs.  I<$@> will
+equal the last expansion error. If B<StopOnError> is true, then on AVP expansion, if an error
+occurs, the expansion process will stop and I<$@> will be the error that halted the expansion.
+
+On AVP expansion, the AVPs are not re-ordered, and the mandatory flag is not changed.
+
+To determine whether an object of type B<Diameter::Message> or B<Diameter::AVP> has been expanded
+by a dictionary, use B<is_expanded_message> and B<is_expanded_avp>, respectively.  An expanded
+message isn't just one created by B<expand_message> and B<expand_avp>.  It is also any message
+created by B<message> and any AVP created by B<avp>.
+
 =head1 YAML SCHEMA
 
 A YAML definition must have this basic structure:
@@ -187,10 +219,10 @@ B<MessageTypes> is a YAML list of YAML maps.  Each map is:
 
  - Code: <code>
    ApplicationId: <app_id>
-   Proxiable: <is_proxiable>
    Request:
       Name: <name>
       AbbreviatedName: <aname>
+      Proxiable: <is_proxiable>
       AvpOrder:
         ...
       MandatoryAvps:
@@ -200,6 +232,7 @@ B<MessageTypes> is a YAML list of YAML maps.  Each map is:
    Answer:
       Name: <name>
       AbbreviatedName: <aname>
+      Proxiable: <is_proxiable>
       AvpOrder:
         ...
       MandatoryAvps:
@@ -259,11 +292,10 @@ my %element_structure = (
     MessageTypes => [0, 'list', [], [1, 'map', {}, {
             ApplicationId => [0, 'uint32', 0],
             Code          => [1, 'uint32', undef],
-            Proxiable     => [0, 'bool', 1],
-            Error         => [0, 'bool', 0],
             Request       => [0, 'map', {}, {
                 Name            => [1, 'string', undef],
                 AbbreviatedName => [0, 'string', ''],
+                Proxiable       => [0, 'bool', 1],
                 AvpOrder        => [0, 'list', []],
                 MandatoryAvps   => [0, 'list', []],
                 OptionalAvps    => [0, 'list', []],
@@ -271,6 +303,7 @@ my %element_structure = (
             Answer        => [0, 'map', {}, {
                 Name            => [1, 'string', undef],
                 AbbreviatedName => [0, 'string', ''],
+                Proxiable       => [0, 'bool', 1],
                 AvpOrder        => [0, 'list', []],
                 MandatoryAvps   => [0, 'list', []],
                 OptionalAvps    => [0, 'list', []],
@@ -282,8 +315,8 @@ my %element_structure = (
             VendorId    => [0, 'uint32', 0],
             Name        => [1, 'string', undef],
             Type        => [0, 'enum', 'OctetString', [qw(Address DiameterIdentity DiameterURI Enumerated Float32 Float64
-                                                          Grouped Integer32 Integer64 IPFilterRule OctetString Time 
-                                                          Unsigned32 Unsigned64 UTF8String)]],
+                                                          Grouped Integer32 Integer64 IPFilterRule OctetString QosFilterRule
+                                                          Time Unsigned32 Unsigned64 UTF8String)]],
         }],
     ],
 );
@@ -295,7 +328,7 @@ use constant {
 };
 
 
-sub new {
+sub from_yaml {
     my $class = shift;
     my %params = @_;
 
@@ -541,12 +574,11 @@ sub message {
     }
 
     return Diameter::Dictionary::Message->new(
+        ApplicationId   => $msg_desc->{Properties}->{ApplicationId},
+        CommandCode     => $msg_desc->{Properties}->{Code},
         Name            => $msg_desc->{Name},
         AbbreviatedName => $msg_desc->{AbbreviatedName},
-        CommandCode     => $msg_desc->{Properties}->{Code},
-        ApplicationId   => $msg_desc->{Properties}->{ApplicationId},
-        IsProxiable     => $msg_desc->{Properties}->{Proxiable},
-        IsError         => $msg_desc->{Properties}->{Error},
+        IsProxiable     => $msg_desc->{Proxiable},
         IsRequest       => $msg_desc->{Request},
         Avps            => \@avps,
     );
@@ -645,6 +677,91 @@ sub describe_avp {
 }
 
 
+sub expand_message {
+    my $self = shift;
+    my $unexpanded = shift;
+    my %params = @_;
+
+    unless (UNIVERSAL::isa( $unexpanded, 'Diameter::Message' )) {
+        $@ = "Invalid Message Exception";
+        return undef;
+    }
+
+    my $fqcc = $unexpanded->application_id . ":" . $unexpanded->command_code;
+
+    if (!exists $self->[DD_MSGS]->{Code}->{$fqcc}) {
+        return $unexpanded;
+    }
+
+    my $info_hr;
+    if ($unexpanded->is_request) {
+        $info_hr = $self->[DD_MSGS]->{Code}->{$fqcc}->{Request};
+    }
+    else {
+        $info_hr = $self->[DD_MSGS]->{Code}->{$fqcc}->{Answer};
+    }
+
+    my $expanded_msg = Diameter::Dictionary::Message->from_unexpanded_message( Name => $info_hr->{Name}, AbbreviatedName => $info_hr->{AbbreviatedName}, Unexpanded => $unexpanded );
+
+    my $expand_avps   = (!exists $params{ExpandAvps}  || $params{ExpandAvps} ? 1 : 0);
+    my $stop_on_error = (!exists $params{StopOnError} || $params{StopOnError} ? 1 : 0);
+
+    my $had_avp_expansion_error = 0;
+    if ($expand_avps) {
+        foreach my $avp ($expanded_msg->avps) {
+            unless ($self->expand_avp( $avp )) {
+                if ($stop_on_error) {
+                    return undef;
+                }
+                else {
+                    $had_avp_expansion_error = 1;
+                }
+            }
+        }
+    }
+
+    return ($had_avp_expansion_error ? undef : $expanded_msg);
+}
+
+
+sub expand_avp {
+    my $self = shift;
+    my $unexpanded = shift;
+
+    unless (UNIVERSAL::isa( $unexpanded, 'Diameter::Message::AVP' )) {
+        $@ = "Invalid Message Exception";
+        return undef;
+    }
+
+    my $fqc = $unexpanded->vendor_id . ":" . $unexpanded->code;
+
+    if (!exists $self->[DD_AVPS]->{Code}->{$fqc}) {
+        return $unexpanded;
+    }
+
+    my $info_hr = $self->[DD_AVPS]->{Code}->{$fqc};
+
+    return Diameter::Dictionary::Message::AVP->from_unexpanded_message( Name => $info_hr->{Name}, DataType => $info_hr->{Type}, Unexpanded => $unexpanded );
+}
+
+
+sub is_expanded_avp {
+    my $self = shift;
+    my $avp = shift;
+
+    return $avp->can( '_is_from_dictionary' ) && $avp->_is_from_dictionary;
+}
+
+
+
+sub is_expanded_message {
+    my $self = shift;
+    my $msg = shift;
+
+    return $msg->can( '_is_from_dictionary' ) && $msg->_is_from_dictionary;
+}
+
+
 #
 # \%avp_pointers = $class->_process_yaml_ds_to_avp_pointers( $yaml_ds );
 #
@@ -719,7 +836,7 @@ sub _get_normalized_avp {
 # "$vendorid:$code" of Avp order; then {MandatoryAvps}, which is a hashref by
 # "$vendorid:$code"; then {OptionalAvps}, which is a hashref by
 # "$vendorid:$code", then {Properties}, which is a hashref of {ApplicationId},
-# {Codes}, {Name}, {AbbreviatedName}, {Request} and {Proxiable}.  The value for each
+# {Code}, {Name}, {AbbreviatedName} and {Request}.  The value for each
 # {"$vendorid:$code"} hashref key is the count when used with {MandatoryAvps}
 # and {OptionalAvps}.  For {AvpOrder}, the value is simply 1.
 #
@@ -744,15 +861,13 @@ sub _process_yaml_ds_to_message_pointers {
         my ($application_id, $code) = ($message_hr->{ApplicationId}, $message_hr->{Code});
 
         my %properties = (ApplicationId => $application_id,
-                          Code          => $code,
-                          Error         => $message_hr->{Error},
-                          Proxiable     => $message_hr->{Proxiable});
+                          Code          => $code);
 
         my %message_ds = (Properties => \%properties);
         my @ra_pair;
 
         foreach my $s (qw(Request Answer)) {
-            my %info = (Properties => \%properties, Request => ($s eq "Request" ? 1 : 0));
+            my %info = (Properties => \%properties, Request => ($s eq "Request" ? 1 : 0), Proxiable => ($message_hr->{$s}->{Proxiable} ? 1 : 0));
 
             my @normalized_avps;
             foreach my $refd_avp (@{ $message_hr->{$s}->{AvpOrder} }) {
@@ -855,7 +970,7 @@ sub _validate_and_expand_yaml_element {
     }
     elsif ($required_type eq "enum") {
         unless (grep { $element_value eq $_ } @{ $structure_def_ar->[E_CHILDREN] }) {
-            $@ = "For ($node_name), value is not in the enum list";
+            $@ = "For ($node_name), value ($element_value) is not in the enum list";
             return 0;
         }
     }
@@ -1058,15 +1173,14 @@ sub _validate_childavps_element {
 package Diameter::Dictionary::Message::AVP;
 
 use warnings;
-
 use parent 'Diameter::Message::AVP';
 
-no strict;
 use constant {
-    AVP_NAME            => Diameter::Message::AVP::AVP__LAST_ELEMENT + 1,
-};
+    SUBTYPE_DATA      => Diameter::Message::AVP::SUBTYPE_DATA,
+    TYPE_PACKAGE_NAME => 'Diameter::Message::AVP',
 
-use strict;
+    AVP_NAME     => 0,
+};
 
 
 # Because we know that Diameter::Message::AVP is a blessed listref,
@@ -1085,14 +1199,41 @@ sub new {
 
     bless $self, $class;
 
-    $self->[AVP_NAME] = $params{Name};
+    $self->[SUBTYPE_DATA]->{TYPE_PACKAGE_NAME()}->[AVP_NAME] = $params{Name};
+
+    return $self;
+}
+
+
+# $class->from_unexpanded_message( Name => $name, DataType => $type, Unexpanded => $e );
+#
+# Constructor from a Diameter::Message::AVP object
+#
+sub from_unexpanded_message {
+    my $class = shift;
+    my %params = @_;
+
+    my $self = $params{Unexpanded};
+
+    bless $self, $class;
+
+    $self->[SUBTYPE_DATA]->{TYPE_PACKAGE_NAME()}->[AVP_NAME] = $params{Name};
+
+    $self->_set_type( $params{DataType} );
 
     return $self;
 }
 
 
 sub name {
-    return shift->[AVP_NAME];
+    return shift->[SUBTYPE_DATA]->{TYPE_PACKAGE_NAME()}->[AVP_NAME];
+}
+
+
+# any type of Diameter::Message::AVP that was expanded by a dictionary MUST include
+# this method.  It MUST return a true value.
+sub _is_from_dictionary {
+    return 1;
 }
 
 
@@ -1101,16 +1242,15 @@ sub name {
 package Diameter::Dictionary::Message;
 
 use warnings;
-
 use parent 'Diameter::Message';
 
-no strict;
 use constant {
-    MESSAGE_NAME                => Diameter::Message::LAST_ELEMENT + 1,  
-    MESSAGE_ABBREVIATED_NAME    => Diameter::Message::LAST_ELEMENT + 2,
+    SUBTYPE_DATA      => Diameter::Message::AVP::SUBTYPE_DATA,
+    TYPE_PACKAGE_NAME => 'Diameter::Message::AVP',
+    
+    MESSAGE_NAME                => 0,
+    MESSAGE_ABBREVIATED_NAME    => 1,
 };
-
-use strict;
 
 
 sub new {
@@ -1125,21 +1265,50 @@ sub new {
 
     bless $self, $class;
 
-    $self->[MESSAGE_NAME] = $params{Name};
-    $self->[MESSAGE_ABBREVIATED_NAME] = $params{AbbreviatedName};
+    $self->[SUBTYPE_DATA]->{TYPE_PACKAGE_NAME()}->[MESSAGE_NAME] = $params{Name};
+    $self->[SUBTYPE_DATA]->{TYPE_PACKAGE_NAME()}->[MESSAGE_ABBREVIATED_NAME] = $params{AbbreviatedName};
 
     return $self;
 }
 
 
+# $class->from_unexpanded_message( Name => $name, AbbreviatedName => $a, Unexpanded => $e );
+#
+# Constructor from a Diameter::Message object
+#
+sub from_unexpanded_message {
+    my $class = shift;
+    my %params = @_;
+
+    my $self = $params{Unexpanded};
+
+    bless $self, $class;
+
+    $self->[SUBTYPE_DATA]->{TYPE_PACKAGE_NAME()}->[MESSAGE_NAME] = $params{Name};
+    $self->[SUBTYPE_DATA]->{TYPE_PACKAGE_NAME()}->[MESSAGE_ABBREVIATED_NAME] = $params{AbbreviatedName};
+
+    return $self;
+}
+
+
+
 sub name {
-    return shift->[MESSAGE_NAME];
+    return shift->[SUBTYPE_DATA]->{TYPE_PACKAGE_NAME()}->[MESSAGE_NAME];
 }
 
 
 sub abbreviated_name {
-    return shift->[MESSAGE_ABBREVIATED_NAME];
+    return shift->[SUBTYPE_DATA]->{TYPE_PACKAGE_NAME()}->[MESSAGE_ABBREVIATED_NAME];
 }
+
+
+# any type of Diameter::Message that was expanded by a dictionary MUST include
+# this method.  It MUST return a true value.
+sub _is_from_dictionary {
+    return 1;
+}
+
+
 
 
 

@@ -423,8 +423,8 @@ AvpTypes:
      Type: "Enumerated"
 EOY
 
-my $d = Diameter::Dictionary->new( FromString => $yaml_string );
-ok( defined $d && ref $d, "Diameter\:\:Dictionary->new() with only single simple MessageType stanza succeeds" );
+my $d = Diameter::Dictionary->from_yaml( FromString => $yaml_string );
+ok( defined $d && ref $d, "Diameter\:\:Dictionary->from_yaml() with only single simple MessageType stanza succeeds" );
 
 validate_avp( $d->avp( Name => "User-Name", Value => "tester123" ),
               "User-Name", "tester123", "eq", 0, 1, 0, "0000000100000011746573746572313233000000",

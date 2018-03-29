@@ -87,6 +87,10 @@ my %AVP_DATA_TYPE_ENCODERS = (
     return shift;
   },
 
+ 'QosFilterRule' => sub {
+    return shift;
+ },
+
  # provide as unix epoch time
  'Time'         => sub {
     return pack "N", shift;
@@ -161,6 +165,10 @@ my %AVP_DATA_TYPE_DECODERS = (
     return shift;
   },
 
+ 'QosFilterRule' => sub {
+    return shift;
+ },
+
  # provide as unix epoch time
  'Time'         => sub {
     return unpack "N", shift;
@@ -185,11 +193,12 @@ my %AVP_DATA_TYPE_DECODERS = (
 
 
 
-# Blessed data structure for Diameter::Message::AVP is listref.  These are the elements
-# NOTE: this type is extended in Diameter::Dictionary.  If changes are made here, they
-# must be reflected in that class definition, too.  That subclass extends this by adding
-# to the blessed listref, so it depends on AVP__LAST_ELEMENT being equal to the index
-# of the last AVP_* element.
+# Blessed data structure for Diameter::Message::AVP is listref.
+#
+# If a subtype is created from this, then the subclass should create
+# $self->[SUBTYPE_DATA]->{$subclass}.  This will contain private data for the
+# subclass.
+#
 #
 use constant {
     AVP_CODE                => 0,
@@ -201,8 +210,7 @@ use constant {
     AVP_ENCODED             => 6,
     AVP_DATA_PAD_LENGTH     => 7,
     AVP_DATA_TYPE           => 8,
-
-    AVP__LAST_ELEMENT       => 8,
+    SUBTYPE_DATA            => 9,
 };
 
 
@@ -350,6 +358,7 @@ sub new {
         undef,                          # AVP_ENCODED
         $data_pad_bytes,                # AVP_DATA_PAD_LENGTH
         $data_type,                     # AVP_DATA_TYPE
+        {},                             # SUBTYPE_DATA
     ], $class;
 
     return $self;
@@ -521,6 +530,7 @@ sub decode {
         $encoded,               # AVP_ENCODED
         $data_pad_bytes,        # AVP_DATA_PAD_LENGTH
         'OctetString',          # AVP_DATA_TYPE
+        {},                     # SUBTYPE_DATA
     ], $class;
 }
 
@@ -544,6 +554,20 @@ sub _set_mandatory_flag {
     }
 
     $self->[AVP_ENCODED] = undef;
+}
+
+
+# $m->_set_type( $new_type );
+#
+# Change the type for this AVP.  Inteded to be called by self or sub-classes only.
+# Value must be a valid AVP type.  No validation occurs.
+#
+sub _set_type {
+    my $self = shift;
+    my $new_type = shift;
+
+    $self->[AVP_TYPED_DATA] = $AVP_DATA_TYPE_DECODERS{$new_type}->( $self->[AVP_RAW_DATA] );
+    $self->[AVP_DATA_TYPE]  = $new_type; 
 }
 
 

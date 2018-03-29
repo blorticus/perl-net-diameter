@@ -1,0 +1,109 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my @order;
+my @mand;
+my @opt;
+
+my %codes;
+
+my $last_code = "";
+my $last_names = "";
+my $last_flags = "";
+
+while (<>) {
+    if (/^ *< Session\-Id >/) {
+        push @order, "Session-Id";
+        push @mand, "Session-Id";
+    }
+    elsif (/^ *(\d+|\d+\*|\*)? \{ (\S+) \}/) {
+        push @order, $2;
+        push @mand, "$2" . (defined $1 ? ":$1" : "");
+    }
+    elsif (/^ *(\d+|\d+\*|\*)? \[ (\S+) \]/) {
+        push @order, $2;
+        push @opt, "$2" . (defined $1 ? ":$1" : "");
+    }
+    elsif (/^ *<(.+?)> *::= *< Diameter Header: (\d+), (.+) >/) {
+        my ($names, $code, $flags) = ($1, $2, $3);
+
+        if ($last_code) {
+            my $proxiable = ($last_flags =~ /PXY/ ? "true" : "false");
+            my ($abr, $name) = split( /,/, $last_names );
+
+            if ($last_flags =~ /REQ/) {
+                $codes{$last_code}{Request} = [$name, $abr, $proxiable, [@order], [@mand], [@opt]];
+            }
+            else {
+                $codes{$last_code}{Answer} = [$name, $abr, $proxiable, [@order], [@mand], [@opt]];
+            }
+        }
+
+        @order = ();
+        @mand  = ();
+        @opt   = ();
+
+        ($last_code, $last_names, $last_flags) = ($code, $names, $flags);
+    }
+}
+
+if ($last_code) {
+    my $proxiable = ($last_flags =~ /PXY/ ? "true" : "false");
+    my ($abr, $name) = split( /,/, $last_names );
+
+    if ($last_flags =~ /REQ/) {
+        $codes{$last_code}{Request} = [$name, $abr, $proxiable, [@order], [@mand], [@opt]];
+    }
+    else {
+        $codes{$last_code}{Answer} = [$name, $abr, $proxiable, [@order], [@mand], [@opt]];
+    }
+}
+
+
+foreach my $code (keys %codes) {
+    print "   - Code: $code\n",
+          "     ApplicationId: 0\n";
+
+    foreach my $t (qw(Request Answer)) {
+        my ($name, $abr, $prox, $order_ar, $mandatory_ar, $opt_ar) = @{ $codes{$code}{$t} };
+        print "     $t:\n",
+              "        Name: $name\n",
+              "        AbbreviatedName: $abr\n",
+              "        Proxiable: $prox\n",
+              print_order( $order_ar ),
+              print_mo( "MandatoryAvps", $mandatory_ar ),
+              print_mo( "OptionalAvps", $opt_ar ),
+    }
+}
+
+sub print_order {
+    my @order = @{ shift() };
+
+    if (@order > 10) {
+        return "        AvpOrder:\n",
+               "            - " .
+               join( "\n            - ", @order ),
+               "\n";
+    }
+    else {
+        return "        AvpOrder: [" . join( ", ", (map { qq|"$_"| } @order) ) . "]\n";
+    }
+}
+
+
+sub print_mo {
+    my $type = shift;
+    my @v = @{shift()};
+
+    if (@v > 6) {
+        return "        $type:\n",
+               "            - " .
+               join( "\n            - ", @v ),
+               "\n";
+    }
+    else {
+        return "        $type: [" . join( ", ", (map { qq|"$_"| } @v) ) . "]\n";
+    }
+}

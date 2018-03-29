@@ -1,9 +1,11 @@
 use Test::More;
 
+BEGIN { use_ok 'Diameter::Dictionary' };
+use Diameter::Message;
+use Diameter::Message::AVP;
+
 use strict;
 use warnings;
-
-BEGIN { use_ok 'Diameter::Dictionary' };
 
 my $yaml_string =<<EOY;
 ---
@@ -273,37 +275,130 @@ EOY
 my $d = Diameter::Dictionary->from_yaml( FromString => $yaml_string );
 ok( defined $d && ref $d, "Diameter\:\:Dictionary->from_yaml() with Message definitions and all corresponding AVP definitions succeeds" );
 
-ok( !$d->message( Foo => 'bar' ), 'Attempt to create Message with neither Name nor Code fails' );
-ok( !$d->message( Name => "foo" ), 'Attempt to create Message with a name not in the dictionary fails' );
-ok( !$d->message( Code => 10 ), 'Attempt to create Message with a code not in the dictionary fails' );
-ok( !$d->message( ApplicationId => 109, Code => 272 ), 'Attempt to create Message with a application_id+code not in the dictionary fails' );
+my $avp = Diameter::Message::AVP->new( Code => 264, Data => "foo.example.com" );
+ok( defined $avp && ref $avp, 'Created unexpanded Origin-Host AVP' );
+ok( !$d->is_expanded_avp( $avp ), 'Origin-Host AVP is unexpanded' );
+ok( !$avp->can('name'), 'Unexpanded Origin-Host AVP has no name' );
+cmp_ok( unpack( "H*", $avp->encode ), 'eq', '0000010800000017666f6f2e6578616d706c652e636f6d00', 'Unexpanded Origin-Host AVP encode check' );
 
-my $m = $d->message( Name => "CER", Avps => [
-        HostIPAddress => "192.168.1.1",
-        OriginHost => "test.example.com",
-        VendorId => 1010,
-        $d->avp( Name => "Origin-Realm", Value => "example.com" ),
-        $d->avp( Name => "Product-Name", Value => "tester" ),
-    ] );
+$avp = $d->expand_avp( $avp );
 
-ok( defined $m && ref $m && $m->isa( 'Diameter::Message' ), 'message() on CER with all but only mandatory AVPs creates Message object' );
+ok( defined $avp && ref $avp, 'exapand_avp on Origin-Host AVP without error' );
+ok( $d->is_expanded_avp( $avp ), 'Origin-Host AVP is now expanded' );
+ok( $avp->can('name'), 'Expanded Origin-Host AVP has name' );
+cmp_ok( $avp->name, 'eq', 'Origin-Host', 'Expanded Origin-Host name is Origin-Host' );
+cmp_ok( $avp->data, 'eq', 'foo.example.com', 'Expanded Origin-Host data check' );
+cmp_ok( unpack( "H*", $avp->encode ), 'eq', '0000010800000017666f6f2e6578616d706c652e636f6d00', 'Expanded Origin-Host AVP encode check' );
+
+
+$avp = Diameter::Message::AVP->new( Code => 258, Data => pack( "N", 16777254 ), IsMandatory => 1 );
+ok( defined $avp && ref $avp, 'Created unexpanded Auth-Application-Id AVP' );
+ok( !$d->is_expanded_avp( $avp ), 'Auth-Application-Id AVP is unexpanded' );
+ok( !$avp->can('name'), 'Unexpanded Auth-Application-Id AVP has no name' );
+cmp_ok( unpack( "H*", $avp->encode ), 'eq', '000001024000000c01000026', 'Unexpanded Auth-Application-Id AVP encode check' );
+
+$avp = $d->expand_avp( $avp );
+
+ok( defined $avp && ref $avp, 'exapand_avp on Auth-Application-Id AVP without error' );
+ok( $d->is_expanded_avp( $avp ), 'Auth-Application-Id AVP is now expanded' );
+ok( $avp->can('name'), 'Expanded Auth-Application-Id AVP has name' );
+cmp_ok( $avp->name, 'eq', 'Auth-Application-Id', 'Expanded Auth-Application-Id name is Auth-Application-Id' );
+cmp_ok( $avp->data, '==', 16777254, 'Expanded Auth-Application-Id data check' );
+cmp_ok( $avp->raw_data, 'eq', pack( "N", 16777254 ), 'Expanded Auth-Application-Id raw data check' );
+cmp_ok( unpack( "H*", $avp->encode ), 'eq', '000001024000000c01000026', 'Expanded Auth-Application-Id AVP encode check' );
+
+
+my $m = Diameter::Message->new( CommandCode => 257, IsRequest => 1, IsProxiable => 0, HopByHopId => 0x10101010, EndToEndId => 0x0a2b, Avps => [] );
+
+ok( defined $m && ref $m, 'Construct unexpanded CER message without AVPs' );
+ok( !$d->is_expanded_message( $m ), 'Unexpanded CER message is_expanded_message check' );
+ok( !$m->can('name'), 'Unexpanded CER message check for name method' );
+ok( !$m->can('abbreviated_name'), 'Unexpanded CER message check for abbreviated_name method' );
+cmp_ok( unpack( "H*", $m->encode ), 'eq', '0100001480000101000000001010101000000a2b', 'Unexpanded CER message encode check' );
+
+$m = $d->expand_message( $m );
+
+ok( defined $m && ref $m, 'expand_message on unexpanded CER message without AVPs' );
+ok( $d->is_expanded_message( $m ), 'Expanded CER message is_expanded_message check' );
+ok( $m->can('name'), 'Expanded CER message check for name method' );
+ok( $m->can('abbreviated_name'), 'Expanded CER message check for abbreviated_name method' );
+cmp_ok( $m->name, 'eq', 'Capabilities-Exchange-Request', 'Expanded CER message check for name' );
+cmp_ok( $m->abbreviated_name, 'eq', 'CER', 'Expanded CER message check for abbreviated name' );
+cmp_ok( unpack( "H*", $m->encode ), 'eq', '0100001480000101000000001010101000000a2b', 'Expanded CER message encode check' );
+
+
+# this type isn't in the dictionary
+$m = Diameter::Message->new( CommandCode => 1010, IsRequest => 1, IsProxiable => 0, HopByHopId => 0x10101010, EndToEndId => 0x0a2b, Avps => [] );
+
+ok( defined $m && ref $m, 'Construct unexpanded message having CommandCode => 1010, without AVPs' );
+ok( !$d->is_expanded_message( $m ), 'Unexpanded message having CommandCode => 1010 is_expanded_message check' );
+ok( !$m->can('name'), 'Unexpanded message having CommandCode => 1010 check for name method' );
+ok( !$m->can('abbreviated_name'), 'Unexpanded message having CommandCode => 1010 check for abbreviated_name method' );
+
+my $nm = $d->expand_message( $m );
+
+cmp_ok( $nm, 'eq', $m, 'expand_message check on unexpanded message having CommandCode => 1010 (not in dictionary)' );
+
+
+# with AVPs but out of order
+$m = Diameter::Message->new(
+        CommandCode => 257,
+        IsRequest   => 1,
+        IsProxiable => 0,
+        Avps => [
+            Diameter::Message::AVP->new( Code => 257, EncodedData => pack( "CCCCCC", 0, 1, 192, 168, 1, 1 ) ),
+            Diameter::Message::AVP->new( Code => 264, EncodedData => "test.example.com", IsMandatory => 1 ),
+            Diameter::Message::AVP->new( Code => 266, EncodedData => pack( "N", 1010 ) ),
+            Diameter::Message::AVP->new( Code => 296, EncodedData => "example.com", IsMandatory => 1 ),
+            Diameter::Message::AVP->new( Code => 269, EncodedData => "tester" ),
+        ]
+);
+
+ok( defined $m && ref $m && $m->isa( 'Diameter::Message' ), 'construction of unexpanded CER with out-of-order mandatory AVPs' );
 
 # spaces in encoding on word boundaries.  Makes it easier to debug
 my $expected_encoding = join( "", split( / /,
                        # Message header
                    "0100006c 80000101 00000000 00000000 00000000" .
+                       # AVP: Host-IP-Address
+                   "00000101 0000000e 0001c0a8 01010000" .
                        # AVP: Origin-Host
                    "00000108 40000018 74657374 2e657861 6d706c65 2e636f6d" .
+                       # AVP: Vendor-Id
+                   "0000010a 0000000c 000003f2" .
                        # AVP: Origin-Realm
                    "00000128 40000013 6578616d 706c652e 636f6d00" .
-                       # AVP: Host-IP-Address
-                   "00000101 4000000e 0001c0a8 01010000" .
-                       # AVP: Vendor-Id
-                   "0000010a 4000000c 000003f2" .
                        # AVP: Product-Name
-                   "0000010d 4000000e 74657374 65720000" ) );
+                   "0000010d 0000000e 74657374 65720000" ) );
 
-cmp_ok( unpack( "H*", $m->encode ), 'eq', $expected_encoding, 'message() on CER with all but only mandatory AVPs encodes correctly, including AVP re-ordering' );
+cmp_ok( unpack( "H*", $m->encode ), 'eq', $expected_encoding, 'encoding of unexpanded CER with out-of-order mandatory AVPs' );
+
+$m = $d->expand_message( $m );
+
+ok( defined $m && ref $m, 'expand_message on expanded CER with out-of-order mandatory AVPs' );
+ok( $d->is_expanded_message( $m ), 'is_expanded_message check on expanded CER with out-of-order mandatory AVPs' );
+ok( $m->can('name'), 'can("name") check on expanded CER with out-of-order mandatory AVPs' );
+ok( $m->can('abbreviated_name'), 'can("name") check on expanded CER with out-of-order mandatory AVPs' );
+cmp_ok( $m->name, 'eq', 'Capabilities-Exchange-Request', 'name check on expanded CER with out-of-order mandatory AVPs' );
+cmp_ok( $m->abbreviated_name, 'eq', 'CER', 'abbreviated_name check on expanded CER with out-of-order mandatory AVPs' );
+cmp_ok( unpack( "H*", $m->encode ), 'eq', $expected_encoding, 'encoding check on expanded CER with out-of-order mandatory AVPs' );
+
+my @expected_avp_info = ( ['Host-IP-Address', 'eq', '192.168.1.1'],
+                          ['Origin-Host',     'eq', 'test.example.com'],
+                          ['Vendor-Id',       '==', 1010],
+                          ['Origin-Realm',    'eq', 'example.com'],
+                          ['Product-Name',    'eq', 'tester'] );
+
+cmp_ok( $m->avps, '==', @expected_avp_info, 'AVP count check on expanded CER with out-of-order mandatory AVPs' );
+
+foreach (my $i = 0; $i < @expected_avp_info; $i++) {
+    my ($name, $op, $value) = @{ $expected_avp_info[$i] };
+    my $avp = ($m->avps)[$i];
+
+    ok( $d->is_expanded_avp( $avp ), 'is_expanded_check on AVP number ' . ($i + 1) . ' for expanded CER with out-of-order mandatory AVPs' );
+    cmp_ok( $avp->name, 'eq', $name,  'name check on AVP number ' . ($i + 1) . ' for expanded CER with out-of-order mandatory AVPs' );
+    cmp_ok( $avp->data, $op,  $value, 'value check on AVP number ' . ($i + 1) . ' for expanded CER with out-of-order mandatory AVPs' );
+}
 
 
 done_testing();
