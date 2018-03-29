@@ -59,7 +59,7 @@ MessageTypes:
            - Redirect-Max-Cache-Time
            - Proxy-Info:*
            - AVP:*
-   - Code: 272
+   - Code: 257
      ApplicationId: 0
      Request:
          Name: "Capabilities-Exchange-Request"
