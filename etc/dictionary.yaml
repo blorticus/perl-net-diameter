@@ -364,7 +364,172 @@ MessageTypes:
          AvpOrder: ["Result-Code", "Origin-Host", "Origin-Realm", "Error-Message", "Failed-AVP", "AVP"]
          MandatoryAvps: ["Result-Code", "Origin-Host", "Origin-Realm"]
          OptionalAvps: ["Error-Message", "Failed-AVP", "AVP:*"]
-
+   - Code: 275
+     ApplicationId: 16777302
+     Request:
+        Name: Sy-Session-Termination-Request
+        AbbreviatedName: Sy-STR
+        Proxiable: true
+        AvpOrder:
+            - Session-Id
+            - Origin-Host
+            - Origin-Realm
+            - Destination-Realm
+            - Auth-Application-Id
+            - Termination-Cause
+            - Destination-Host
+            - Origin-State-Id
+            - Proxy-Info
+            - Route-Record
+            - AVP
+        MandatoryAvps: ["Session-Id", "Origin-Host", "Origin-Realm", "Destination-Realm", "Auth-Application-Id", "Termination-Cause"]
+        OptionalAvps: ["Destination-Host", "Origin-State-Id", "Proxy-Info:*", "Route-Record:*", "AVP:*"]
+     Answer:
+        Name: Sy-Session-Termination-Answer
+        AbbreviatedName: Sy-STA
+        Proxiable: true
+        AvpOrder:
+            - Session-Id
+            - Origin-Host
+            - Origin-Realm
+            - Result-Code
+            - Error-Message
+            - Error-Reporting-Host
+            - Failed-AVP
+            - Origin-State-Id
+            - Redirect-Host
+            - Redirect-Host-Usage
+            - Redirect-Max-Cache-Time
+            - Proxy-Info
+            - AVP
+        MandatoryAvps: ["Session-Id", "Origin-Host", "Origin-Realm"]
+        OptionalAvps:
+            - Result-Code
+            - Error-Message
+            - Error-Reporting-Host
+            - Failed-AVP:*
+            - Origin-State-Id
+            - Redirect-Host:*
+            - Redirect-Host-Usage
+            - Redirect-Max-Cache-Time
+            - Proxy-Info:*
+            - AVP:*
+   - Code: 8388636
+     ApplicationId: 16777302
+     Request:
+        Name: Spending-Notification-Request
+        AbbreviatedName: SNR
+        Proxiable: true
+        AvpOrder:
+            - Session-Id
+            - Origin-Host
+            - Origin-Realm
+            - Destination-Realm
+            - Destination-Host
+            - Auth-Application-Id
+            - Origin-State-Id
+            - Policy-Counter-Status-Report
+            - Proxy-Info
+            - Route-Record
+            - AVP
+        MandatoryAvps: ["Session-Id", "Origin-Host", "Origin-Realm", "Destination-Realm", "Destination-Host", "Auth-Application-Id"]
+        OptionalAvps: ["Origin-State-Id", "Policy-Counter-Status-Report:*", "Proxy-Info:*", "Route-Record:*", "AVP:*"]
+     Answer:
+        Name: Spending-Notification-Answer
+        AbbreviatedName: SNA
+        Proxiable: true
+        AvpOrder:
+            - Session-Id
+            - Origin-Host
+            - Origin-Realm
+            - Result-Code
+            - Experimental-Result
+            - Origin-State-Id
+            - Error-Message
+            - Error-Reporting-Host
+            - Redirect-Host
+            - Redirect-Host-Usage
+            - Redirect-Max-Cache-Time
+            - Failed-AVP
+            - Proxy-Info
+            - AVP
+        MandatoryAvps: ["Session-Id", "Origin-Host", "Origin-Realm"]
+        OptionalAvps:
+            - Result-Code
+            - Experimental-Result
+            - Origin-State-Id
+            - Error-Message
+            - Error-Reporting-Host
+            - Redirect-Host:*
+            - Redirect-Host-Usage
+            - Redirect-Max-Cache-Time
+            - Failed-AVP:*
+            - Proxy-Info:*
+            - AVP:*
+   - Code: 8388635
+     ApplicationId: 16777302
+     Request:
+        Name: Spending-Limit-Request
+        AbbreviatedName: SLR
+        Proxiable: true
+        AvpOrder:
+            - Session-Id
+            - Auth-Application-Id
+            - Origin-Host
+            - Origin-Realm
+            - Destination-Realm
+            - Destination-Host
+            - Origin-State-Id
+            - SL-Request-Type
+            - Subscription-Id
+            - Policy-Counter-Identifier
+            - Proxy-Info
+            - Route-Record
+            - AVP
+        MandatoryAvps: ["Session-Id", "Auth-Application-Id", "Origin-Host", "Origin-Realm", "Destination-Realm", "SL-Request-Type"]
+        OptionalAvps:
+            - Destination-Host
+            - Origin-State-Id
+            - Subscription-Id:*
+            - Policy-Counter-Identifier:*
+            - Proxy-Info:*
+            - Route-Record:*
+            - AVP:*
+     Answer:
+        Name: Spending-Limit-Answer
+        AbbreviatedName: SLA
+        Proxiable: true
+        AvpOrder:
+            - Session-Id
+            - Auth-Application-Id
+            - Origin-Host
+            - Origin-Realm
+            - Result-Code
+            - Experimental-Result
+            - Policy-Counter-Status-Report
+            - Error-Message
+            - Error-Reporting-Host
+            - Failed-AVP
+            - Origin-State-Id
+            - Redirect-Host
+            - Redirect-Host-Usage
+            - Redirect-Max-Cache-Time
+            - Proxy-Info
+            - AVP
+        MandatoryAvps: ["Session-Id", "Auth-Application-Id", "Origin-Host", "Origin-Realm"]
+        OptionalAvps:
+            - Result-Code
+            - Experimental-Result
+            - Policy-Counter-Status-Report:*
+            - Error-Message
+            - Error-Reporting-Host
+            - Failed-AVP:*
+            - Origin-State-Id
+            - Redirect-Host:*
+            - Redirect-Host-Usage
+            - Redirect-Max-Cache-Time
+            - Proxy-Info:*
+            - AVP:*
 AvpTypes:
    - Code: 1
      VendorId: 0
