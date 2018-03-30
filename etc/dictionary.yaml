@@ -417,8 +417,8 @@ MessageTypes:
    - Code: 8388636
      ApplicationId: 16777302
      Request:
-        Name: Spending-Notification-Request
-        AbbreviatedName: SNR
+        Name: Sy-Spending-Notification-Request
+        AbbreviatedName: Sy-SNR
         Proxiable: true
         AvpOrder:
             - Session-Id
@@ -435,8 +435,8 @@ MessageTypes:
         MandatoryAvps: ["Session-Id", "Origin-Host", "Origin-Realm", "Destination-Realm", "Destination-Host", "Auth-Application-Id"]
         OptionalAvps: ["Origin-State-Id", "Policy-Counter-Status-Report:*", "Proxy-Info:*", "Route-Record:*", "AVP:*"]
      Answer:
-        Name: Spending-Notification-Answer
-        AbbreviatedName: SNA
+        Name: Sy-Spending-Notification-Answer
+        AbbreviatedName: Sy-SNA
         Proxiable: true
         AvpOrder:
             - Session-Id
@@ -469,8 +469,8 @@ MessageTypes:
    - Code: 8388635
      ApplicationId: 16777302
      Request:
-        Name: Spending-Limit-Request
-        AbbreviatedName: SLR
+        Name: Sy-Spending-Limit-Request
+        AbbreviatedName: Sy-SLR
         Proxiable: true
         AvpOrder:
             - Session-Id
@@ -496,8 +496,8 @@ MessageTypes:
             - Route-Record:*
             - AVP:*
      Answer:
-        Name: Spending-Limit-Answer
-        AbbreviatedName: SLA
+        Name: Sy-Spending-Limit-Answer
+        AbbreviatedName: Sy-SLA
         Proxiable: true
         AvpOrder:
             - Session-Id
