@@ -517,7 +517,7 @@ sub _validate_avp_set_for_message {
         my $vic = $avp->vendor_id . ":" . $avp->code;
 
         $matching_avps{$vic} = 1;
-        if (!exists $msg_desc_hr->{MandatoryAvps}->{$vic} && !exists $msg_desc_hr->{OptionalAvps}->{$vic}) {
+        if (!exists $msg_desc_hr->{MandatoryAvps}->{$vic} && !exists $msg_desc_hr->{OptionalAvps}->{$vic} && !exists $msg_desc_hr->{OptionalAvps}->{AVP}) {
             $@ = "Invalid AVP Set Exception: AVP with VendorId=(" . $avp->vendor_id . ") and Code (" . $avp->code . ")";
             return 0;
         }
