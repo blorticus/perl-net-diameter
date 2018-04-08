@@ -74,8 +74,16 @@ $msg = Diameter::Message->new(
     ],
 );
 
-check_msg_values( $msg, 257, 0, 0xc0, 1, 0x12345678, 0xffee1100, 112, "01000070c00001010000000012345678ffee11000000010840000017746573742e663564656d6f2e636f6d000000012840000012663564656d6f2e636f6d0000000001014000000e0001c0a8190100000000010a4000000c000015a80000010d40000014746573742d6861726e657373", "CER header only, but empty Avp provided" );
+check_msg_values( $msg, 257, 0, 0xc0, 1, 0x12345678, 0xffee1100, 112, "01000070c00001010000000012345678ffee11000000010840000017746573742e663564656d6f2e636f6d000000012840000012663564656d6f2e636f6d0000000001014000000e0001c0a8190100000000010a4000000c000015a80000010d40000014746573742d6861726e657373", "CER header and basic AVP list" );
 
+my @avps = $msg->avps_by_code( 264 );
+cmp_ok( @avps, '==', 1, 'CER header and basic AVP list avps_by_code( 264 )' );
+
+@avps = $msg->avps_by_code( 269 );
+cmp_ok( @avps, '==', 1, 'CER header and basic AVP list avps_by_code( 269 )' );
+
+@avps = $msg->avps_by_code( 279 );
+cmp_ok( @avps, '==', 0, 'CER header and basic AVP list avps_by_code( 279 )' );
 
 done_testing();
 

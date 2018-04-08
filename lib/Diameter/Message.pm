@@ -38,6 +38,8 @@ Diameter::Message - Interface describing a Diameter Message, with encoders and d
 
  $socket->send( $m->encode );
 
+ @avps = $m->avp_by_code( $code, $vendorid );
+
 =head1 DESCRIPTION
 
 This package allows one to create objects representing Diameter Messages (see RFC 6733).  There is a package
@@ -378,6 +380,23 @@ sub decode {
 
     return $class->new( Version => $version, ApplicationId => $app_id, Length => $msg_length, CommandCode => $code, Flags => $flags,
                         HopByHopId => $hbh_id, EndToEndId => $ete_id, Avps => \@avps );
+}
+
+
+=item I<@avps> = I<$m>-E<gt>B<avps_by_code>( I<$code>, I<$vendor_id> );
+
+Retrieve all AVPs in this message that match the I<$code> and I<$vendor_id>.
+I<$vendor_id> can be ommitted, in which case it is assumed to be 0.
+
+=cut
+
+sub avps_by_code {
+    my $self = shift;
+    my ($code, $vendorid) = @_;
+
+    $vendorid = 0   if !defined $vendorid;
+
+    return (grep { $_->code == $code && $_->vendor_id == $vendorid } @{ $self->[AVP_LIST] });    
 }
 
 
