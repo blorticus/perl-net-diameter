@@ -393,14 +393,194 @@ sub from_yaml {
 }
 
 
+# $avp_ar = $self->_inflate_avps_parameter_for_message( \@avp_defs );
+#
+# Given a set of AVPs as provided to the Avps parameter of the message()
+# method, convert any label => value pairs into a Diameter::Dictionary::Message::AVP
+# object.  Step through Grouped AVPs and do the same.
+#
+# Return the list of AVP objects, or undef on error.  $@ also set on error
+#
+sub _inflate_avps_parameter_for_message {
+    my $self = shift;
+    my $avp_defs_ar = shift;
+
+    my @avps;
+
+    # Avps can be a Diameter::AVP object, or a Label, or a Value.  A Value must
+    # always follow a Label, and a Label must always follow a Value or an object.
+    # An object must only follow a Value.
+    # A Value can be a listref, which is Grouped AVP set
+    my $last_item = "Value";
+    my $last_label = "";
+
+    foreach my $avp_def (@{ $avp_defs_ar }) {
+        if (ref $avp_def) {
+            if (UNIVERSAL::isa($avp_def, 'Diameter::Message::AVP')) {
+                if ($last_item eq "Object" || $last_item eq "Value") {
+                    push @avps, $avp_def;
+
+                    $last_item = "Object";
+                }
+                else {
+                    $@ = "Invalid Parameter Exception: object follows label in Avps definition";
+                    return undef;
+                }
+            }
+            elsif (ref $avp_def eq "ARRAY") {
+                unless ($last_label ne "Label") {
+                    $@ = "Invalid Parameter Exception: listref must be a value";
+                    return undef;
+                }
+                
+                my $subavp_ar = $self->_inflate_avps_parameter_for_message( $avp_def )
+                    or return undef;
+
+                 if (!exists $self->[DD_AVPS]->{ReducedName}->{$last_label}) {
+                    $@ = "Unknown AVP Exception: $last_label";
+                    return undef;
+                }
+
+                my $avp_hr = $self->[DD_AVPS]->{ReducedName}->{$last_label};
+
+                unless ($avp_hr->{Type} eq "Grouped") {
+                    $@ = "AVP Type Exception: grouped data provided to ungrouped AVP (${\$avp_hr->{Name}})";
+                    return undef;
+                }
+
+                my $avp = Diameter::Dictionary::Message::AVP->new(
+                    Name        => $avp_hr->{Name},
+                    Code        => $avp_hr->{Code},
+                    VendorId    => $avp_hr->{VendorId},
+                    DataType    => "Grouped",
+                    Data        => $subavp_ar,
+                ) or return undef;  # $@ already set in Diameter::Dictionary::Message::AVP::new
+
+                push @avps, $avp;
+
+                $last_item = "Value";
+            }
+            
+        }
+        elsif (!ref $avp_def) {
+            if ($last_item eq "Object" || $last_item eq "Value") {
+                $last_label = $avp_def;
+                $last_item = "Label";
+            }
+            else {
+                if (!exists $self->[DD_AVPS]->{ReducedName}->{$last_label}) {
+                    $@ = "Unknown AVP Exception: $last_label";
+                    return undef;
+                }
+
+                my $avp_hr = $self->[DD_AVPS]->{ReducedName}->{$last_label};
+
+                my $avp = Diameter::Dictionary::Message::AVP->new(
+                    Name        => $avp_hr->{Name},
+                    Code        => $avp_hr->{Code},
+                    VendorId    => $avp_hr->{VendorId},
+                    DataType    => $avp_hr->{Type},
+                    Data        => $avp_def,
+                ) or return undef;  # $@ already set in Diameter::Dictionary::Message::AVP::new
+
+                push @avps, $avp;
+
+                $last_item = "Value";
+            }
+        }
+        else {
+            $@ = "Invalid Parameter Exception: in Avps, refs must be Diameter::AVP objects";
+            return undef;
+        }
+    }
+
+    return \@avps;
+}
+
+
+# $bool = $self->_validate_avp_set_for_message( \%msg_desc, \@avps )
+#
+# %msg_desc is the descriptor information about the message to which
+# the AVP information is attached.  It comes from
+# $self->[DD_MSGS]->{Code}->{"$application_id:$code"}->[$x].
+# @avps is a list of Diameter:Message::AVP objects (or objects of
+# subtypes). This method determines whether the AVPs are all permitted
+# for this message type. Return false and set $@ if not; return true
+# otherwise.
+#
+sub _validate_avp_set_for_message {
+    my $self = shift;
+    my ($msg_desc_hr, $avps_ar) = @_;
+
+    my %matching_avps;
+    foreach my $avp (@{ $avps_ar }) {
+        my $vic = $avp->vendor_id . ":" . $avp->code;
+
+        $matching_avps{$vic} = 1;
+        if (!exists $msg_desc_hr->{MandatoryAvps}->{$vic} && !exists $msg_desc_hr->{OptionalAvps}->{$vic} && !exists $msg_desc_hr->{OptionalAvps}->{AVP}) {
+            $@ = "Invalid AVP Set Exception: AVP with VendorId=(" . $avp->vendor_id . ") and Code (" . $avp->code . ")";
+            return 0;
+        }
+    }
+
+    foreach my $vic (keys %{ $msg_desc_hr->{MandatoryAvps} }) {
+        if (!exists $matching_avps{$vic}) {
+            $@ = "Invalid AVP Set Exception: missing mandatory AVP with VendorId=(" . (split( /:/, $vic ))[0] . ") and Code (" . (split( /:/, $vic ))[1] . ")";
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+
+# \@avps = $self = _reorder_avps_and_set_mandatory_flags( \%msg_desc, \@avps )
+#
+# %msg_desc is the descriptor information about the message to which
+# the AVP information is attached.  It comes from
+# $self->[DD_MSGS]->{Code}->{"$application_id:$code"}->[$x].
+# @avps is a list of Diameter:Message::AVP objects (or objects of
+# subtypes). 
+#
+# For each mandatory element, set the mandatory flag.  Re-order the AVPs according
+# to the described order.  Return the altered list of AVPs.
+#
+sub _reorder_avps_and_set_mandatory_flags {
+    my $self = shift;
+    my ($msg_desc_hr, $avps_ar) = @_;
+
+    my %avps;
+
+    foreach my $avp (@{ $avps_ar }) {
+        my $vic = $avp->vendor_id . ":" . $avp->code;
+
+        push @{ $avps{$vic} }, $avp;
+
+        if (exists $msg_desc_hr->{MandatoryAvps}->{$vic}) {
+            $avp->_set_mandatory_flag( 1 );
+        }
+    }
+
+    my @ordered_avps;
+
+    foreach my $vic (@{ $msg_desc_hr->{AvpOrder} }) {
+        push @ordered_avps, @{ $avps{$vic} }    if exists $avps{$vic};
+    }
+
+    return \@ordered_avps;
+}
+
+
 sub message {
     my $self = shift;
     my %params = @_;
 
-    my $msg_desc;
+    my $msg_desc_hr;
+    my $avps_ordered_ar = [];
+
     if (exists $params{Name} && defined $params{Name}) {
         if (exists $self->[DD_MSGS]->{Name}->{$params{Name}}) {
-            $msg_desc = $self->[DD_MSGS]->{Name}->{$params{Name}};
+            $msg_desc_hr = $self->[DD_MSGS]->{Name}->{$params{Name}};
         }
         else {
             $@ = "No Such Dictionary Entry Exception";
@@ -413,10 +593,10 @@ sub message {
 
         if (exists $self->[DD_MSGS]->{Code}->{"$params{ApplicationId}:$params{Code}"}) {
             if ($params{IsRequest}) {
-                $msg_desc = $self->[DD_MSGS]->{Code}->{"$params{ApplicationId}:$params{Code}"}->[0];
+                $msg_desc_hr = $self->[DD_MSGS]->{Code}->{"$params{ApplicationId}:$params{Code}"}->[0];
             }
             else {
-                $msg_desc = $self->[DD_MSGS]->{Code}->{"$params{ApplicationId}:$params{Code}"}->[1];
+                $msg_desc_hr = $self->[DD_MSGS]->{Code}->{"$params{ApplicationId}:$params{Code}"}->[1];
             }
         }
         else {
@@ -429,158 +609,34 @@ sub message {
         return undef;
     }
 
-    my @avps;
     if (exists $params{Avps} && defined $params{Avps}) {
         unless (ref $params{Avps} eq 'ARRAY') {
             $@ = "Invalid Parameter Exception: Avps must be a listref";
             return undef;
         }
 
-        # Avps can be a Diameter::AVP object, or a Label, or a Value.  A Value must
-        # always follow a Label, and a Label must always follow a Value or an object.
-        # An object must only follow a Value.
-        my $last_item = "Value";
-        my $last_label = "";
+        my $avps_ar = $self->_inflate_avps_parameter_for_message( $params{Avps} )
+            or return undef;
 
-        my %avp_count;  # indexed by "$vendorid:$code", count of AVPs present
-        my %avp_set;    # indexed by "$vendorid:$code", listref of AVPs of that type
-
-        foreach my $avp_k (@{ $params{Avps} }) {
-            if (ref $avp_k) {
-                if (UNIVERSAL::isa($avp_k, 'Diameter::Message::AVP')) {
-                    if ($last_item eq "Object" || $last_item eq "Value") {
-                        my $vic = $avp_k->vendor_id . ":" . $avp_k->code;
-                        $avp_count{$vic}++;
-                        push @{ $avp_set{$vic} }, $avp_k;
-
-                        if (exists $msg_desc->{MandatoryAvps}->{$vic}) {
-                            $avp_k->_set_mandatory_flag( 1 );
-                        }
-                        else {
-                            $avp_k->_set_mandatory_flag( 0 );
-                            
-                        }
-
-                        $last_item = "Object";
-                    }
-                    else {
-                        $@ = "Invalid Parameter Exception: object follows label in Avps definition";
-                        return undef;
-                    }
-                }
-                else {
-                    $@ = "Invalid Parameter Exception: in Avps, refs must be Diameter::AVP objects";
-                    return undef;
-                }
-            }
-            else {
-                if ($last_item eq "Object" || $last_item eq "Value") {
-                    $last_label = $avp_k;
-                    $last_item = "Label";
-                }
-                else {
-                    if (!exists $self->[DD_AVPS]->{ReducedName}->{$last_label}) {
-                        $@ = "Unknown AVP Exception: $last_label";
-                        return undef;
-                    }
-
-                    my $avp_hr = $self->[DD_AVPS]->{ReducedName}->{$last_label};
-
-                    my $vic = $avp_hr->{VendorId} . ":" . $avp_hr->{Code};
-
-                    my $is_mandatory;
-                    if (exists $msg_desc->{MandatoryAvps}->{$vic}) {
-                        $is_mandatory = 1;
-                    }
-                    elsif (exists $msg_desc->{OptionalAvps}->{$vic} || exists $msg_desc->{OptionalAvps}->{AVP}) {
-                        $is_mandatory = 0;
-                    }
-                    else {
-                        $@ = "AVP Not Allowed Exception: " . $avp_hr->{Name};
-                        return undef;
-                    }
-
-                    my $avp = Diameter::Dictionary::Message::AVP->new(
-                        Name        => $avp_hr->{Name},
-                        Code        => $avp_hr->{Code},
-                        VendorId    => $avp_hr->{VendorId},
-                        IsMandatory => $is_mandatory,
-                        DataType    => $avp_hr->{Type},
-                        Data        => $avp_k,
-                    );
-
-                    if (!defined $avp) {
-                        return undef;  # $@ already set in Diameter::Dictionary::Message::AVP::new
-                    }
-
-                    $avp_count{$vic}++;
-                    push @{ $avp_set{$vic} }, $avp;
-
-                    $last_item = "Value";
-                }
-            }
-        }
-
-        # validate that all mandatory AVPs are present
-        foreach my $vic (keys %{ $msg_desc->{MandatoryAvps} }) {
-            if (!exists $avp_count{$vic}) {
-                $@ = "Missing Mandatory AVP Exception: $vic";
-                return undef;
-            }
-        }
-
-        # validate AVP counts
-        foreach my $vic (keys %avp_count) {
-            my $required_count;
-
-            if (exists $msg_desc->{MandatoryAvps}->{$vic}) {
-                $required_count = $msg_desc->{MandatoryAvps}->{$vic};
-            }
-            elsif (exists $msg_desc->{OptionalAvps}->{$vic}) {
-                $required_count = $msg_desc->{OptionalAvps}->{$vic};
-            }
-            else {
-                # ASSERT: if we're here, then we already validated that $msg_desc->{OptionalAvps}->{AVP} exists
-                next;
-            }
-
-            if ($required_count =~ /^\d+$/) {
-                if ($avp_count{$vic} != $required_count) {
-                    $@ = "Invalid AVP Count Exception: $vic";
-                    return undef;
-                }
-            }
-            elsif ($required_count =~ /^(\d+)\*$/) {
-                if ($avp_count{$vic} < $1) {
-                    $@ = "Invalid AVP Count Exception: $vic";
-                    return undef;
-                }
-            }
-            # ASSERT: $required_count eq '*'
-        }
-
-        # and finally, order the AVPs appropriately
-        foreach my $vic (@{ $msg_desc->{AvpOrder} }) {
-            if (exists $avp_set{$vic}) {
-                push @avps, @{ $avp_set{$vic} };
-                delete $avp_set{$vic};
-            }
-        }
-
-        foreach my $vic (keys %avp_set) {
-            # any remaining AVPs without a specific ordering added in an arbitary order
-            push @avps, @{ $avp_set{$vic} };
-        }
+        $self->_validate_avp_set_for_message( $msg_desc_hr, $avps_ar )
+            or return undef;
+    
+        $avps_ordered_ar = $self->_reorder_avps_and_set_mandatory_flags( $msg_desc_hr, $avps_ar );
     }
 
+    my %ids;
+    $ids{HopByHopId} = $params{HopByHopId}  if exists $params{HopByHopId} && defined $params{HopByHopId};
+    $ids{EndToEndId} = $params{EndToEndId}  if exists $params{EndToEndId} && defined $params{EndToEndId};
+
     return Diameter::Dictionary::Message->new(
-        ApplicationId   => $msg_desc->{Properties}->{ApplicationId},
-        CommandCode     => $msg_desc->{Properties}->{Code},
-        Name            => $msg_desc->{Name},
-        AbbreviatedName => $msg_desc->{AbbreviatedName},
-        IsProxiable     => $msg_desc->{Proxiable},
-        IsRequest       => $msg_desc->{Request},
-        Avps            => \@avps,
+        %ids,
+        ApplicationId   => $msg_desc_hr->{Properties}->{ApplicationId},
+        CommandCode     => $msg_desc_hr->{Properties}->{Code},
+        Name            => $msg_desc_hr->{Name},
+        AbbreviatedName => $msg_desc_hr->{AbbreviatedName},
+        IsProxiable     => $msg_desc_hr->{Proxiable},
+        IsRequest       => $msg_desc_hr->{Request},
+        Avps            => $avps_ordered_ar,
     );
 }
 

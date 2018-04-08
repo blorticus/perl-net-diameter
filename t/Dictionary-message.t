@@ -84,10 +84,10 @@ MessageTypes:
             - AVP:*
    - Code: 282
      ApplicationId: 0
-     Proxiable: false
      Request:
          Name: "Disconnect-Peer-Request"
          AbbreviatedName: "DPR"
+         Proxiable: false
          AvpOrder:
             - Origin-Host
             - Origin-Realm
@@ -116,6 +116,70 @@ MessageTypes:
          OptionalAvps:
             - Error-Message
             - Failed-AVP
+            - AVP:*
+   - Code: 8388635
+     ApplicationId: 16777302
+     Request:
+        Name: Sy-Spending-Limit-Request
+        AbbreviatedName: Sy-SLR
+        Proxiable: true
+        AvpOrder:
+            - Session-Id
+            - Auth-Application-Id
+            - Origin-Host
+            - Origin-Realm
+            - Destination-Realm
+            - Destination-Host
+            - Origin-State-Id
+            - SL-Request-Type
+            - Subscription-Id
+            - Policy-Counter-Identifier
+            - Proxy-Info
+            - Route-Record
+            - AVP
+        MandatoryAvps: ["Session-Id", "Auth-Application-Id", "Origin-Host", "Origin-Realm", "Destination-Realm", "SL-Request-Type"]
+        OptionalAvps:
+            - Destination-Host
+            - Origin-State-Id
+            - Subscription-Id:*
+            - Policy-Counter-Identifier:*
+            - Proxy-Info:*
+            - Route-Record:*
+            - AVP:*
+     Answer:
+        Name: Sy-Spending-Limit-Answer
+        AbbreviatedName: Sy-SLA
+        Proxiable: true
+        AvpOrder:
+            - Session-Id
+            - Auth-Application-Id
+            - Origin-Host
+            - Origin-Realm
+            - Result-Code
+            - Experimental-Result
+            - Policy-Counter-Status-Report
+            - Error-Message
+            - Error-Reporting-Host
+            - Failed-AVP
+            - Origin-State-Id
+            - Redirect-Host
+            - Redirect-Host-Usage
+            - Redirect-Max-Cache-Time
+            - Proxy-Info
+            - AVP
+        MandatoryAvps: ["Session-Id", "Auth-Application-Id", "Origin-Host", "Origin-Realm"]
+        OptionalAvps:
+            - Result-Code
+            - Experimental-Result
+            - Policy-Counter-Status-Report:*
+            - Error-Message
+            - Error-Reporting-Host
+            - Failed-AVP:*
+            - Origin-State-Id
+            - Redirect-Host:*
+            - Redirect-Host-Usage
+            - Redirect-Max-Cache-Time
+            - Proxy-Info:*
             - AVP:*
 AvpTypes:
    - Code: 1
@@ -259,6 +323,18 @@ AvpTypes:
    - Code: 300
      Name: "E2E-Sequence"
      Type: "Grouped"
+   - Code: 443
+     VendorId: 0
+     Name: "Subscription-Id"
+     Type: "Grouped"
+   - Code: 444
+     VendorId: 0
+     Name: "Subscription-Id-Data"
+     Type: "UTF8String"
+   - Code: 450
+     VendorId: 0
+     Name: "Subscription-Id-Type"
+     Type: "Enumerated"
    - Code: 480
      Name: "Accounting-Record-Type"
      Type: "Enumerated"
@@ -268,6 +344,23 @@ AvpTypes:
    - Code: 485
      Name: "Accounting-Record-Number"
      Type: "Unsigned32"
+   - Code: 2901
+     VendorId: 10415
+     Name: "Policy-Counter-Identifier"
+     Type: "UTF8String"
+   - Code: 2902
+     VendorId: 10415
+     Name: "Policy-Counter-Status"
+     Type: "UTF8String"
+   - Code: 2903
+     VendorId: 10415
+     Name: "Policy-Counter-Status-Report"
+     Type: "Grouped"
+   - Code: 2904
+     VendorId: 10415
+     Name: "SL-Request-Type"
+     Type: "Enumerated"
+
 EOY
 
 my $d = Diameter::Dictionary->from_yaml( FromString => $yaml_string );
@@ -304,6 +397,53 @@ my $expected_encoding = join( "", split( / /,
                    "0000010d 4000000e 74657374 65720000" ) );
 
 cmp_ok( unpack( "H*", $m->encode ), 'eq', $expected_encoding, 'message() on CER with all but only mandatory AVPs encodes correctly, including AVP re-ordering' );
+
+$m = $d->message(
+    Name        => "Sy-SLA",
+    HopByHopId  => 0x1234,
+    EndToEndId  => 0x2,
+        Avps        => [
+            SessionId           => "test.example.com;123456789;12345",
+            ResultCode          => 2001,
+            AuthApplicationId   => 16777302,
+            OriginHost          => "test.example.com",
+            OriginRealm         => "example.com",
+            PolicyCounterStatusReport   => [
+                PolicyCounterIdentifier         => 'TSSTI',
+                PolicyCounterStatus             => 'LT',
+            ],
+            PolicyCounterStatusReport   => [
+                PolicyCounterIdentifier         => 'SUBSCRIBER-BALANCE-STATUS',
+                PolicyCounterStatus             => 'OK',
+            ],
+        ],
+);
+
+ok( defined $m && ref $m, 'message() on Sy-SLR with nested Grouped AVPs creates object' );
+
+$expected_encoding = join( "", split( / /,
+                        # Message header
+                    "010000f4 4080001b 01000056 00001234 00000002" .
+                        # AVP: Session-Id
+                    "00000107 40000028 74657374 2e657861 6d706c65 2e636f6d 3b313233 34353637 38393b313 2333435" .
+                        # AVP: Auth-Application-Id
+                    "00000102 4000000c 01000056" .
+                        # AVP: Origin-Host
+                    "00000108 40000018 74657374 2e657861 6d706c65 2e636f6d" .
+                       # AVP: Origin-Realm
+                    "00000128 40000013 6578616d 706c652e 636f6d00" .
+                        # AVP: Result-Code
+                    "0000010c 0000000c 000007d1" .
+                        # AVP: PolicyCountStatusReport [Grouped: PolicyCounterIdentifier+PolicyCounterStatus]
+                    "00000b57 80000030 000028af" .
+                        "00000b55 80000011 000028af 54535354 49000000" .
+                        "00000b56 8000000e 000028af 4c540000" .
+                        # AVP: PolicyCountStatusReport [Grouped: PolicyCounterIdentifier+PolicyCounterStatus]
+                    "00000b57 80000044 000028af" .
+                        "00000b55 80000025 000028af 53554253 43524942 45522d42 414c414e 43452d53 54415455 53000000" .
+                        "00000b56 8000000e 000028af 4f4b0000" ) );
+
+cmp_ok( unpack( "H*", $m->encode ), 'eq', $expected_encoding, 'message() on Sy-SLR with nested Grouped AVPs encodes as expected' );
 
 
 done_testing();
